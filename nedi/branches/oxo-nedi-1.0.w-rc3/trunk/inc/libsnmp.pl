@@ -754,7 +754,7 @@ sub CDP {
 				$rser     =~ s/(.*?)\((\S+)\)/$1/;
 			}
 			if ($_[1] =~ /\Q$rci\E/){								# is it me?
-				$main::int{$_[0]}{$locif[14]}{com} .= "CDP seing itself! ";
+				$main::int{$_[0]}{$locif[14]}{com} .= "CDP seing itself! "; #bug with WS-C2948 "uninitialized value"
 				if($misc::notify =~ /d/){
 					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$misc::now\",\"$_[0]\",\"CDP seing itself!\"") ){
 						die "DB error messages!\n";

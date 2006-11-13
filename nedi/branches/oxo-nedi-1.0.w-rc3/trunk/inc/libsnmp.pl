@@ -88,6 +88,8 @@ sub Identify {
 				if ($l !~ /^#|^;|^$/){
 					my @v  = split(/\s+/,$l);
 					if (!$v[1]){$v[1] = ""}
+# added v[0] check after a talk on irc with digimainia
+    					if (!$v[0]){$v[0] = ""}
 					if ($v[0] eq "Type" and $v[1])	{$misc::sysobj{$so}{ty} = $v[1]}
 					elsif ($v[0] eq "OS")		{$misc::sysobj{$so}{os} = $v[1]}
 					elsif ($v[0] eq "Icon")		{$misc::sysobj{$so}{ic} = $v[1]}

@@ -1,0 +1,43 @@
+# Definition for 1.3.6.1.4.1.9.1.522 created by Defgen 1.0
+
+# General
+SNMPv	1
+Type	FWSM
+OS	other
+Icon	fwbl
+Bridge	
+Dispro	
+Serial	
+Bimage	1.3.6.1.2.1.1.1.0
+
+# Vlan Specific
+VLnams	
+VTPdom	
+VTPmod	
+
+# Interfaces
+IFalia	
+IFalix	
+IFvlan	
+IFvlix	
+IFdupl	
+IFduix	
+Halfdp	
+Fulldp	
+
+# Modules
+Modesc	
+Moclas	
+Movalu	
+Moslot	
+Modhw	
+Modsw	
+Modfw	
+Modser	
+Momodl	
+
+# RRD Graphing
+CPUutl	1.3.6.1.4.1.9.9.109.1.1.1.1.5
+Temp	
+MemCPU	1.3.6.1.4.1.9.9.48.1.1.1.6.1
+MemIO	1.3.6.1.4.1.9.9.48.1.1.1.5.1

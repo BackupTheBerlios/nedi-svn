@@ -26,7 +26,7 @@ $grp = isset( $_GET['grp']) ? $_GET['grp'] : "";
 ?>
 <h1>User Accounts</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
-<table bgcolor=#000000 cellspacing=1 cellpadding=6 border=0 width=100%>
+<table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/user.png border=0></a></th>
 <th>User
 <input type="text" name="usr" size="12">
@@ -74,7 +74,7 @@ if (isset($_GET['usr']) and isset($_GET['create']) ){
 	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3> $_GET[gad] $_GET[mgp] $upokmsg</h3>";}
 }
 ?>
-<table bgcolor=#666666 cellspacing=1 cellpadding=8 border=0 width=100%>
+<table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
 <th>Name</th><th>Email</th><th>Phone #</th><th>Comment</th><th>Language</th>
 <th>Created on</th><th>Last Login</th><th>Groups</th><th>Action</th>
@@ -120,7 +120,7 @@ if($res){
 	print @DbError($link);
 }
 //@DbClose($link);
-echo "</table><table bgcolor=#666666 cellspacing=1 cellpadding=8 border=0 width=100%>\n";
+echo "</table><table bgcolor=#666666 $tabtag>\n";
 echo "<tr bgcolor=#$bg2><td>$row users ($query)</td></tr></table>\n";
 
 include_once ("inc/footer.php");

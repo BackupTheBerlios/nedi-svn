@@ -17,10 +17,13 @@ $btag	= "";
 $nocache= 0;
 $calendar= 0;
 $refresh = 0;
+$msgfile = 'log/msg.txt';
 
 include_once ("inc/header.php");
 
 $name = $_SESSION['user'];
+$_POST = sanitize($_POST);
+$msg = isset( $_POST['msg']) ? $_POST['msg'] : "";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if(isset($_GET['up']) ){
@@ -60,8 +63,8 @@ if ($uok == 1) {
 
 ?>
 <h1>User Profile</h1>
-<form method="get" action="<?=$_SERVER['PHP_SELF']?>" name=pro>
-<table bgcolor=#000000 cellspacing=1 cellpadding=6 border=0 width=100%>
+<form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="pro">
+<table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/smil.png border=0 title="Set your personal information"></a>
 <br><?=$name?></th>
 <th valign=top align=right>
@@ -84,9 +87,10 @@ Comment <input type="text" name="comment" size="50" value="<?=$u[12]?>" >
 
 </th>
 <th width=80><input type="submit" name="up" value="Update"></th>
-</tr></table>
+</tr></table></form>
+
 <h2>Groups</h2>
-<table bgcolor=#666666 cellspacing=1 cellpadding=8 border=0 width=100%>
+<table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
 <th>Admin</th><th>Network</th><th>Helpdesk</th><th>Monitoring</th><th>Manager</th><th>Other</th>
 <th>Created on</th>
@@ -98,7 +102,42 @@ Comment <input type="text" name="comment" size="50" value="<?=$u[12]?>" >
 <th><?=($u[6])?"<img src=img/32/umgr.png>":"<img src=img/16/bcls.png>"?></th>
 <th><?=($u[7])?"<img src=img/32/glob.png>":"<img src=img/16/bcls.png>"?></th>
 <th><?=date("j. M Y",$u[10])?></th>
-</tr></table></form>
+</tr></table>
+
 <?
+if(preg_match("/adm/",$_SESSION['group']) ){
+	if(isset($_POST['dan']) ){
+		unlink($msgfile);
+	}elseif(isset($_POST['can']) ){
+		$fh = fopen($msgfile, 'w') or die("Cannot write $msgfile!");
+		fwrite($fh, "$msg");
+		fclose($fh);
+	}
+
+?>
+<h2>Announcemnet</h2>
+<form method="post" action="<?=$_SERVER['PHP_SELF']?>" name="msg">
+<table bgcolor=#000000 <?=$tabtag?> >
+<tr bgcolor=#eeee88>
+<th>
+<textarea rows="16" name="msg" cols="80">
+<?
+	if (file_exists($msgfile)) {
+		readfile($msgfile);
+	};
+?>
+</textarea></th>
+<th width="80">
+<input type="submit" name="dan" value="Delete">
+<p>
+<input type="submit" name="can" value="Create">
+</th></table>
+<?
+}elseif (file_exists('log/msg.txt')) {
+	echo "<h2>Announcemnet</h2><table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td><pre>\n";
+	include_once ($msgfile);
+	echo "</pre></td></tr></table>";
+}
+
 include_once ("inc/footer.php");
 ?>

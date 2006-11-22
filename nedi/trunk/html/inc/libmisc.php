@@ -25,7 +25,7 @@ function ReadConf($group) {
 		die;
 	}
 	global $timeout,$ignoredvlans,$locsep,$locformat,$lang,$guiauth,$redbuild,$disc,$modgroup,$pause;
-	global $mainmenu,$backend,$dbpath,$dbhost,$dbname,$dbuser,$dbpass,$retire;
+	global $mod,$backend,$dbpath,$dbhost,$dbname,$dbuser,$dbpass,$retire;
 	global $rrdstep;
 
 	foreach ($conf as $cl) {
@@ -34,10 +34,9 @@ function ReadConf($group) {
 			$v =  preg_split('/\s+/',$l);
 
 			if ($v[0] == "module"){
-			if (! isset($v[4]) ){$v[4] = "";}
-			$levelonesave = isset($_POST['levelonesave']) ? stripslashes($_POST['levelonesave']) : "";
+				$v[4] = isset($v[4]) ? $v[4] : "usr";
 				$modgroup["$v[1]-$v[2]"] = $v[4];
-				if( preg_match("/$v[4]/",$group) ){
+				if( strpos($group,$v[4]) !== false){
 					$mod[$v[1]][$v[2]] = $v[3];
 				}
 			}
@@ -63,20 +62,8 @@ function ReadConf($group) {
 				array_shift($v);
 				$disc = implode(" ",$v );
 			}
-
 		}
-
 	}
-
-	$mainmenu = "[\n";
-	foreach (array_keys($mod) as $m) {
-		$mainmenu .= " [null,'$m',null,null,null,\n";
-		foreach ($mod[$m] as $s => $i) {
-			$mainmenu .= "  ['<img src=./img/16/$i.png>','$s','$m-$s.php',null,null],\n";
-		}
-		$mainmenu .= " ],\n";
-	}
-	$mainmenu .= "];";
 }
 
 //===================================================================
@@ -191,7 +178,7 @@ function selectbox($type,$sel="") {
 	}elseif($type == "nodes"){
 		$options = array("name"=>"Name","ip"=>"IP address","ipupdate"=>"IP Update","ipchanges"=>"IP Changes","iplost"=>"IP Lost","mac"=>"MAC address","oui"=>"Vendor","device"=>"Device","ifname"=>"Interface",   "vlanid"=>"Vlan","ifmetric"=>"IF Metric","ifchanges"=>"IF Changes","ifupdate"=>"IF Update","firstseen"=>"First Seen","lastseen"=>"Last Seen");
 	}elseif($type == "devices"){
-		$options = array("name"=>"Name","ip"=>"IP address","serial"=>"Serial #","type"=>"Type","services"=>"Services","description"=>"Description",   "os"=>"OS","bootimage"=>"Bootimage","location"=>"Location","contact"=>"Contact","vtpdomain"=>"VTP Domain","vtpmode"=>"VTP Mode","snmpversion"=>"SNMP Ver","communtiy"=>"Community","tport"=>"CLI port","login"=>"Login","firstseen"=>"First Seen", "lastseen"=>"Last Seen");
+		$options = array("name"=>"Name","ip"=>"IP address","serial"=>"Serial #","type"=>"Type","services"=>"Services","description"=>"Description",   "os"=>"OS","bootimage"=>"Bootimage","location"=>"Location","contact"=>"Contact","vtpdomain"=>"VTP Domain","vtpmode"=>"VTP Mode","snmpversion"=>"SNMP Ver","community"=>"Community","tport"=>"CLI port","login"=>"Login","firstseen"=>"First Seen", "lastseen"=>"Last Seen");
 	}elseif($type == "messages"){
 		$options = array("id"=>"ID","level"=>"Level","time"=>"Time","source"=>"Source","info"=>"Info");
 	}elseif($type == "limit"){

@@ -16,8 +16,13 @@ $mico['250'] = "ford";
 function Cimg($cat) {
 
 	if($cat < 10)		{return "fiqu";}
+	elseif($cat == 11)	{return "powr";}
+	elseif($cat == 13)	{return "cach";}
 	elseif($cat < 20)	{return "home";}
+	elseif($cat == 23)	{return "nic";}
 	elseif($cat < 30)	{return "dev";}
+	elseif($cat == 32)	{return "cfg2";}
+	elseif($cat == 33)	{return "dumy";}
 	elseif($cat < 40)	{return "user";}
 }
 //===================================================================

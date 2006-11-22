@@ -22,13 +22,13 @@ include_once ("inc/header.php");
 include_once ('inc/libnod.php');
 
 $_GET = sanitize($_GET);
-$na = isset($_GET['na']) ? $_GET['na'] : "";
-$ip = isset($_GET['ip']) ? $_GET['ip'] : "";
-$ord = isset($_GET['ord']) ? $_GET['ord'] : "";
-$del = isset($_GET['del']) ? $_GET['del'] : "";
+$na = isset($_GET['na']) ? $_GET['na'] : "-";
+$ip = isset($_GET['ip']) ? $_GET['ip'] : 0;
 $stl = isset($_GET['stl']) ? $_GET['stl'] : "";
 $dev = isset($_GET['dev']) ? $_GET['dev'] : "";
 $ifn = isset($_GET['ifn']) ? $_GET['ifn'] : "";
+$ord = isset($_GET['ord']) ? $_GET['ord'] : "";
+$del = isset($_GET['del']) ? $_GET['del'] : "";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 
@@ -93,16 +93,14 @@ if($res){
 		if ($nnod == 1) {
 			$n	= @DbFetchRow($nres);
 			@DbFreeResult($nres);
-			$dbna	= preg_replace("/^(.*?)\.(.*)/","$1", $n[0]);
-			$dbip	= long2ip($n[1]);
-			$img	= Nimg("$n[2];$n[3]");
-			$ls	= date("r",$n[5]);
-			list($fc,$lc) = Agecol($n[4],$n[5],$row % 2);
 		}else{
-			$img	= "gen.png";
-			$ls	= "Not in Nodes";
-			list($fc,$lc) = Agecol(1,10000000,$row % 2);
+			$n = array('Not in nodes',0,$s[2],$s[3],0,0,'-','-');
 		}
+		$dbna	= preg_replace("/^(.*?)\.(.*)/","$1", $n[0]);
+		$dbip	= long2ip($n[1]);
+		$img	= Nimg("$n[2];$n[3]");
+		$ls	= date("r",$n[5]);
+		list($fc,$lc) = Agecol($n[4],$n[5],$row % 2);
 		$na	= preg_replace("/^(.*?)\.(.*)/","$1", $s[0]);
 		$ip	= long2ip($s[1]);
 		$sup	= date("r",$s[6]);

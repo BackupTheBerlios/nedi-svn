@@ -38,8 +38,8 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 <th>
 <SELECT MULTIPLE name="rep[]" size=4>
 <OPTION value="typ" <? if(in_array("typ",$rep)){echo "selected";} ?> >Device Types
-<OPTION value="vtp" <? if(in_array("vtp",$rep)){echo "selected";} ?> >VTP Domain
 <OPTION value="sft" <? if(in_array("sft",$rep)){echo "selected";} ?> >Software
+<OPTION value="vtp" <? if(in_array("vtp",$rep)){echo "selected";} ?> >VTP Domain
 <OPTION VALUE="ust" <? if(in_array("ust",$rep)){echo "selected";} ?> >Update Stats 
 
 </SELECT></th>
@@ -108,34 +108,6 @@ if ( in_array("typ",$rep) ){
 	echo "<tr bgcolor=#$bg2><td>$row device types of $ndev devices in total</td></tr></table>\n";
 }
 
-if ( in_array("vtp",$rep) ){
-?>
-<h2>VTP Domains</h2><p>
-<table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th><img src=img/32/stat.png><br>VTP Domain</th>
-<th><img src=img/32/dev.png><br>Devices</th>
-<?
-	if($ord){
-		arsort($dvtp);
-	}else{
-		ksort($dvtp);
-	}
-	$row = 0;
-	foreach ($dvtp as $vtp => $n){
-		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
-		$row++;
-		$op="=";
-		if(!$vtp){$vtp="^$";$op="regexp";}
-		$tbar = Bar($n,0);
-		$uvtp = rawurlencode($vtp);
-		echo "<tr bgcolor=#$bg>\n";
-		echo "<td><a href=Devices-List.php?ina=vtpdomain&opa=$op&sta=$vtp>$vtp</a></td><td>\n";
-		echo "$tbar $n</td></tr>\n";
-	}
-	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$row VTP domains of $ndev devices in total</td></tr></table>\n";
-}
-
 if ( in_array("sft",$rep) ){
 ?>
 <table cellspacing=10 width=100%>
@@ -184,6 +156,34 @@ if ( in_array("sft",$rep) ){
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$row boot images of $ndev devices in total</td></tr></table>\n";
 	echo '</td></tr></table>';
+}
+
+if ( in_array("vtp",$rep) ){
+?>
+<h2>VTP Domains</h2><p>
+<table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
+<th><img src=img/32/stat.png><br>VTP Domain</th>
+<th><img src=img/32/dev.png><br>Devices</th>
+<?
+	if($ord){
+		arsort($dvtp);
+	}else{
+		ksort($dvtp);
+	}
+	$row = 0;
+	foreach ($dvtp as $vtp => $n){
+		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+		$row++;
+		$op="=";
+		if(!$vtp){$vtp="^$";$op="regexp";}
+		$tbar = Bar($n,0);
+		$uvtp = rawurlencode($vtp);
+		echo "<tr bgcolor=#$bg>\n";
+		echo "<td><a href=Devices-List.php?ina=vtpdomain&opa=$op&sta=$vtp>$vtp</a></td><td>\n";
+		echo "$tbar $n</td></tr>\n";
+	}
+	echo "</table><table bgcolor=#666666 $tabtag >\n";
+	echo "<tr bgcolor=#$bg2><td>$row VTP domains of $ndev devices in total</td></tr></table>\n";
 }
 
 if ( in_array("ust",$rep) ){

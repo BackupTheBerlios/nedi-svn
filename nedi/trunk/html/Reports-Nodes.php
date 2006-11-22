@@ -438,7 +438,7 @@ if ( in_array("ust",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$n updates from $tnod nodes in total</td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>$row updates from $tnod nodes in total</td></tr></table>\n";
 }
 
 include_once ("inc/footer.php");

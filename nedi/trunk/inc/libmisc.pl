@@ -158,15 +158,15 @@ sub Shif {
 	my $n = $_[0];
 
 	if ($n){
-		$n =~ s/^GigabitEthernet/Gi/;
-		$n =~ s/^FastEthernet/Fa/;
+		$n =~ s/gigabit[\s]{0,1}ethernet/Gi/i;
+		$n =~ s/fast[\s]{0,1}ethernet/Fa/i;
 		$n =~ s/^Ethernet/Et/;
 		$n =~ s/^Serial/Se/;
-		$n =~ s/^BayStack (.*?)- //;
 		$n =~ s/^[F|G]EC-//;										# Doesn't match telnet CAM table!
-		$n =~ s/PCI|Fast Ethernet|interface//g;								# Strip other garbage
+		$n =~ s/^BayStack (.*?)- //;									# Nortel specific
+		$n =~ s/(Port\d): .*/$1/g;									# Ruby specific
+		$n =~ s/pci|motorola|power|switch|network|interface|management//ig;				# Strip other garbage
 		$n =~ s/\s+//g;											# Strip spaces
-
 		return $n;
 	}else{
 		return "-";
@@ -237,7 +237,7 @@ sub GetChanges {
 	my $diffs = diff($_[0], $_[1]);
 	return '' unless @$diffs;
 
-	foreach $chunk (@$diffs) {
+	foreach my $chunk (@$diffs) {
 		foreach $line (@$chunk) {
 			my ($sign, $lineno, $l) = @$line;
 			if ( $l !~ /\#time:|ntp clock-period/){
@@ -354,12 +354,16 @@ sub Discover {
 			}else{
 				print "\t";									# Spacer instead of L3 info.
 			}
-			if($main::dev{$name}{us}){$cnok = 0}
+			if($main::dev{$name}{us}){								# Don't prep if name exists
+				$cnok = 0;
+			}elsif($main::dev{$name}{cp}){								# No port no name no service
+				$cnok = 2;
+			}
 			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  specified in .def
 				if(defined $main::opt{s}){							# Force SNMP if opt_s or specified in .def
 					&snmp::MacTable($name);
 				}else{
-					if($cnok){$cnok = &cli::PrepDev($name)}					# PrepDev returns 2, if failed
+					if($cnok != 2){$cnok = &cli::PrepDev($name)}				# PrepDev returns 2, if failed
 					if(!$cnok and $main::dev{$name}{os} eq "IOS"){
 						if( &cli::GetIosMacTab($name) ){				# Fall back to SNMP if telnet fails.
 							&snmp::MacTable($name);
@@ -632,10 +636,9 @@ sub BuildNod {
 		my $nad = 0;
 		open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";					# read arp.dat
 		
-		my @adat = <ARPDAT>;										# Has nothing to do with Alesis ;-)
+		my @adat = <ARPDAT>;
 		close("ARPDAT");
 		chomp @adat;
-	
 		foreach my $l (@adat){
 			my @ad = split(/\s/,$l);
 			if($ad[2] > $retire){									# Only add current entries
@@ -826,7 +829,6 @@ sub ManageRRD {
 			}
 			if($ok){
 				if ($main::opt{t}){
-					#print "\n RRD: $irf\t$main::int{$_[0]}{$i}{ioc}/$main::int{$_[0]}{$i}{ooc} Bytes\t $main::int{$_[0]}{$i}{ier}/$main::int{$_[0]}{$i}{oer} Errors";
 					printf ("%12s %12d %12d %8d %8d\n", $irf,$main::int{$_[0]}{$i}{ioc},$main::int{$_[0]}{$i}{ooc},$main::int{$_[0]}{$i}{ier},$main::int{$_[0]}{$i}{oer}  ) if $main::opt{d};
 				}else{
 					$ok = 1 + system ("rrdtool",

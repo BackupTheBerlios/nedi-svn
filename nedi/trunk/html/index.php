@@ -31,7 +31,7 @@ $bg1 = "88AACC";
 $bg2 = "99BBDD";
 
 include_once ("inc/libmisc.php");
-ReadConf('login');
+ReadConf('usr');
 include_once ("inc/lang-eng.php");
 
 if($backend == 'MSQ'){
@@ -64,7 +64,7 @@ if(isset( $_POST['user'])  ){
 		session_start(); 
 
 		$_SESSION['user']	= $_POST['user'];
-		$_SESSION['group']	= "";
+		$_SESSION['group']	= "usr,";
 		if ($usr[2]) {$_SESSION['group']	.= "adm,";}
 		if ($usr[3]) {$_SESSION['group']	.= "net,";}
 		if ($usr[4]) {$_SESSION['group']	.= "dsk,";}

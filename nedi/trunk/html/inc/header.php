@@ -38,12 +38,22 @@ require_once ("lib" . strtolower($backend) . ".php");
 <td ID=MainMenuID></td><th width=80><?=$_SESSION['user']?></th></tr></table>
 
 <SCRIPT LANGUAGE="JavaScript"><!--
-	var mainmenu = <?=$mainmenu?> 												// PHP $mainmenu evaluated in libmisc.php, ReadConf()
-	cmDraw ('MainMenuID', mainmenu, 'hbr', cmThemeN, 'ThemeN');
+var mainmenu = [
+<?
+	foreach (array_keys($mod) as $m) {
+		echo "	[null,'$m',null,null,null,\n";
+		foreach ($mod[$m] as $s => $i) {
+			echo "		['<img src=./img/16/$i.png>','$s','$m-$s.php',null,null],\n";
+		}
+		echo "	],\n";
+	}
+?>
+];
+cmDraw ('MainMenuID', mainmenu, 'hbr', cmThemeN, 'ThemeN');
 --></SCRIPT>
 <p>
 <?
-if( !preg_match("/$modgroup[$self]/",$_SESSION['group']) ){
+if( strpos($_SESSION['group'],$modgroup[$self]) === false){
 	echo $nokmsg;
 	die;
 }

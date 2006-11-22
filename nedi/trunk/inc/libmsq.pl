@@ -486,7 +486,7 @@ sub WriteLink {
 	my $nlink = 0;
 
 	my $dbh = DBI->connect("DBI:mysql:$misc::dbname:$misc::dbhost", "$misc::dbuser", "$misc::dbpass", { RaiseError => 1, AutoCommit => 0});
-	$dbh->do("TRUNCATE links") if (!$_[0]);
+	$dbh->do("DELETE FROM links where type != \"S\"") if (!$_[0]);
 	my $sth = $dbh->prepare("INSERT INTO links(device,ifname,neighbour,nbrifname,bandwidth,type,power,nbrduplex,nbrvlanid) VALUES ( ?,?,?,?,?,?,?,?,? )");
 
 	foreach my $dv ( sort keys(%main::link) ){
@@ -648,7 +648,7 @@ sub WlanUp {
 
 	find(\&misc::GetAp, $main::opt{w});										# Calls GetAp() in libmisc.pl
 
-	$dbh->do("DELETE FROM wlan");
+	$dbh->do("TRUNCATE wlan");
 	$sth = $dbh->prepare("INSERT INTO wlan(mac,time) VALUES ( ?,? )");
 	for my $mc (sort(keys %ap) ){ $sth->execute ( $mc,$ap{$mc} ) }
 	$dbh->commit;

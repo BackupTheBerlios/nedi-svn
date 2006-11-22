@@ -9,6 +9,7 @@
 # 27/03/06	initial version.
 # 15/05/06	new concept towards CPU and Mem graphing
 # 2/11/06		cosmetic changes
+# 8/11/06		medium graph option
 */
 
 $bg1	= "BBDDDD";
@@ -27,6 +28,7 @@ $cpu = isset($_GET['cpu']) ? $_GET['cpu'] : "";
 $mem = isset($_GET['mem']) ? $_GET['mem'] : "";
 $tmp = isset($_GET['tmp']) ? $_GET['tmp'] : "";
 $dur = isset($_GET['dur']) ? $_GET['dur'] : "";
+$sze = isset($_GET['sze']) ? "m" : "l";
 ?>
 <h1>Device Graphs</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="traf">
@@ -88,24 +90,27 @@ Duration
 <OPTION VALUE="360" <?=($dur == "360")?"selected":""?> >Year
 </SELECT>
 </th>
+<th>
+<INPUT type="checkbox" name="sze" <?=($sze == "m")?"checked":""?> > Medium Graphs<br>
+</th>
 <th width=80><input type="submit" value="Show"></th>
 </tr></table></form><p><center>
 <?
 $udev = rawurlencode($dv);
 if($cpu ){
-	echo "<img src=inc/drawrrd.php?dv=$udev&s=l&t=cpu&dur=$dur><p>";
+	echo "<img src=inc/drawrrd.php?dv=$udev&s=$sze&t=cpu&dur=$dur>\n";
 }
 if($mem ){
-	echo "<img src=inc/drawrrd.php?dv=$udev&s=l&t=mem&dur=$dur><p>";
+	echo "<img src=inc/drawrrd.php?dv=$udev&s=$sze&t=mem&dur=$dur>\n";
 }
 if($tmp ){
-	echo "<img src=inc/drawrrd.php?dv=$udev&s=l&t=tmp&dur=$dur><p>";
+	echo "<img src=inc/drawrrd.php?dv=$udev&s=$sze&t=tmp&dur=$dur>\n";
 }
 if( isset($if[0]) ){
 	$ifs = 'if[]='. implode('&if[]=', $if);
 
-	echo "<img src=inc/drawrrd.php?dv=$udev&$ifs&s=l&t=trf&dur=$dur>\n";
-	echo "<p><img src=inc/drawrrd.php?dv=$udev&$ifs&s=l&t=err&dur=$dur>";
+	echo "<p><img src=inc/drawrrd.php?dv=$udev&$ifs&s=$sze&t=trf&dur=$dur>\n";
+	echo "<img src=inc/drawrrd.php?dv=$udev&$ifs&s=$sze&t=err&dur=$dur>\n";
 }
 include_once ("inc/footer.php");
 ?>

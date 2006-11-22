@@ -31,7 +31,7 @@ $opa = isset($_GET['opa']) ? $_GET['opa'] : "";
 $opb = isset($_GET['opb']) ? $_GET['opb'] : "";
 $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
-$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','device','vlanid','firstseen','lastseen');
+$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','if','vlanid','firstseen','lastseen');
 
 ?>
 <h1>Node List</h1>
@@ -72,7 +72,7 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','device','vlanid',
 <OPTION VALUE="ipstats" <?=(in_array("ipstats",$col))?"selected":""?> >IP stats
 <OPTION VALUE="mac" <?=(in_array("mac",$col))?"selected":""?> >MAC address
 <OPTION VALUE="oui" <?=(in_array("oui",$col))?"selected":""?> >OUI vendor
-<OPTION VALUE="device" <?=(in_array("device",$col))?"selected":""?> >Device
+<OPTION VALUE="if" <?=(in_array("if",$col))?"selected":""?> >Interface
 <OPTION VALUE="ifstats" <?=(in_array("ifstats",$col))?"selected":""?> >IF stats
 <OPTION VALUE="vlanid" <?=(in_array("vlanid",$col))?"selected":""?> >Vlan
 <?
@@ -117,7 +117,7 @@ if ($ina){
 	if( in_array("ipstats",$col) ){echo "<th>IP Update chg/lost</th>";}
 	if( in_array("mac",$col) ){echo "<th>MAC Address</th>";}
 	if( in_array("oui",$col) ){echo "<th>OUI Vendor</th>";}
-	if( in_array("device",$col) ){echo "<th>Device</th><th>Interface</th>";}
+	if( in_array("if",$col) ){echo "<th>Device</th><th>Interface</th>";}
 	if( in_array("ifstats",$col) ){echo "<th>IF Update chg/metric</th>";}
 	if(in_array("graph",$col)){echo "<th>Traffic / Errors</th>";}
 	if( in_array("vlanid",$col) ){echo "<th>Vlan</th>";}
@@ -156,7 +156,7 @@ if ($ina){
 			}
 			if(in_array("mac",$col)){ echo "<td>$n[2]</td>";}
 			if(in_array("oui",$col)){ echo "<td>$n[3]</td>";}
-			if(in_array("device",$col)){ echo "<td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a></td><td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a></td>";}
+			if(in_array("if",$col)){ echo "<td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a></td><td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a></td>";}
 			if(in_array("ifstats",$col)){
 				$iu       = date("j.M G:i:s",$n[10]);
 				list($i1c,$i2c) = Agecol($n[10],$n[10],$row % 2);
@@ -164,8 +164,8 @@ if ($ina){
 			}
 			if($rrdstep and in_array("graph",$col)){
 				echo "<td nowrap align=center>\n";
-				echo "<a href=Devices-Graph.php?dv=$d&if%5B%5D=$if><img src=inc/drawrrdstep.php?dv=$d&if%5B%5D=$if&s=s&t=trf border=0>\n";
-				echo "<img src=inc/drawrrdstep.php?dv=$d&if%5B%5D=$if&s=s&t=err border=0></a>\n";
+				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$if><img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=trf border=0>\n";
+				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=err border=0></a>\n";
 			}
 			if(in_array("vlanid",$col)){ echo "<td>$n[8]</td>";}
 

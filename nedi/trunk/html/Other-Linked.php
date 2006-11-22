@@ -25,6 +25,7 @@ $nb = isset($_GET['nb']) ? $_GET['nb'] : "";
 $ni = isset($_GET['ni']) ? $_GET['ni'] : "";
 $bwd = isset($_GET['bwd']) ? $_GET['bwd'] : "";
 $bwn = isset($_GET['bwn']) ? $_GET['bwn'] : "";
+$typ = isset($_GET['typ']) ? $_GET['typ'] : "";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if ( isset($_GET['add']) ){
@@ -140,14 +141,26 @@ Bandwidth
 <option value="10000000000">10G
 </select>
 </th>
-<th width=80><input type="submit" name="add" value="Add"></th>
+
+<th width=80>
+<input type="submit" name="add" value="Add">
+<p>or just<p>
+<select size=1 name="typ" onchange="this.form.submit();">
+<option value="">Show
+<option value="S">Static
+<option value="C">CDP
+<option value="L">LLDP
+<option value="O">OUI
+<option value="M">MAC
+</select>
+</th>
 </tr></table></form><p>
 <?
-if ($dv){
+if ($dv or $typ){
 ?>
 <h2><?=$dv?> - Links</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th><img src=img/32/dumy.png><br>Interface</th>
+<th colspan=2><img src=img/32/dev.png><br>Device</th>
 <th colspan=2><img src=img/32/dev.png><br>Neighbour</th>
 <th><img src=img/32/tap.png><br>Bandwidth</th>
 <th><img src=img/32/powr.png title="PoE consumption in mW"><br>Power</th>
@@ -155,7 +168,11 @@ if ($dv){
 <th><img src=img/32/idea.png><br>Action</th></tr>
 </tr>
 <?
-	$query	= GenQuery('links','s','*','ifname','',array('device'),array('='),array($dv));
+	if ($dv){
+		$query	= GenQuery('links','s','*','ifname','',array('device'),array('='),array($dv));
+	}else{
+		$query	= GenQuery('links','s','*','ifname','',array('type'),array('='),array($typ));
+	}
 	$res	= @DbQuery($query,$link);
 	if($res){
 		$nli = 0;
@@ -163,7 +180,7 @@ if ($dv){
 		while( ($l = @DbFetchRow($res)) ){
 			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 			$row++;
-			echo "<tr bgcolor=#$bg><td>$l[2]</td><th>$l[3]</th><td>$l[4] (Vlan$l[9] $l[8])</td>\n";
+			echo "<tr bgcolor=#$bg><th>$l[1]</th><td>$l[2]</td><th>$l[3]</th><td>$l[4] (Vlan$l[9] $l[8])</td>\n";
 			echo "<td align=right>" . Zfix($l[5]) . "</td><td align=right>$l[7]</td>";
 			echo "<td align=center>$l[6]</td>\n";
 			echo "<th><a href=?dli=$l[0]&dv=$l[1]><img src=img/16/bcnl.png border=0 hspace=8 onclick=\"return confirm('Delete link?');\" title=\"Delete link\"></a></th></tr>\n";

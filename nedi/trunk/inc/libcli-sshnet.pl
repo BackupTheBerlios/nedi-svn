@@ -64,7 +64,7 @@ sub PrepDev{
 	if($main::dev{$_[0]}{os} eq "Cat1900"){
 		do {
 			$us = shift (@users);
-			print " U:$us" if $main::opt{d};
+			print "U:$us " if $main::opt{d};
 			my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 								Port	=> $cp,
 								Prompt  => $prompt,
@@ -203,8 +203,8 @@ sub PrepDev{
 	}else{
 		print ":$cp " if $main::opt{d};
 		$main::dev{$_[0]}{us} = $us;
-		$main::dev{$_[0]}{cp} = $cp;
 	}
+	$main::dev{$_[0]}{cp} = $cp;
 	return $nok;
 }
 
@@ -446,7 +446,7 @@ sub GetIosCfg{
 	}
 	if( $cfg[$#cfg] eq "" ){pop @cfg}										# Remove empty line at the end.
 	print "Bi";
-	print "$cl lines " if $main::opt{d};
+	print "-$cl" if $main::opt{d};
 	return @cfg;
 }
 
@@ -490,7 +490,7 @@ sub GetCatCfg{
 					}
 				}
 				$session->cmd("set length 0");
-				my @run = $session->cmd($cmd);
+				@run = $session->cmd($cmd);
 				$session->close;
 			}else{
 				$session->close;
@@ -512,7 +512,7 @@ sub GetCatCfg{
 		}
 	}
 	print "Bc";
-	print "$cl lines " if $main::opt{v};
+	print "-$cl" if $main::opt{d};
 	return @cfg;
 }
 
@@ -547,7 +547,7 @@ sub GetC19Cfg{
 					}		
 				}
 				print "B9";
-				print "$cl lines " if $main::opt{v};
+				print "-$cl" if $main::opt{d};
 			} else {
 				print "Te";
 				return "Couldn't enable!\n";
@@ -626,8 +626,8 @@ sub GetIronCfg{
 		}
 	}
 	if( $cfg[$#cfg] eq "" ){pop @cfg}										# Remove empty line at the end.
-	print "Bi";
-	print "$cl lines " if $main::opt{d};
+	print "Bf";
+	print "-$cl" if $main::opt{d};
 	return @cfg;
 }
 
@@ -712,8 +712,8 @@ print "H" if $main::opt{d};
 		}
 	}
 	pop @cfg;
-	print "Bi";
-	print "$cl lines " if $main::opt{d};
+	print "Bh";
+	print "-$cl" if $main::opt{d};
 	return @cfg;
 }
 

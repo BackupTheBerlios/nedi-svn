@@ -36,7 +36,7 @@ use Getopt::Std;
 use vars qw($nediconf $cdp $lldp $oui);
 use vars qw(%nod %dev %int %mod %link %vlan %opt %net %usr); 
 
-getopts('AbcdDilLnost:u:vw:',\%opt) or &Help();
+getopts('AbcdDilLnost:u:vw:y',\%opt) or &Help();
 #if (! keys %opt ){&Help()}
 
 $misc::now = time;
@@ -88,6 +88,8 @@ if ($opt{w}) {
 	&db::WlanUp();
 }elsif($opt{i}) {
 	&db::InitDB();
+}elsif($opt{y}) {
+	&ShowDefs();
 }else{
 	&misc::ReadOUIs();
 	&db::ReadDev();
@@ -170,25 +172,43 @@ if ($opt{w}) {
 }
 
 #===================================================================
+# List supported device types
+#===================================================================
+sub ShowDefs {
+	print "Supported Devices ---------------------------------------------------------\n";
+	chdir("sysobj");
+	my @defs = glob("*.def");
+	foreach my $df (sort @defs){
+		open F, $df or print "couldn't open $df\n" && return;
+		while (<F>) {
+			chomp;
+			next unless /^Type/o;
+			$_ =~ s/^Type\s//;
+			printf ("%-40s %s \n",$_,$df );
+		}
+	}
+}
+#===================================================================
 # Display some help
 #===================================================================
 sub Help {
 	print "\n";
-	print "usage: nedi.pl [-i|-t|-l|-c|-w|(-D)] <more option(s)>\n";
+	print "usage: nedi.pl [-i|-D|-t|-l|-c|-w|-y|] <more option(s)>\n";
 	print "Discovery Options (can be combined, default is static) --------------------\n";
 	print "-u<file>	use specified seedlist\n";
 	print "-c	CDP discovery\n";
 	print "-l 	LLDP discovery\n";
 	print "-o	OUI discovery (based on ARP chache entries of the above\n";
 	print "-b	backup running configs\n";
-	print "-A 	Append to networks, links, vlans, interfaces and modules tables.\n";
-	print "-L 	Don't touch links, so you can maintain them manually.\n";
+	print "-A 	append to networks, links, vlans, interfaces and modules tables.\n";
+	print "-L 	don't touch links, so you can maintain them manually.\n";
 	print "Other Options -------------------------------------------------------------\n";
 	print "-i	initialize database and start all over\n";
 	print "-w<path>	add Kismet csv files in path to WLAN database.\n";
 	print "-t<ip>	test IP only, but don't write anything\n";
-	print "-d/D	store (and verbose discovery)/retrieve vars in debug mode\n\n";
+	print "-d/D	store (and verbose discovery)/retrieve vars in debug mode\n";
 	print "-v	verbose output\n";
+	print "-y	show supported devices based on .def files (in sysobj)\n\n";
 	print "\nOutput Legend -----------------------------------------------------------\n";
 	print "Statistics (lower case letters):\n";
 	print "i#	Interfaces\n";
@@ -196,7 +216,7 @@ sub Help {
 	print "a#	ARP entries\n";
 	print "f#	Forwarding entries\n";
 	print "m#	Modules\n";
-	print "#/#	Queueing (added/done already)\n";
+	print "[clo]#/#	(CDP,LLDP or OUI) queueing (added/done already)\n";
 	print "b#	border hits\n";
 	print "\nNotifications (upper case letters):\n";
 	print "Ax	Addresses (i=IF IP, m=IF mask, a=arptable, n=no IF)\n";
@@ -213,5 +233,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w-rc3 3.Nov 2006\n";
+	die "NeDi 1.0.w 22.Nov 2006\n";
 }

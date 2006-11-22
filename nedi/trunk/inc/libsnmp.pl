@@ -87,8 +87,8 @@ sub Identify {
 			foreach my $l (@def){
 				if ($l !~ /^#|^;|^$/){
 					my @v  = split(/\s+/,$l);
-					if (!$v[1]){$v[1] = ""}
-					if ($v[0] eq "Type" and $v[1])	{$misc::sysobj{$so}{ty} = $v[1]}
+					if (!defined $v[1]){$v[1] = ""}
+					if ($v[0] eq "Type")		{$misc::sysobj{$so}{ty} = $v[1]}
 					elsif ($v[0] eq "OS")		{$misc::sysobj{$so}{os} = $v[1]}
 					elsif ($v[0] eq "Icon")		{$misc::sysobj{$so}{ic} = $v[1]}
 					elsif ($v[0] eq "SNMPv")	{
@@ -479,7 +479,7 @@ sub Interfaces {
 			print "$err\n" if $main::opt{d};
 		}else{
 			%ifax  = %{$r};
-			$usedoid{$ifalxO} = \%ifax;						# (store in case it's the same for vlans or duplex)
+			$usedoid{$ifalxO} = \%ifax;							# (store in case it's the same for vlans or duplex)
 			foreach my $x (keys (%ifax)){							# ...and map directly to if indexes
 				my $i = $x;
 				$i =~ s/$ifalxO//;
@@ -499,8 +499,8 @@ sub Interfaces {
 		if ($err){print "Iv";print "$err\n" if $main::opt{d};$notice++}else{ %ifvl  = %{$r}}
 	}
 	if($ifvlxO){											# If vlans use a different index
-		if(exists $usedoid{$ifvlxO}){							# and if it's been used before
-			%ifvx = %{$usedoid{$ifvlxO}};						# assign the vlan oid to where the used one points to.
+		if(exists $usedoid{$ifvlxO}){								# and if it's been used before
+			%ifvx = %{$usedoid{$ifvlxO}};							# assign the vlan oid to where the used one points to.
 		}else{											# Otherwhise walk it
 			$r = $session->get_table($ifvlxO);
 			$err = $session->error;
@@ -530,8 +530,8 @@ sub Interfaces {
 		if ($err){print "Id";print "$err\n" if $main::opt{d};$notice++}else{ %ifdp  = %{$r}}
 	}
 	if($ifduxO){											# If duplex uses a different index
-		if(exists $usedoid{$ifduxO}){							# and if it's been used before
-			%ifdx = %{$usedoid{$ifduxO}};						# assign the duplex oid to where the used one points to.
+		if(exists $usedoid{$ifduxO}){								# and if it's been used before
+			%ifdx = %{$usedoid{$ifduxO}};							# assign the duplex oid to where the used one points to.
 		}else{											# Otherwhise walk it
 			$r = $session->get_table($ifduxO);
 			$err = $session->error;
@@ -564,16 +564,16 @@ sub Interfaces {
 		my $idn = &misc::Shif( "$ifde{$dek}" );
 		if ( $ifna{"$ifnamO.$i"} ){
 			if(exists $misc::portprop{$dv}{$ifna{"$ifnamO.$i"}} ){
-				$ina = $ifna{"$ifnamO.$i"} . "-$i";
+				$ina = $ifna{"$ifnamO.$i"} . "$i";
 			}else{
 				$ina = $ifna{"$ifnamO.$i"};
 			}
 		}elsif( exists $misc::portprop{$dv}{$idn} ){
-			$ina = &misc::Shif( "$ifde{$dek}-$i" );			# Use IF desc and make unique, if necessary
+			$ina = &misc::Shif( "$ifde{$dek}-$i" );						# Use IF desc and make unique, if necessary
 		}else{
-			$ina = &misc::Shif( "$ifde{$dek}" );			# Use IF desc if name is empty
+			$ina = &misc::Shif( "$ifde{$dek}" );						# Use IF desc if name is empty
 		}
-		$main::int{$dv}{$i}{fwd} = $i;					# Bogus now, but eventually to bridge forwarding port...
+		$main::int{$dv}{$i}{fwd} = $i;								# Bogus now, but eventually to bridge forwarding port...
 		$main::int{$dv}{$i}{ina} = $ina;
 		$main::int{$dv}{$i}{des} = (defined $ifde{$dek}?$ifde{$dek}:"");
 		$main::int{$dv}{$i}{typ} = (defined $iftp{"$iftypO.$i"}?$iftp{"$iftypO.$i"}:0);
@@ -722,10 +722,12 @@ sub CDP {
 	foreach my $i (keys (%cdp)){
 		my $lif	  = $main::int{$_[0]}{$i}{ina};							# Assign interfacename.
 		foreach my $n (keys (%{$cdp{$i}})){
-			my $rip	  = '0.0.0.0';
 			my $rdup  = "-";
 			
-			my $riph = (defined $cdp{$i}{$n}{4}?$cdp{$i}{$n}{4}:"");
+			my $rip   = "0.0.0.0";
+			if(defined $cdp{$i}{$n}{4} and $cdp{$i}{$n}{4} ne ""){
+				$rip = &misc::MapIp( unpack("C",substr($cdp{$i}{$n}{4},0,1)).".".unpack("C",substr($cdp{$i}{$n}{4},1,1)).".".unpack("C",substr($cdp{$i}{$n}{4},2,1)).".".unpack("C",substr($cdp{$i}{$n}{4},3,1)) );
+			}
 			my $rdes  = &misc::Strip( $cdp{$i}{$n}{5} );
 			my $rci   = &misc::Strip( $cdp{$i}{$n}{6} );
 			my $rif	  = &misc::Shif(  $cdp{$i}{$n}{7} );
@@ -741,20 +743,21 @@ sub CDP {
 			}
 			my $rvln = (defined $cdp{$i}{$n}{14}?$cdp{$i}{$n}{14}:0);
 			my $rpwr = (defined $cdp{$i}{$n}{15}?$cdp{$i}{$n}{15}:0);
+			if($rpwr > 4000000000){$rpwr = 0}						# > 4MW is just wrong...used until Cisco to fixes it
 			my $renam = $rci;
 			my $rser  = $rci;
-			if($rdes =~ /^Revision /){									# Procurves reverse name and SN...of course
-				$renam    =~ s/(.*?)\((\S+)\)/$1/;							# Extract remote name from CatOS neighbours
+			if($rdes =~ /^Revision /){							# Procurves reverse name and SN...of course
+				$renam    =~ s/(.*?)\((\S+)\)/$1/;					# Extract remote name from CatOS neighbours
 				$rser     =~ s/(.*?)\((\S+)\)/$2/;			
 			}else{			
-				$renam    =~ s/(.*?)\((\S+)\)/$2/;							# Extract remote name from CatOS neighbours
-				$renam    =~  s/^(.*?)\.(.*)/$1/;							# Domain part confuses CDP links!		
+				$renam    =~ s/(.*?)\((\S+)\)/$2/;					# Extract remote name from CatOS neighbours
+				$renam    =~  s/^(.*?)\.(.*)/$1/;					# Domain part confuses CDP links!		
 				$rser     =~ s/(.*?)\((\S+)\)/$1/;
 			}
-			if ($_[1] =~ /\Q$rci\E/){								# is it me?
-				$main::int{$_[0]}{$locif[14]}{com} .= "CDP seing itself! ";
+			if ($_[1] eq $rci){								# is it me?
+				$main::int{$_[0]}{$i}{com} .= "CDP seeing itself! ";
 				if($misc::notify =~ /d/){
-					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$misc::now\",\"$_[0]\",\"CDP seing itself!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$misc::now\",\"$_[0]\",\"CDP seeing itself!\"") ){
 						die "DB error messages!\n";
 					}
 				}
@@ -766,7 +769,7 @@ sub CDP {
 				$misc::cdplink{$_[0]}{$lif}{$renam}{$rif}{du} = $rdup;
 				$misc::cdplink{$_[0]}{$lif}{$renam}{$rif}{vl} = $rvln;
 				$main::int{$_[0]}{$i}{com} .= "CDP:$renam-$rif ";
-				if($riph eq ""){								# ip is empty?
+				if($rip eq "0.0.0.0"){							# ip not set?
 					$main::dev{$renam}{ip} = $rip;
 					$main::dev{$renam}{sn} = "($rser)";
 					$main::dev{$renam}{de} = $rdes;
@@ -785,14 +788,13 @@ sub CDP {
 					}
 					print "Q0\t";
 				}elsif(defined $misc::webdev and $rci =~ /$misc::webdev/ or defined $misc::leafdev and $rci =~ /$misc::leafdev/){
-					if(defined $misc::webdev and $rci =~ /$misc::webdev/){			# Try to get some info through the web interface
+					if(defined $misc::webdev and $rci =~ /$misc::webdev/){				# Try to get some info through the web interface
 					}
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{bw} = $main::int{$_[0]}{$i}{spd};
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{ty} = "V";
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{pr} = 0;
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{du} = $main::int{$_[0]}{$i}{dpx};
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{vl} = $main::int{$_[0]}{$i}{vln};
-					$rip = &misc::MapIp( unpack("C",substr($riph,0,1)).".".unpack("C",substr($riph,1,1)).".".unpack("C",substr($riph,2,1)).".".unpack("C",substr($riph,3,1)) );
 					$main::dev{$renam}{ip} = $rip;
 					$main::dev{$renam}{sn} = "($rser)";
 					$main::dev{$renam}{bi} = $rdes;
@@ -814,15 +816,14 @@ sub CDP {
 					$main::dev{$renam}{ls} = $misc::now;
 					$misc::portprop{$_[0]}{$lif}{pho} = 1;
 					print "Qp\t";
-				}else{										# none of the above...let's queue it!
+				}else{									# none of the above...let's queue it!
 					$misc::portprop{$_[0]}{$lif}{upl} = 1;
-					$rip = &misc::MapIp( unpack("C",substr($riph,0,1)).".".unpack("C",substr($riph,1,1)).".".unpack("C",substr($riph,2,1)).".".unpack("C",substr($riph,3,1)) );
 					if (grep /^\Q$rci\E$/,(@misc::donecdp,@misc::donenam,@misc::todo) ){	# Don't queue if done or already queued... (The \Q \E is to prevent interpreting the CDPid as a regexp)
 						$dn++;
-					}elsif (defined $misc::border and $rci =~ /$misc::border/){		# ...or matching the border.
+					}elsif (defined $misc::border and $rci =~ /$misc::border/){	# ...or matching the border.
 						$bd++;
 					}else{
-						if ($main::cdp) {						# queue if it's a CDP discovery 
+						if ($main::cdp) {					# queue if it's a CDP discovery 
 							push (@misc::todo,"$rci");
 							$misc::doip{$rci} = $rip;
 							$ad++;
@@ -835,7 +836,7 @@ sub CDP {
 	}
 	if ($main::opt{d}){
 #		printf ("%4d+%d",$ad,$dn );
-		print " q$ad/$dn-b$bd";
+		print " c$ad/$dn-b$bd";
 	}
 
 }
@@ -933,7 +934,7 @@ sub ArpTable {
 	if (!$main::opt{v}){
 		print " a$narp";
 		if ($main::opt{o}){
-			print " $noui+$dn";
+			print " o$noui+$dn";
 			if ($bd){print " b$bd"}else{print "  "}
 		}else{print "  "}
 	}
@@ -1089,7 +1090,7 @@ sub Modules {
 		my $s = $msl{$i};
 		$i =~ s/$misc::sysobj{$so}{mt}\.//;
 		if (exists $mcl{"$misc::sysobj{$so}{mc}.$i"}){
-			if($mcl{"$misc::sysobj{$so}{mc}.$i"} == $misc::sysobj{$so}{mv}){$ismod =1}
+			if($mcl{"$misc::sysobj{$so}{mc}.$i"} eq $misc::sysobj{$so}{mv}){$ismod =1}	# == caused error, if not numeric...
 		}else{
 			$ismod = 1;
 		}

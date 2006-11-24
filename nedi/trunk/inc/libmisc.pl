@@ -526,7 +526,7 @@ sub Links {
 								$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "O";
 								$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
 								$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-								$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "to $ndv-$nif? ";
+								$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "to $ndv-$nif? ";# Problem with port channels on CatOS?
 								$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "to $na-$upl? ";
 								print "$na:$upl <-> $ndv:$nif?\n" if $main::opt{v};
 							}

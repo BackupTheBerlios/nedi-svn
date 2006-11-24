@@ -3,7 +3,7 @@
 # General
 SNMPv	1
 Type	350F-HD
-OS	other
+OS	Baystack350
 Icon	w2br
 Bridge	normal
 Dispro	
@@ -20,7 +20,7 @@ IFalia
 IFalix	
 IFvlan	
 IFvlix	
-IFdupl	
+IFdupl	doublespeed
 IFduix	
 Halfdp	1
 Fulldp	2

@@ -35,9 +35,10 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 <th>Select Report(s)</th>
 <th>
 <SELECT MULTIPLE name="rep[]" size=4>
-<OPTION VALUE="itr" <? if(in_array("itr",$rep)){echo "selected";} ?> >Total Traffic
 <OPTION VALUE="aif" <? if(in_array("aif",$rep)){echo "selected";} ?> >Active Interfaces
 <OPTION VALUE="dif" <? if(in_array("dif",$rep)){echo "selected";} ?> >Disabled Interfaces
+<OPTION VALUE="itr" <? if(in_array("itr",$rep)){echo "selected";} ?> >Total Traffic
+<OPTION VALUE="lmi" <? if(in_array("lmi",$rep)){echo "selected";} ?> >Link Mismatch
 </SELECT>
 
 </th>
@@ -60,8 +61,11 @@ $query	= GenQuery('interfaces');
 $res	= @DbQuery($query,$link);
 if($res){
 	$nif = 0;
+	$ndif = 0;
 	while( ($i = @DbFetchRow($res)) ){
 		$numif[$i[0]]++;
+		$ifdu["$i[0];;$i[1]"] = $i[10];
+		$ifvl["$i[0];;$i[1]"]   = $i[11];
 		$topino["$i[0];;$i[1]"] = $i[12];
 		$topier["$i[0];;$i[1]"] = $i[13];
 		$topoto["$i[0];;$i[1]"] = $i[14];
@@ -137,19 +141,21 @@ if ( in_array("dif",$rep) ){
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/bstp.png><br>Disabled Interfaces</th>
 <?
-	if($ord){
-		krsort($disif);
-	}else{
-		ksort($disif);
-	}
-	$row = 0;
-	foreach ($disif as $dv => $di){
-		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
-		$row++;
-		$ud	= rawurlencode($dv);
-		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$ud>$dv</a></td>\n";
-		echo "<td>$di</td></tr>\n";
+	if($ndif){
+		if($ord){
+			krsort($disif);
+		}else{
+			ksort($disif);
+		}
+		$row = 0;
+		foreach ($disif as $dv => $di){
+			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+			$row++;
+			$ud	= rawurlencode($dv);
+			echo "<tr bgcolor=#$bg>\n";
+			echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$ud>$dv</a></td>\n";
+			echo "<td>$di</td></tr>\n";
+		}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$ndif disabled interfaces on $row devices in total</td></tr></table>\n";
@@ -306,6 +312,82 @@ if ( in_array("itr",$rep) ){
 
 
 	echo '</td></tr></table>';
+}
+
+if ( in_array("lmi",$rep) ){
+?>
+<h2>Link Mismatch</h2><p>
+<table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
+<th width=80><img src=img/32/fiqu.png><br>Mismatch</th>
+<th><img src=img/32/dev.png><br>Device</th>
+<th colspan=2><img src=img/32/dumy.png><br>Interface</th>
+<th><img src=img/32/dev.png><br>Device</th>
+<th colspan=2><img src=img/32/dumy.png><br>Interface</th>
+<?
+	$query	= GenQuery('links');
+	$res	= @DbQuery($query,$link);
+	$nli    = @DbNumRows($res);
+	if($res){
+		$row = 0;
+		while( ($l = @DbFetchRow($res)) ){
+			$libw[$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
+			$lidu[$l[3]][$l[4]][$l[1]][$l[2]] = $l[8];
+			$livl[$l[3]][$l[4]][$l[1]][$l[2]] = $l[9];
+		}
+		@DbFreeResult($res);
+	}else{
+		print @DbError($link);
+		die;
+	}
+	$row = 0;
+	foreach(array_keys($lidu) as $dv){
+		foreach(array_keys($lidu[$dv]) as $if){
+			foreach(array_keys($lidu[$dv][$if]) as $nb){
+				foreach(array_keys($lidu[$dv][$if][$nb]) as $ni){
+					$ud = urlencode($dv);
+					$un = urlencode($nb);
+					if($libw[$dv][$if][$nb][$ni] and $libw[$nb][$ni][$dv][$if]){
+						if($libw[$dv][$if][$nb][$ni] != $libw[$nb][$ni][$dv][$if]){
+							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+							$row++;
+							echo "<tr bgcolor=#$bg>\n";
+							echo "<td bgcolor=$bi width=20 align=center><img src=img/spd.png></td>\n";
+							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if</td>\n";
+							echo "<th>".Zfix($libw[$dv][$if][$nb][$ni])."</th>\n";
+							echo "<td><a href=Devices-Status.php?dev=$un>$nb</a></td><td>$ni</td>\n";
+							echo "<th>".Zfix($libw[$nb][$ni][$dv][$if])."</th></tr>\n";
+						}
+					}
+					if (strlen($lidu[$dv][$if][$nb][$ni]) == 2 and strlen($lidu[$nb][$ni][$dv][$if]) == 2){ 
+						if($lidu[$dv][$if][$nb][$ni] != $lidu[$nb][$ni][$dv][$if]){
+							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+							$row++;
+							echo "<tr bgcolor=#$bg>\n";
+							echo "<td bgcolor=$bi width=20 align=center><img src=img/dpx.png></td>\n";
+							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if (".$ifdu["$dv;;$if"].")</td>\n";
+							echo "<th>".$lidu[$dv][$if][$nb][$ni]."</th>\n";
+							echo "<td><a href=Devices-Status.php?dev=$un>$nb</a></td><td>$ni (".$ifdu["$nb;;$ni"].")</td>\n";
+							echo "<th>".$lidu[$nb][$ni][$dv][$if]."</th></tr>\n";
+						}
+					}
+					if($livl[$dv][$if][$nb][$ni] and $livl[$nb][$ni][$dv][$if]){
+						if($livl[$dv][$if][$nb][$ni] != $livl[$nb][$ni][$dv][$if]){
+							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+							$row++;
+							echo "<tr bgcolor=#$bg>\n";
+							echo "<td bgcolor=$bi width=20 align=center><img src=img/16/stat.png></td>\n";
+							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if (Vlan".$ifvl["$dv;;$if"].")</td>\n";
+							echo "<th>Vlan".$livl[$dv][$if][$nb][$ni]."</th>\n";
+							echo "<td><a href=Devices-Status.php?dev=$un>$nb</a></td><td>$ni (Vlan".$ifvl["$nb;;$ni"].")</td>\n";
+							echo "<th>Vlan".$livl[$nb][$ni][$dv][$if]."</th></tr>\n";
+						}
+					}
+				}
+			}
+		}
+	}
+	echo "</table><table bgcolor=#666666 $tabtag >\n";
+	echo "<tr bgcolor=#$bg2><td>$row canditates of $nli links in total</td></tr></table>\n";
 }
 }
 

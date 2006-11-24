@@ -525,9 +525,22 @@ sub Interfaces {
 		}
 	}
 	if($ifdupO){											# ...and IF duplex
-		$r = $session->get_table($ifdupO);
-		$err = $session->error;
-		if ($err){print "Id";print "$err\n" if $main::opt{d};$notice++}else{ %ifdp  = %{$r}}
+		if($ifdupO eq "doublespeed"){								# If duplex is indicated by doubling the speed...
+			foreach my $x (keys (%ifsp)){
+				my $i = $x;
+				$i =~ s/$ifspdO\.//;
+				if($ifsp{$x} =~ /^20/){
+					$ifsp{$x} /= 2;
+					$duplex{$i} = 2;
+				}elsif($ifsp{$x} =~ /^10/){						# No speed, no duplex...
+					$duplex{$i} = 1;
+				}
+			}
+		}else{
+			$r = $session->get_table($ifdupO);
+			$err = $session->error;
+			if ($err){print "Id";print "$err\n" if $main::opt{d};$notice++}else{ %ifdp  = %{$r}}
+		}
 	}
 	if($ifduxO){											# If duplex uses a different index
 		if(exists $usedoid{$ifduxO}){								# and if it's been used before
@@ -599,6 +612,8 @@ sub Interfaces {
 			if( $duplex{$i} eq $misc::sysobj{$main::dev{$_[0]}{so}}{fd} ){$main::int{$dv}{$i}{dpx} = "FD"}
 			elsif( $duplex{$i} eq $misc::sysobj{$main::dev{$_[0]}{so}}{hd} ){$main::int{$dv}{$i}{dpx} = "HD"}
 			else{$main::int{$dv}{$i}{dpx} = "?"}
+		}else{
+			$main::int{$dv}{$i}{dpx} = "-";
 		}
 		$misc::portprop{$dv}{$ina}{pop} = 0;
 		$misc::portprop{$dv}{$ina}{idx} = $i;

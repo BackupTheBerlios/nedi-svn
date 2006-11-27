@@ -64,12 +64,13 @@ if($res){
 	$ndif = 0;
 	while( ($i = @DbFetchRow($res)) ){
 		$numif[$i[0]]++;
-		$ifdu["$i[0];;$i[1]"] = $i[10];
-		$ifvl["$i[0];;$i[1]"]   = $i[11];
-		$topino["$i[0];;$i[1]"] = $i[12];
+		$topino["$i[0];;$i[1]"] = $i[12];						# Using a flat array for sorting on counter values
 		$topier["$i[0];;$i[1]"] = $i[13];
 		$topoto["$i[0];;$i[1]"] = $i[14];
 		$topoer["$i[0];;$i[1]"] = $i[15];
+		$ifsp["$i[0];;$i[1]"]   = $i[9];
+		$ifdu["$i[0];;$i[1]"] = $i[10];
+		$ifvl["$i[0];;$i[1]"]   = $i[11];
 		if($i[12] > 70){$nactif[$i[0]]++;}
 		if($i[8] == 2){$ndif++;$disif[$i[0]] .= "$i[1] ";}
 		$nif++;
@@ -318,11 +319,11 @@ if ( in_array("lmi",$rep) ){
 ?>
 <h2>Link Mismatch</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th width=80><img src=img/32/fiqu.png><br>Mismatch</th>
+<th width=80><img src=img/32/fiqu.png title="Speed,Vlan or Duplex are tested"><br>Mismatch</th>
+<th><img src=img/32/dev.png title="Check alt-order to show incomplete entries as well"><br>Device</th>
+<th colspan=2><img src=img/32/dumy.png title="Bold value is link related and tested here..."><br>Interface</th>
 <th><img src=img/32/dev.png><br>Device</th>
-<th colspan=2><img src=img/32/dumy.png><br>Interface</th>
-<th><img src=img/32/dev.png><br>Device</th>
-<th colspan=2><img src=img/32/dumy.png><br>Interface</th>
+<th colspan=2><img src=img/32/dumy.png title="...IF related value in () just for reference"><br>Interface</th>
 <?
 	$query	= GenQuery('links');
 	$res	= @DbQuery($query,$link);
@@ -346,19 +347,19 @@ if ( in_array("lmi",$rep) ){
 				foreach(array_keys($lidu[$dv][$if][$nb]) as $ni){
 					$ud = urlencode($dv);
 					$un = urlencode($nb);
-					if($libw[$dv][$if][$nb][$ni] and $libw[$nb][$ni][$dv][$if]){
+					if($ord or $libw[$dv][$if][$nb][$ni] and $libw[$nb][$ni][$dv][$if]){
 						if($libw[$dv][$if][$nb][$ni] != $libw[$nb][$ni][$dv][$if]){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
 							echo "<tr bgcolor=#$bg>\n";
 							echo "<td bgcolor=$bi width=20 align=center><img src=img/spd.png></td>\n";
-							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if</td>\n";
+							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if (".Zfix($ifsp["$dv;;$if"]).")</td>\n";
 							echo "<th>".Zfix($libw[$dv][$if][$nb][$ni])."</th>\n";
-							echo "<td><a href=Devices-Status.php?dev=$un>$nb</a></td><td>$ni</td>\n";
+							echo "<td><a href=Devices-Status.php?dev=$un>$nb</a></td><td>$ni (".Zfix($ifsp["$nb;;$ni"]).")</td>\n";
 							echo "<th>".Zfix($libw[$nb][$ni][$dv][$if])."</th></tr>\n";
 						}
 					}
-					if (strlen($lidu[$dv][$if][$nb][$ni]) == 2 and strlen($lidu[$nb][$ni][$dv][$if]) == 2){ 
+					if ($ord or strlen($lidu[$dv][$if][$nb][$ni]) == 2 and strlen($lidu[$nb][$ni][$dv][$if]) == 2){ 
 						if($lidu[$dv][$if][$nb][$ni] != $lidu[$nb][$ni][$dv][$if]){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
@@ -370,7 +371,7 @@ if ( in_array("lmi",$rep) ){
 							echo "<th>".$lidu[$nb][$ni][$dv][$if]."</th></tr>\n";
 						}
 					}
-					if($livl[$dv][$if][$nb][$ni] and $livl[$nb][$ni][$dv][$if]){
+					if($ord or $livl[$dv][$if][$nb][$ni] and $livl[$nb][$ni][$dv][$if]){
 						if($livl[$dv][$if][$nb][$ni] != $livl[$nb][$ni][$dv][$if]){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
@@ -382,9 +383,13 @@ if ( in_array("lmi",$rep) ){
 							echo "<th>Vlan".$livl[$nb][$ni][$dv][$if]."</th></tr>\n";
 						}
 					}
+					if($row == $lim){break;}
 				}
+				if($row == $lim){break;}
 			}
+			if($row == $lim){break;}
 		}
+		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$row canditates of $nli links in total</td></tr></table>\n";

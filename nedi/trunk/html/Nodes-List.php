@@ -74,6 +74,7 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','if','vlanid','fir
 <OPTION VALUE="oui" <?=(in_array("oui",$col))?"selected":""?> >OUI vendor
 <OPTION VALUE="if" <?=(in_array("if",$col))?"selected":""?> >Interface
 <OPTION VALUE="ifstats" <?=(in_array("ifstats",$col))?"selected":""?> >IF stats
+<OPTION VALUE="ifdet" <?=(in_array("ifdet",$col))?"selected":""?> >IF detail
 <OPTION VALUE="vlanid" <?=(in_array("vlanid",$col))?"selected":""?> >Vlan
 <?
 if($rrdstep){
@@ -119,6 +120,7 @@ if ($ina){
 	if( in_array("oui",$col) ){echo "<th>OUI Vendor</th>";}
 	if( in_array("if",$col) ){echo "<th>Device</th><th>Interface</th>";}
 	if( in_array("ifstats",$col) ){echo "<th>IF Update chg/metric</th>";}
+	if( in_array("ifdet",$col) ){echo "<th>IF Detail</th>";}
 	if(in_array("graph",$col)){echo "<th>Traffic / Errors</th>";}
 	if( in_array("vlanid",$col) ){echo "<th>Vlan</th>";}
 	if( in_array("firstseen",$col) ){echo "<th>First seen</th>";}
@@ -161,6 +163,22 @@ if ($ina){
 				$iu       = date("j.M G:i:s",$n[10]);
 				list($i1c,$i2c) = Agecol($n[10],$n[10],$row % 2);
 				echo "<td bgcolor=#$i1c>$iu - $n[11]/$n[9]</td>";
+			}
+			if(in_array("ifdet",$col)){
+				$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
+				$iquery	= GenQuery('interfaces','s','*','','',array('device','name'),array('=','='),array($n[6],$n[7]),array('AND') );
+				$ires	= @DbQuery($iquery,$link);
+				$nif	= @DbNumRows($ires);
+				if ($nif == 1) {
+					$if	= @DbFetchRow($ires);		
+					if ($if[8] == "2"){
+						$ifimg	= "<img src=img/bulbr.png title=\"Disabled!\">";
+					}else{
+						$ifimg = "<img src=img/bulbg.png title=\"Enabled\">";
+					}
+					echo "<td> $ifimg ".Zfix($if[9])."-$if[10] <i>$if[7] $if[16]</i></td>";
+				}
+				@DbFreeResult($ires);
 			}
 			if($rrdstep and in_array("graph",$col)){
 				echo "<td nowrap align=center>\n";

@@ -3,6 +3,9 @@
 # Program: trap.pl
 # Programmer: Remo Rickli
 #
+# Put this in /etc/snmp/snmptrapd.conf
+# traphandle      default /usr/bin/perl /opt/nedi/trap.pl
+#
 # DATE     COMMENT
 # -------- ------------------------------------------------------------------
 # 10/06/05 v1.0.s initial version

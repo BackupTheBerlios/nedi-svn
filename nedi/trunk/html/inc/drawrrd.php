@@ -16,6 +16,7 @@ if(!preg_match('/[0-9]{1,3}/',$_GET['dur']) ){$_GET['dur'] = 7;}
 
 $udev	= rawurlencode($_GET['dv']);								#str_replace( "-","%2D",
 $rrddev	= "rrd/$udev";										# change, if your system can't handle symlinks!
+$rrdbin	= "rrdtool";										# point to rrdtol binary.
 $title	= "";
 $drawin	= "";
 $drawout= "";
@@ -76,10 +77,10 @@ if($_GET['s'] == 's'){
 
 if($debug){
 	echo "<b>$debug</b>";
-	echo "<pre>rrdtool graph  - -a PNG $title $opts\n\t$drawin\n\t$lbreak\n\t$drawout</pre>";
+	echo "<pre>$rrdbin graph  - -a PNG $title $opts\n\t$drawin\n\t$lbreak\n\t$drawout</pre>";
 }else{
 	header("Content-type: image/png");
-	passthru("rrdtool graph  - -a PNG $title $opts $drawin $lbreak $drawout");
+	passthru("$rrdbin graph  - -a PNG $title $opts $drawin $lbreak $drawout");
 }
 
 function StackTraffic($rdv,$interfaces,$idef,$odef){

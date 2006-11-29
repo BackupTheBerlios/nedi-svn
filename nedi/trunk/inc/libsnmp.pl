@@ -622,7 +622,7 @@ sub Interfaces {
 		print "\n IF:$i\t$ina\tD:$main::int{$dv}{$i}{dpx}\tVL:$main::int{$dv}{$i}{vln}\t$ifde{$dek}\t$main::int{$dv}{$i}{ali}" if $main::opt{v};
 		$ni++;
 	}
-	print "i$ni" if !$main::opt{v};
+	print " i$ni" if !$main::opt{v};
 	return $notice;
 }
 
@@ -676,7 +676,7 @@ sub IfAddresses {
 		print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
 		$nia++;
 	}
-	print "p$nia" if !$main::opt{v};
+	print " p$nia" if !$main::opt{v};
 	return $notice;
 }
 

@@ -219,7 +219,7 @@ sub GetIosMacTab{
 	my $cmd = "sh mac-address-table dyn";
 
 	if($misc::sysobj{$main::dev{$_[0]}{so}}{bf} eq "CAP"){
-		$cmd = "sh bridge";
+		$cmd = "sh bridge | exclude \*\*\*";								# Work around aged (***) forwarding entries
 	}
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
@@ -240,7 +240,7 @@ sub GetIosMacTab{
 							Timeout	=> $misc::timeout,
 							Errmode	=> 'return'
 							);
-		if( defined($session) ){										# To be sure it doesn't bail out...
+		if( defined($session) ){									# To be sure it doesn't bail out...
 			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
 				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
 					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
@@ -272,7 +272,7 @@ sub GetIosMacTab{
 			foreach my $col (@mactab){
 				if ($col =~ /^(Gi|Fa|Do|Po)/){
 					$po = $col;
-					if($po =~ /\.[0-9]/){					# Does it look like a subinterface?
+					if($po =~ /\.[0-9]/){							# Does it look like a subinterface?
 						my @subpo = split(/\./,$po);
 						$vl = $subpo[1];
 						if($misc::portprop{$_[0]}{$subpo[0]}{upl}){$misc::portprop{$_[0]}{$po}{upl} = 1}	# inhert uplink metric on subinterface

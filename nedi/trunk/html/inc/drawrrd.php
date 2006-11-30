@@ -5,6 +5,9 @@
 # use GET option d=1 to debug output.
 //===============================
 */
+$rrdcmd  = "rrdtool";										# point to rrdtool
+$rrdpath = "/var/nedi/rrd";									# point to rrds
+
 session_start(); 
 if( !$_SESSION['group'] ){
 	echo $nokmsg;
@@ -14,9 +17,7 @@ $debug = isset( $_GET['d']) ? "Debugging" : "";
 $_GET['dur'] = isset( $_GET['dur']) ? $_GET['dur'] : 7;
 if(!preg_match('/[0-9]{1,3}/',$_GET['dur']) ){$_GET['dur'] = 7;}
 
-$udev	= rawurlencode($_GET['dv']);								#str_replace( "-","%2D",
-$rrddev	= "rrd/$udev";										# change, if your system can't handle symlinks!
-$rrdbin	= "rrdtool";										# point to rrdtol binary.
+$rrddev	= "$rrdpath/" . rawurlencode($_GET['dv']);
 $title	= "";
 $drawin	= "";
 $drawout= "";
@@ -77,10 +78,10 @@ if($_GET['s'] == 's'){
 
 if($debug){
 	echo "<b>$debug</b>";
-	echo "<pre>$rrdbin graph  - -a PNG $title $opts\n\t$drawin\n\t$lbreak\n\t$drawout</pre>";
+	echo "<pre>$rrdcmd graph  - -a PNG $title $opts\n\t$drawin\n\t$lbreak\n\t$drawout</pre>";
 }else{
 	header("Content-type: image/png");
-	passthru("$rrdbin graph  - -a PNG $title $opts $drawin $lbreak $drawout");
+	passthru("$rrdcmd graph  - -a PNG $title $opts $drawin $lbreak $drawout");
 }
 
 function StackTraffic($rdv,$interfaces,$idef,$odef){

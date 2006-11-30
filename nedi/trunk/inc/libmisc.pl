@@ -9,6 +9,7 @@
 package misc;
 
 my $rrdpath	= "rrd";
+my $rrdcmd	= "rrdtool";
 
 use vars qw($now $seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
 use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath);
@@ -356,7 +357,7 @@ sub Discover {
 			}
 			if($main::dev{$name}{us}){								# Don't prep if name exists
 				$cnok = 0;
-			}elsif($main::dev{$name}{cp}){								# No port no name no service
+			}elsif(defined $main::dev{$name}{cp}){							# No port no name no service
 				$cnok = 2;
 			}
 			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  specified in .def
@@ -785,7 +786,7 @@ sub ManageRRD {
 			$ok = 1;
 		}else{
 			my $ds = 2 * $rrdstep;
-			$ok = 1 + system ("rrdtool",
+			$ok = 1 + system ($rrdcmd,
 					"create","$rrdpath/$dv/system.rrd",
 					"-s","$rrdstep",
 					"DS:cpu:GAUGE:$ds:0:100",
@@ -803,7 +804,7 @@ sub ManageRRD {
 					printf ("\n%12s %12s %12s %8s %8s\n", "Interface","Inoctet","Outoctet","Inerror","Outerror"  );
 				}
 			}else{
-				$ok = 1 + system ("rrdtool",
+				$ok = 1 + system ($rrdcmd,
 						"update",
 						"$rrdpath/$dv/system.rrd","N:$main::dev{$_[0]}{cpu}:$main::dev{$_[0]}{mcp}:$main::dev{$_[0]}{mio}:$main::dev{$_[0]}{tmp}");
 				print "Ru" if !$ok;
@@ -817,7 +818,7 @@ sub ManageRRD {
 				$ok = 1;
 			}else{
 				my $ds = 2 * $rrdstep;
-				$ok = 1 + system ("rrdtool",
+				$ok = 1 + system ($rrdcmd,
 						"create","$rrdpath/$dv/$irf.rrd",
 						"-s","$rrdstep",
 						"DS:inoct:COUNTER:$ds:0:10000000000",
@@ -831,7 +832,7 @@ sub ManageRRD {
 				if ($main::opt{t}){
 					printf ("%12s %12d %12d %8d %8d\n", $irf,$main::int{$_[0]}{$i}{ioc},$main::int{$_[0]}{$i}{ooc},$main::int{$_[0]}{$i}{ier},$main::int{$_[0]}{$i}{oer}  ) if $main::opt{d};
 				}else{
-					$ok = 1 + system ("rrdtool",
+					$ok = 1 + system ($rrdcmd,
 							"update",
 							"$rrdpath/$dv/$irf.rrd","N:$main::int{$_[0]}{$i}{ioc}:$main::int{$_[0]}{$i}{ooc}:$main::int{$_[0]}{$i}{ier}:$main::int{$_[0]}{$i}{oer}");
 							print "Ru($irf)" if !$ok;

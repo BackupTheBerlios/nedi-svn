@@ -215,15 +215,14 @@ if ( in_array("ust",$rep) ){
 		if(!$devup[$d]['ls']){$devup[$d]['ls'] = 0;}
 		$fbar = Bar($devup[$d]['fs'],100000);
 		$lbar = Bar($devup[$d]['ls'],1);
-		$fd   = str_replace(" ","%20",date("m/d/Y H:i:s",$d));
-
+		$fd   = rawurlencode(date("m/d/Y H:i:s",$d));
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bg1>".date("r",$d)."</th>\n";
-		echo "<td>$fbar <a href=Devices-List.php?ina=firstseen&opa==&sta=\"$fd\">".$devup[$d]['fs']."</a> first seen<br>\n";
-		echo "$lbar <a href=Devices-List.php?ina=lastseen&opa==&sta=\"$fd\">".$devup[$d]['ls']."</a> last seen</td></tr>\n";
+		echo "<td>$fbar <a href=Devices-List.php?ina=firstseen&opa==&sta=$fd>".$devup[$d]['fs']."</a> first seen<br>\n";
+		echo "$lbar <a href=Devices-List.php?ina=lastseen&opa==&sta=$fd>".$devup[$d]['ls']."</a> last seen</td></tr>\n";
 		if($row == $lim){break;}
 	}
-	echo "</table><table bgcolor=#666666 $tabtag >\n";
+	echo "</table><table bgcolor=#666666 $tabtag>\n";
 	echo "<tr bgcolor=#$bg2><td>$row updates from $ndev devices in total</td></tr></table>\n";
 }
 

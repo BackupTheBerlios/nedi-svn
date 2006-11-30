@@ -102,9 +102,9 @@ if ($opt{w}) {
 		if($opt{c}){$cdp = 1}
 		if($opt{l}){$lldp = 1}
 		print "Dynamic discovery with $nseed seed(s) on ". localtime($misc::now)."\n";
-		print "==================================================================================\n";
-		print "Device				Status					Todo/Done\n";
-		print "----------------------------------------------------------------------------------\n";
+		print "===============================================================================\n";
+		print "Device				Status				     Todo/Done\n";
+		print "-------------------------------------------------------------------------------\n";
 		while ($#misc::todo ne "-1"){
 			my $cdpid = shift(@misc::todo);
 			my $name = &misc::Discover($cdpid);
@@ -115,9 +115,9 @@ if ($opt{w}) {
 		}
 	}else{
 		print "Static discovery with $nseed devices on ". localtime($misc::now)."\n";
-		print "==================================================================================\n";
-		print "Device				Status					Todo/Done\n";
-		print "----------------------------------------------------------------------------------\n";
+		print "===============================================================================\n";
+		print "Device				Status				     Todo/Done\n";
+		print "-------------------------------------------------------------------------------\n";
 		while ($#misc::todo ne "-1"){
 			my $ip = shift(@misc::todo);
 			my $name = &misc::Discover($ip);
@@ -132,7 +132,7 @@ if ($opt{w}) {
 		$oui = 1;
 		my $noudo = scalar(@misc::oudo);
 		if($noudo){
-			print "- - OUI Discovery with $noudo canditates - - - - - - - - - - - - - - - - - - - - -\n";
+			print "-  OUI Discovery with $noudo canditates - - - - - - - - - - - - - - - - - - - -\n";
 			while ($#misc::oudo ne "-1"){
 				my $mac = shift(@misc::oudo);
 				my $name = &misc::Discover($mac);
@@ -144,7 +144,7 @@ if ($opt{w}) {
 			}
 		}
 	}
-	print "----------------------------------------------------------------------------------\n";
+	print "-------------------------------------------------------------------------------\n";
 	if (scalar @misc::donenam){
 		&misc::StorVar() if ($opt{d});
 		&misc::Links();
@@ -227,11 +227,11 @@ sub Help {
 	print "M#..	Mapping IP or telnet port according to config\n";
 	print "Mx	Modules (t=slot, d=desc, c=class, h=hw, f=fw, s=sw, n=SN, m=model)\n";
 	print "Qx	Queueing (c=CPD, l=LLDP, 0=IP is 0.0.0.0, s=seeing itself, d=desc filter, v=voip)\n";
-	print "Rx	RRD (c=create, d=mkdir, u=update)\n";
+	print "Rx	RRD (d=mkdir, u=update, s=create sys, i=create IF)\n";
 	print "Sx	SNMP (c=connect, n=SN, B=Bootimage,u=CPU util, m=CPUmem,i=IOmem,t=Temp)\n";
 	print "Tx	Telnet (c=connect,e=enable, l=login, u=no user, o=other\n";
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w (X-mas Edition) 29.Nov 2006\n";
+	die "NeDi 1.0.w (X-mas Edition) 1.Dez 2006\n";
 }

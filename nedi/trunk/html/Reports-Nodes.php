@@ -429,12 +429,11 @@ if ( in_array("ust",$rep) ){
 		$lbar = Bar($nodup[$d]['ls'],1);
 		$ibar = Bar($nodup[$d]['iu'],0);
 		$fd   = rawurlencode(date("m/d/Y H:i:s",$d));
-
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bg1>".date("r",$d)."\n";
-		echo "<td>$fbar <a href=Nodes-List.php?ina=firstseen&opa==&sta=\"".$fd."\">".$nodup[$d]['fs']."</a> first seen<br>\n";
-		echo "$lbar <a href=Nodes-List.php?ina=lastseen&opa==&sta=\"".$fd."\">".$nodup[$d]['ls']."</a> last seen <br>\n";
-		echo "$ibar <a href=Nodes-List.php?ina=ifupdate&opa==&sta=\"".$fd."\">".$nodup[$d]['iu']."</a> IF Updates</td></tr>\n";
+		echo "<td>$fbar <a href=Nodes-List.php?ina=firstseen&opa==&sta=".$fd.">".$nodup[$d]['fs']."</a> first seen<br>\n";
+		echo "$lbar <a href=Nodes-List.php?ina=lastseen&opa==&sta=".$fd.">".$nodup[$d]['ls']."</a> last seen <br>\n";
+		echo "$ibar <a href=Nodes-List.php?ina=ifupdate&opa==&sta=".$fd.">".$nodup[$d]['iu']."</a> IF Updates</td></tr>\n";
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";

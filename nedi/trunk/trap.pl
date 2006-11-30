@@ -4,7 +4,7 @@
 # Programmer: Remo Rickli
 #
 # Put this in /etc/snmp/snmptrapd.conf
-# traphandle      default /usr/bin/perl /opt/nedi/trap.pl
+# traphandle      cd /var/nedi;./trap.pl
 #
 # DATE     COMMENT
 # -------- ------------------------------------------------------------------
@@ -31,17 +31,12 @@ use strict;
 
 use vars qw(%dev); 
 
-require './inc/libmisc.pl';														# Use the miscellaneous nedi library
+#my $p = $0;
+#$p =~ s/(.*)\/(.*)/$1/;
 
+require "./inc/libmisc.pl";											# Use the miscellaneous nedi library
 &misc::ReadConf();
-
-if ($misc::backend eq "MSQ"){
-	require "./inc/libmsq.pl";
-}elsif ($misc::backend eq "CSV"){
-	require "./inc/libcsv.pl";
-}else{
-	die "Backend not configured!\n";
-}
+require "./inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
 my $now = time;
 
 # process the trap:

@@ -29,7 +29,7 @@ use strict;
 use Getopt::Std;
 use Net::SNMP qw(snmp_dispatcher ticks_to_time);
 
-use vars qw($now $maxi);									# Global since access from functions is required
+use vars qw($now $maxi);										# Global since access from functions is required
 use vars qw(%opt %dev %usr %mon %depdevs %depdown %depcount); 
 
 getopts('DvV',\%opt) or &Help();
@@ -40,7 +40,7 @@ require "./inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::b
 require './inc/libmon.pl';
 
 if ($opt{D}) {												# Daemonize or...
-	print "Daemonizing\n";
+	print "Moni.pl daemonizing\n";
 	&misc::Daemonize;
 }else{
 	select(STDOUT); $| = 1;										# ...disable buffering.

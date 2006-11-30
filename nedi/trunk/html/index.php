@@ -44,6 +44,7 @@ if($backend == 'MSQ'){
 }
 $_POST = sanitize($_POST);
 
+$failed = 0;
 if(isset( $_POST['user'])  ){
 	$pass = md5( $_POST['pass'] );
 
@@ -86,7 +87,7 @@ if(isset( $_POST['user'])  ){
 		echo "<script>document.location.href='User-Profile.php';</script>\n";
 		exit();
 	} else {
-		echo $logmsg;
+		$failed = 1;
 	}
 }
 
@@ -95,9 +96,9 @@ if(isset( $_POST['user'])  ){
 <head><title>NeDi Login</title>
 <link href="inc/style.css" type=text/css rel=stylesheet>
 <link rel="shortcut icon" href="img/favicon.ico">
-
 </head>
 <body onLoad=document.login.user.focus();>
+<?=($failed)?$logmsg:""?>
 <p>
 <table border=0 cellspacing=1 cellpadding=8 bgcolor=#000000 width=50% align=center>
 <tr bgcolor=#<?="$bg2" ?>><td align=center background=img/blubg.png colspan=3><img src=img/nedib.png border=0></td></tr>

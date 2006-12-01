@@ -29,15 +29,17 @@ use strict;
 use Getopt::Std;
 use Net::SNMP qw(snmp_dispatcher ticks_to_time);
 
-use vars qw($now $maxi);										# Global since access from functions is required
+use vars qw($p $now $maxi);										# Global since access from functions is required
 use vars qw(%opt %dev %usr %mon %depdevs %depdown %depcount); 
 
 getopts('DvV',\%opt) or &Help();
 
-require './inc/libmisc.pl';										# Include required libraries
+$p = $0;
+$p =~ s/(.*)\/(.*)/$1/;
+require "$p/inc/libmisc.pl";										# Include required libraries
 &misc::ReadConf();
-require "./inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
-require './inc/libmon.pl';
+require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
+require "$p/inc/libmon.pl";
 
 if ($opt{D}) {												# Daemonize or...
 	print "Moni.pl daemonizing\n";

@@ -4,7 +4,7 @@
 # Programmer: Remo Rickli
 #
 # Put this in /etc/snmp/snmptrapd.conf
-# traphandle      cd /var/nedi;./trap.pl
+# traphandle      /path-to-nedi/trap.pl
 #
 # DATE     COMMENT
 # -------- ------------------------------------------------------------------
@@ -29,14 +29,13 @@
 
 use strict;
 
-use vars qw(%dev); 
+use vars qw(%dev $p);
 
-#my $p = $0;
-#$p =~ s/(.*)\/(.*)/$1/;
-
-require "./inc/libmisc.pl";											# Use the miscellaneous nedi library
+$p = $0;
+$p =~ s/(.*)\/(.*)/$1/;
+require "$p/inc/libmisc.pl";											# Use the miscellaneous nedi library
 &misc::ReadConf();
-require "./inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
+require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
 my $now = time;
 
 # process the trap:
@@ -53,8 +52,8 @@ my $level = 10;
 my $src = $ip;
 &db::ReadDev('ip',&misc::Ip2Dec($ip));
 
-if(exists $dev{$src}){
-	$src = $dev{$src};
+if(exists $dev{$name}){
+	$src = $name;
 	$level = 50;
 }
 

@@ -33,21 +33,23 @@
 use strict;
 use Getopt::Std;
  
-use vars qw($nediconf $cdp $lldp $oui);
+use vars qw($p $nediconf $cdp $lldp $oui);
 use vars qw(%nod %dev %int %mod %link %vlan %opt %net %usr); 
 
 getopts('AbcdDilLnost:u:vw:y',\%opt) or &Help();
 #if (! keys %opt ){&Help()}
 
+$p = $0;
+$p =~ s/(.*)\/(.*)/$1/;
 $misc::now = time;
-require './inc/libmisc.pl';											# Use the miscellaneous nedi library
+require "$p/inc/libmisc.pl";											# Use the miscellaneous nedi library
 &misc::ReadConf();
-require './inc/libsnmp.pl';											# Use the SNMP function library
-require './inc/libcli-sshnet.pl';												# Use the Net::SSH::Perl CLI library
+require "$p/inc/libsnmp.pl";											# Use the SNMP function library
+require "$p/inc/libcli-sshnet.pl";												# Use the Net::SSH::Perl CLI library
 #require './inc/libcli-ssh2.pl';											# Use the Net::SSH2 based CLI library
 #require './inc/libcli-sshpty.pl';												# Use the ssh-binary based CLI library
-require './inc/libmon.pl';											# Use the Monitoring lib for notifications.
-require "./inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
+require "$p/inc/libmon.pl";											# Use the Monitoring lib for notifications.
+require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
 
 if($opt{u}){
 	$misc::seedlist = "$opt{u}";
@@ -176,7 +178,7 @@ if ($opt{w}) {
 #===================================================================
 sub ShowDefs {
 	print "Supported Devices ---------------------------------------------------------\n";
-	chdir("sysobj");
+	chdir("$p/sysobj");
 	my @defs = glob("*.def");
 	foreach my $df (sort @defs){
 		open F, $df or print "couldn't open $df\n" && return;

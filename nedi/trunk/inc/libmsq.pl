@@ -159,8 +159,8 @@ sub InitDB{
 	print "wlan";
 	$dbh->do("CREATE TABLE wlan (mac VARCHAR(12),time INT unsigned, index(mac) )");
 	my @wlan = ();
-	if (-e "./inc/wlan.txt"){
-		open  ("WLAN", "./inc/wlan.txt" );
+	if (-e "$main::p/inc/wlan.txt"){
+		open  ("WLAN", "$main::p/inc/wlan.txt" );
 		@wlan = <WLAN>;
 		close("WLAN");
 		chomp(@wlan);

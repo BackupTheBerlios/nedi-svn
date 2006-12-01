@@ -24,8 +24,8 @@ use vars qw(@todo @oudo @doneoth @donecdp @donenam @donemac @doneip @comms @seed
 #===================================================================
 sub ReadConf {
 
-	if (-e "./nedi.conf"){
-		open  ("CONF", "./nedi.conf");
+	if (-e "$main::p/nedi.conf"){
+		open  ("CONF", "$main::p/nedi.conf");
 	}elsif (-e "/etc/nedi.conf"){
 		open  ("CONF", "/etc/nedi.conf");
 	}else{
@@ -85,7 +85,7 @@ sub ReadConf {
 #===================================================================
 sub ReadOUIs {
 
-	open  ("OUI", "./inc/oui.txt" ) or die "oui.txt not in ./inc, please dl from ieee.org first!";		# read OUI's first
+	open  ("OUI", "$main::p/inc/oui.txt" ) or die "oui.txt not in $main::p/inc, please dl from ieee.org first!";		# read OUI's first
 	my @oui = <OUI>;
 	close("OUI");
 	chomp @oui;
@@ -97,7 +97,7 @@ sub ReadOUIs {
 			$oui{lc($m[0])} = substr($m[2],0,32);
 		}
 	}
-	open  ("IAB", "./inc/iab.txt" ) or die "iab.txt not in ./inc, please dl from ieee.org first!";		# now add IAB's (00-50-C2)	
+	open  ("IAB", "$main::p/inc/iab.txt" ) or die "iab.txt not in $main::p/inc, please dl from ieee.org first!";		# now add IAB's (00-50-C2)	
 	my @iab = <IAB>;
 	close("IAB");
 	chomp @iab;
@@ -280,7 +280,7 @@ sub InitSeeds {
 		$doip{"testing"} = $main::opt{t};
 		print "$main::opt{t} added for testing\n" if $main::opt{t};
 		$s++;
-	}elsif (-e "./$seedlist"){
+	}elsif (-e "$main::p/$seedlist"){
 		open  (LIST, $seedlist );
 		my @list = <LIST>;
 		close(LIST);
@@ -866,42 +866,42 @@ sub RetrVar{
 
 	use Storable;
 	
-	my $sysobj = retrieve('./sysobj.db');
+	my $sysobj = retrieve("$main::p/sysobj.db");
 	%sysobj = %$sysobj;
-	my $portnew = retrieve('./portnew.db');
+	my $portnew = retrieve("$main::p/portnew.db");
 	%portnew = %{$portnew};
-	my $portprop = retrieve('./portprop.db');
+	my $portprop = retrieve("$main::p/portprop.db");
 	%portprop = %$portprop;
-	my $doip = retrieve('./doip.db');
+	my $doip = retrieve("$main::p/doip.db");
 	%doip = %$doip;
-	my $arp = retrieve('./arp.db');
+	my $arp = retrieve("$main::p/arp.db");
 	%arp = %$arp;
-	my $rarp = retrieve('./rarp.db');
+	my $rarp = retrieve("$main::p/rarp.db");
 	%rarp = %$rarp;
-	my $ifmac = retrieve('./ifmac.db');
+	my $ifmac = retrieve("$main::p/ifmac.db");
 	%ifmac = %$ifmac;
 
-	my $doneoth = retrieve('./doneoth.db');
+	my $doneoth = retrieve("$main::p/doneoth.db");
 	@doneoth = @{$doneoth};
-	my $donecdp = retrieve('./donecdp.db');
+	my $donecdp = retrieve("$main::p/donecdp.db");
 	@donecdp = @$donecdp;
-	my $donenam = retrieve('./donenam.db');
+	my $donenam = retrieve("$main::p/donenam.db");
 	@donenam = @$donenam;
-	my $donemac = retrieve('./donemac.db');
+	my $donemac = retrieve("$main::p/donemac.db");
 	@donemac = @$donemac;
-	my $doneip = retrieve('./doneip.db');
+	my $doneip = retrieve("$main::p/doneip.db");
 	@doneip = @$doneip;
 
 
-	my $dev = retrieve('./dev.db');
+	my $dev = retrieve("$main::p/dev.db");
 	%main::dev = %$dev;
-	my $net = retrieve('./net.db');
+	my $net = retrieve("$main::p/net.db");
 	%main::net = %$net;
-	my $int = retrieve('./int.db');
+	my $int = retrieve("$main::p/int.db");
 	%main::int = %$int;
-	my $cdplink = retrieve('./cdplink.db');
+	my $cdplink = retrieve("$main::p/cdplink.db");
 	%misc::cdplink = %$cdplink;
-	my $vlan = retrieve('./vlan.db');
+	my $vlan = retrieve("$main::p/vlan.db");
 	%main::vlan = %$vlan;
 }
 
@@ -912,25 +912,25 @@ sub StorVar{
 
 	use Storable;
 	
-	store \%sysobj, './sysobj.db';
-	store \%portnew, './portnew.db';
-	store \%portprop, './portprop.db';
-	store \%doip, './doip.db';
-	store \%arp, './arp.db';
-	store \%rarp, './rarp.db';
-	store \%ifmac, './ifmac.db';
+	store \%sysobj, "$main::p/sysobj.db";
+	store \%portnew, "$main::p/portnew.db";
+	store \%portprop, "$main::p/portprop.db";
+	store \%doip, "$main::p/doip.db";
+	store \%arp, "$main::p/arp.db";
+	store \%rarp, "$main::p/rarp.db";
+	store \%ifmac, "$main::p/ifmac.db";
 	
-	store \@doneoth, './doneoth.db';
-	store \@donecdp, './donecdp.db';
-	store \@donenam, './donenam.db';
-	store \@donemac, './donemac.db';
-	store \@doneip, './doneip.db';
+	store \@doneoth, "$main::p/doneoth.db";
+	store \@donecdp, "$main::p/donecdp.db";
+	store \@donenam, "$main::p/donenam.db";
+	store \@donemac, "$main::p/donemac.db";
+	store \@doneip, "$main::p/doneip.db";
 
-	store \%main::dev, './dev.db';
-	store \%main::int, './int.db';
-	store \%main::net, './net.db';
-	store \%misc::cdplink, './cdplink.db';
-	store \%main::vlan, './vlan.db';
+	store \%main::dev, "$main::p/dev.db";
+	store \%main::int, "$main::p/int.db";
+	store \%main::net, "$main::p/net.db";
+	store \%misc::cdplink, "$main::p/cdplink.db";
+	store \%main::vlan, "$main::p/vlan.db";
 }
 
 

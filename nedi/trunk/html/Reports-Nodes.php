@@ -117,7 +117,7 @@ if ( in_array("sum",$rep) ){
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th width=25%><img src=img/32/db.png title="Lost IP nodes used to have an address. Swift nodes were discovered only once."><br>Item</th>
 <th><img src=img/32/form.png><br>Value</th>
-<tr bgcolor=#<?=$bga?> ><th bgcolor=#<?=$bia?>>Non DNS Nodes</th><td><?=$nodb?><a href=Nodes-List.php?ina=name&opa="regexp"&sta="^$"> <?=$nodns?></a></td></tr>
+<tr bgcolor=#<?=$bga?> ><th bgcolor=#<?=$bia?>>Non DNS Nodes</th><td><?=$nodb?><a href=Nodes-List.php?ina=name&opa=regexp&sta=%5E%24> <?=$nodns?></a></td></tr>
 <tr bgcolor=#<?=$bgb?> ><th bgcolor=#<?=$bib?>>Non IP Nodes</th><td><?=$noib?><a href=Nodes-List.php?ina=ip&opa==&sta=0> <?=$nodip['0']?></a></td></tr>
 <tr bgcolor=#<?=$bga?> ><th bgcolor=#<?=$bia?>>Lost IPs</th><td><?=$lipb?><a href=Nodes-List.php?ina=iplost&opa=%3E&sta=0> <?=$lip?></a></td></tr>
 <tr bgcolor=#<?=$bgb?> ><th bgcolor=#<?=$bib?>>Swift Nodes</th><td><?=$swib?><a href=Nodes-List.php?ina=firstseen&cop==&inb=lastseen> <?=$nswift?></a></td></tr>

@@ -30,14 +30,16 @@ use IO::Socket;
 use Getopt::Std;
 
 use vars qw($nediconf);
-use vars qw(%opt %dev %dip %usr); 
+use vars qw($p %opt %dev %dip %usr); 
 
 getopts('DvV',\%opt) or &Help();
 
-require './inc/libmisc.pl';										# Use the miscellaneous nedi library
+$p = $0;
+$p =~ s/(.*)\/(.*)/$1/;
+require "$p/inc/libmisc.pl";										# Use the miscellaneous nedi library
 &misc::ReadConf();
-require './inc/libmon.pl';										# Use the SNMP function library
-require "./inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
+require "$p/inc/libmon.pl";										# Use the SNMP function library
+require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
 
 #Disable buffering.
 select(STDOUT); $| = 1;

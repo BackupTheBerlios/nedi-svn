@@ -72,10 +72,10 @@ sub Identify {
 		if(!$err and defined $r->{$sysO}){$so = &misc::Strip($r->{$sysO})}
 
 		if(!exists $misc::sysobj{$so}){								# Load .def if not done already
-			if (-e "./sysobj/$so.def"){
-				open  ("DEF", "sysobj/$so.def");
+			if (-e "$main::p/sysobj/$so.def"){
+				open  ("DEF", "$main::p/sysobj/$so.def");
 			}else{
-				open  ("DEF","sysobj/other.def");
+				open  ("DEF","$main::p/sysobj/other.def");
 			}
 			my @def = <DEF>;
 			close("DEF");

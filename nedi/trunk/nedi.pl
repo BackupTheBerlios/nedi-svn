@@ -46,8 +46,6 @@ require "$p/inc/libmisc.pl";											# Use the miscellaneous nedi library
 &misc::ReadConf();
 require "$p/inc/libsnmp.pl";											# Use the SNMP function library
 require "$p/inc/libcli-sshnet.pl";												# Use the Net::SSH::Perl CLI library
-#require './inc/libcli-ssh2.pl';											# Use the Net::SSH2 based CLI library
-#require './inc/libcli-sshpty.pl';												# Use the ssh-binary based CLI library
 require "$p/inc/libmon.pl";											# Use the Monitoring lib for notifications.
 require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
 
@@ -87,14 +85,14 @@ if ($opt{D}){
 # -------------------------------------------------------------------
 
 if ($opt{w}) {
-	&db::WlanUp();
+	print &db::WlanUp();
 }elsif($opt{i}) {
 	&db::InitDB();
 }elsif($opt{y}) {
 	&ShowDefs();
 }else{
-	&misc::ReadOUIs();
-	&db::ReadDev();
+	print &misc::ReadOUIs();
+	print &db::ReadDev();
 
 	my $nseed = &misc::InitSeeds();
 
@@ -151,23 +149,23 @@ if ($opt{w}) {
 		&misc::StorVar() if ($opt{d});
 		&misc::Links();
 	
-		&db::ReadNod();
+		print &db::ReadNod();
 		&misc::BuildNod();
 		&misc::RetireNod();
 	
 		die "Only testing, nothing written!" if $opt{t};
 		
-		&db::UnStock();
-		&db::WriteDev();
+		print &db::UnStock();
+		print &db::WriteDev();
 		
-		&db::WriteInt($opt{A});
-		&db::WriteVlan($opt{A});
-		&db::WriteMod($opt{A});
+		print &db::WriteInt($opt{A});
+		print &db::WriteVlan($opt{A});
+		print &db::WriteMod($opt{A});
 
-		&db::WriteLink($opt{A}) if (!$opt{L});
-		&db::WriteNet();
+		print &db::WriteLink($opt{A}) if (!$opt{L});
+		print &db::WriteNet();
 
-		&db::WriteNod();
+		print &db::WriteNod();
 	}else{
 		print "Nothing discovered, nothing written...\n";
 	}
@@ -235,5 +233,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w (X-mas Edition) 1.Dez 2006\n";
+	die "NeDi 1.0.w (X-mas Edition) 4.Dez 2006\n";
 }

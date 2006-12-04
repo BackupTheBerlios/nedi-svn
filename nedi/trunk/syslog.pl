@@ -45,7 +45,7 @@ require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::
 select(STDOUT); $| = 1;
 
 if ($opt{D}) {
-	print "Syslog.pl Daemonizing\n";
+	print "syslog.pl Daemonizing\n";
 	&misc::Daemonize;
 }
 my $maxlen	= 512;

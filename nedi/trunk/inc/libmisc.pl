@@ -111,7 +111,7 @@ sub ReadOUIs {
 		}
 	}
 	my $nnic = keys(%oui);
-	print "$nnic	NIC vendor entries read.\n";
+	return "$nnic	NIC vendor entries read.\n";
 }
 
 #===================================================================
@@ -274,7 +274,6 @@ sub InitSeeds {
 
 	my $s = 0;
 
-	print "\n";
 	if($main::opt{t}){
 		push (@todo,"testing");
 		$doip{"testing"} = $main::opt{t};

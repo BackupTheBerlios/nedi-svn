@@ -58,9 +58,9 @@ sub PrepDev{
 	my $us  = "";
 	my @users = @misc::users;
 	my $cp  = &MapTp($main::dev{$_[0]}{ip});
-	if ( defined $main::dev{$_[0]}{us} and $main::dev{$_[0]}{us} ne ""){					# Build user list, with priority on db entry of device.
-		unshift(@users,$main::dev{$_[0]}{us} );
-	}
+#	if ( defined $main::dev{$_[0]}{us} and $main::dev{$_[0]}{us} ne ""){					# Build user list, with priority on db entry of device.
+#		unshift(@users,$main::dev{$_[0]}{us} );
+#	}
 	if($main::dev{$_[0]}{os} eq "Cat1900"){
 		do {
 			$us = shift (@users);

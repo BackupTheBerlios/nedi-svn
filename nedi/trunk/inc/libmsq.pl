@@ -212,7 +212,7 @@ sub ReadDev {
 	}
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$npdev	devices read from MySQL:$misc::dbname.devices\n" if !$main::opt{D};
+	return "$npdev	devices read from MySQL:$misc::dbname.devices\n";
 }
 
 #===================================================================
@@ -245,7 +245,7 @@ sub ReadNod {
 	}
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nnod	nodes read from MySQL:$misc::dbname.nodes\n";
+	return "$nnod	nodes read from MySQL:$misc::dbname.nodes\n";
 	
 }
 
@@ -336,7 +336,7 @@ sub WriteDev {
 			if(!defined $main::dev{$na}{cp}){$main::dev{$na}{cp}	= 0}
 			if(!defined $main::dev{$na}{sp}){$main::dev{$na}{sp}	= 0}
 			if(!defined $main::dev{$na}{hc}){$main::dev{$na}{hc}	= 0}
-			if($main::dev{$na}{ic} eq ""){
+			if(!$main::dev{$na}{ic}){
 				if($main::dev{$na}{sv} > 8){
 					$main::dev{$na}{ic} = 'geng';
 				}elsif($main::dev{$na}{sv} > 4){
@@ -375,7 +375,7 @@ sub WriteDev {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$ndev	devices written to MySQL:$misc::dbname.devices\n";
+	return "$ndev	devices written to MySQL:$misc::dbname.devices\n";
 }
 
 #===================================================================
@@ -415,7 +415,7 @@ sub WriteInt {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nint	interfaces written to MySQL:$misc::dbname.interfaces\n";
+	return "$nint	interfaces written to MySQL:$misc::dbname.interfaces\n";
 }
 
 #===================================================================
@@ -446,7 +446,7 @@ sub WriteMod {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nmod	modules written to MySQL:$misc::dbname.modules\n";
+	return "$nmod	modules written to MySQL:$misc::dbname.modules\n";
 }
 
 #===================================================================
@@ -475,7 +475,7 @@ sub WriteNet {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nnet	networks written to MySQL:$misc::dbname.networks\n";
+	return "$nnet	networks written to MySQL:$misc::dbname.networks\n";
 }
 
 #===================================================================
@@ -510,7 +510,7 @@ sub WriteLink {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nlink	links written to MySQL:$misc::dbname.links\n";
+	return "$nlink	links written to MySQL:$misc::dbname.links\n";
 }
 
 #===================================================================
@@ -533,7 +533,7 @@ sub WriteVlan {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nvlans	vlans written to MySQL:$misc::dbname.vlans\n";
+	return "$nvlans	vlans written to MySQL:$misc::dbname.vlans\n";
 }
 
 #===================================================================
@@ -568,7 +568,7 @@ sub UnStock {
 	$sth->finish if $sth;
 	$dbh->disconnect;
 
-	print "$nrm	devices removed from MySQL:$misc::dbname.stock\n";
+	return "$nrm	devices removed from MySQL:$misc::dbname.stock\n";
 }
 
 #===================================================================
@@ -625,7 +625,7 @@ sub WriteNod {
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nnod	nodes written to MySQL:$misc::dbname.nodes\n";
+	return "$nnod	nodes written to MySQL:$misc::dbname.nodes\n";
 }
 
 #===================================================================
@@ -656,7 +656,7 @@ sub WlanUp {
 	$dbh->disconnect;
 
 	my $wnew = scalar keys %ap;
-	print "$wnew	new Wlan entries written.\n";
+	return "$wnew	new Wlan entries written.\n";
 }
 
 #===================================================================
@@ -681,12 +681,11 @@ sub ReadMon {
 		$main::mon{$d}{ut} = $f[6];
 		$main::mon{$d}{lt} = $f[7];
 		$main::mon{$d}{ok} = $f[8];
-
 		$nmon++;
 	}
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	print "$nmon	monitor entries read from MySQL:$misc::dbname.monitoring\n" if !$main::opt{D};
+	return "$nmon	monitor entries read from MySQL:$misc::dbname.monitoring\n";
 }
 
 #===================================================================
@@ -694,6 +693,7 @@ sub ReadMon {
 #===================================================================
 sub ReadUser {
 
+	my $nusr  = 0;
 	my $where = "";
 	if($_[0] and $_[1]){$where = "WHERE $_[0] = \"$_[1]\""}
 
@@ -705,9 +705,11 @@ sub ReadUser {
 		$main::usr{$u}{ml} = $f[8];
 		$main::usr{$u}{ss} = $f[9];
 		$main::usr{$u}{lg} = $f[13];
+		$nusr++;
 	}
 	$sth->finish if $sth;
 	$dbh->disconnect;
+	return "$nusr	users read from MySQL:$misc::dbname.user\n";
 }
 
 #===================================================================

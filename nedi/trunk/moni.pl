@@ -42,7 +42,7 @@ require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::
 require "$p/inc/libmon.pl";
 
 if ($opt{D}) {												# Daemonize or...
-	print "Moni.pl daemonizing\n";
+	print "moni.pl daemonizing\n";
 	&misc::Daemonize;
 }else{
 	select(STDOUT); $| = 1;										# ...disable buffering.

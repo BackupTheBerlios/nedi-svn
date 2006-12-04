@@ -4,8 +4,7 @@
 //===============================
 session_start(); 
 
-$self = preg_replace("/^\/(.*)\.php$/","$1",$_SERVER['PHP_SELF']);
-
+$self = preg_replace("/.*\/(.+).php/","$1",$_SERVER['PHP_SELF']);
 require_once ('libmisc.php');
 if(isset ($_SESSION['group']) ){
 	ReadConf($_SESSION['group']);

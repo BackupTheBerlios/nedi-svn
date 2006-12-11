@@ -3,7 +3,7 @@
 
 // Authentication messages
 $nokmsg		= "<h4>Sorry, you're not authorized for this!</h4>\n";
-$logmsg		= "<script>alert('Incorrect login!');</script>\n";
+$logmsg		= "Incorrect login!";
 
 // Command messages
 $upokmsg	= "updated!\n";

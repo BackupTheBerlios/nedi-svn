@@ -60,7 +60,8 @@ while ($sock->recv(my $msg, $maxlen)) {
 			$devup = $now;
 			undef (%dev);
 			undef (%dip);
-			&db::ReadDev(!$opt{v});
+			my $rd = &db::ReadDev();
+			print $rd  if $opt{v};
 			foreach my $d (keys %dev){
 				$dip{$dev{$d}{'ip'}} = $d;
 			}

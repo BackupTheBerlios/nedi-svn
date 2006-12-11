@@ -87,10 +87,12 @@ if(isset( $_POST['user'])  ){
 		echo "<script>document.location.href='User-Profile.php';</script>\n";
 		exit();
 	} else {
-		$failed = 1;
+		echo "<body bgcolor=#ff0000>";
+		echo "<script>alert('$logmsg');";
+		echo "history.go(-1);";
+		echo "</script></body>";
 	}
 }
-
 ?>
 <html>
 <head><title>NeDi Login</title>
@@ -98,8 +100,8 @@ if(isset( $_POST['user'])  ){
 <link rel="shortcut icon" href="img/favicon.ico">
 </head>
 <body onLoad=document.login.user.focus();>
-<?=($failed)?$logmsg:""?>
 <p>
+<form name="login" method="post" action="<?=$_SERVER['PHP_SELF']?>">
 <table border=0 cellspacing=1 cellpadding=8 bgcolor=#000000 width=50% align=center>
 <tr bgcolor=#<?="$bg2" ?>><td align=center background=img/blubg.png colspan=3><img src=img/nedib.png border=0></td></tr>
 <tr bgcolor=#D0D0D0>
@@ -109,16 +111,13 @@ if(isset( $_POST['user'])  ){
 <p><hr>
 <?=$disc?>
 </th></tr>
-
-<form name="login" method="post" action="<?=$_SERVER['PHP_SELF']?>">
-
 <tr bgcolor=#<?="$bg2" ?>>
 <th>User <input type="text" name="user" size="12"></th>
 <th>Pass <input type="password" name="pass" size="12"></th>
-<th><input type="submit" value="Login"></th>
+<th>
+<input type="submit" value="Login">
+</th>
 </tr>
-
-</form>
-
 </table>
+</form>
 </body>

@@ -51,16 +51,17 @@ $co[] = $cop;
 $nof = 0;
 if( isset($_GET['p']) ){
 	$nof = abs($off - $lim);
-	$lim = "$nof,$lim";
 }elseif( isset($_GET['n']) ){
 	$nof = $off + $lim;
-	$lim = "$nof,$lim";
+	$dlim = "$nof,$lim";
+}else{
+	$dlim = "$lim";
 }
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if( isset($_GET['del']) ){
 	if(preg_match("/adm/",$_SESSION['group']) ){
-		$query	= GenQuery('messages','d','*','id desc',$lim,$in,$op,$st,$co );
+		$query	= GenQuery('messages','d','*','id desc',$dlim,$in,$op,$st,$co );
 		if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Messages $delokmsg</h3>";}
 	}else{
 		echo $nokmsg;
@@ -140,7 +141,7 @@ foreach (array_keys($mlvl) as $ml){
 </tr>
 
 <?
-$query	= GenQuery('messages','s','*','id desc',$lim,$in,$op,$st,$co );
+$query	= GenQuery('messages','s','*','id desc',$dlim,$in,$op,$st,$co );
 $res	= @DbQuery($query,$link);
 $nmsg = 0;
 if($res){

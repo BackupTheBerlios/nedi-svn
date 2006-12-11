@@ -33,10 +33,11 @@ $off = isset($_GET['off']) ? $_GET['off'] : 0;
 $nof = 0;
 if( isset($_GET['p']) ){
 	$nof = abs($off - $lim);
-	$lim = "$nof,$lim";
 }elseif( isset($_GET['n']) ){
 	$nof = $off + $lim;
-	$lim = "$nof,$lim";
+	$dlim = "$nof,$lim";
+}else{
+	$dlim = "$lim";
 }
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
@@ -94,11 +95,11 @@ foreach (array_keys($icat) as $ic){
 
 <?
 if ($cat){
-	$query	= GenQuery('incidents','s','*','id desc',$lim,array('category'),array('='),array($cat));
+	$query	= GenQuery('incidents','s','*','id desc',$dlim,array('category'),array('='),array($cat));
 }elseif ($id){
-	$query	= GenQuery('incidents','s','*','',$lim,array('id'),array('='),array($id));
+	$query	= GenQuery('incidents','s','*','','',array('id'),array('='),array($id));
 }else{
-	$query	= GenQuery('incidents','s','*','id desc',$lim);
+	$query	= GenQuery('incidents','s','*','id desc',$dlim);
 }
 $res	= @DbQuery($query,$link);
 if($res){

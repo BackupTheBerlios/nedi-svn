@@ -16,10 +16,10 @@ $bib	= "E6E6E6";
 // Read configuration
 function ReadConf($group) {
 
-	if (file_exists('../nedi.conf')) {
-		$conf = file('../nedi.conf');
-	}elseif (file_exists('/etc/nedi.conf')) {
+	if (file_exists('/etc/nedi.conf')) {
 		$conf = file('/etc/nedi.conf');
+	}elseif (file_exists('../nedi/nedi.conf')) {
+		$conf = file('../nedi/nedi.conf');
 	}else{
 		echo "Dude, where's nedi.conf?";
 		die;

@@ -259,6 +259,6 @@ sub Help {
 	print "---------------------------------------------------------------------------\n";
 	print "Options:\n";
 	print "-D		daemonize moni.pl\n";
-	print "-v		verbose output\n\n";
+	print "-v/V		verbose output\n\n";
 	die "Moni 1.0.w 1.Jun 2006\n";
 }

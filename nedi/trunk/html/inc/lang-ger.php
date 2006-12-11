@@ -3,7 +3,7 @@
 
 // Authentifizierungs Meldungen
 $nokmsg		= "<h4>Sie sind dafür nicht berechtigt!</h4>\n";
-$logmsg		= "<script>alert('Ungueltige Anmeldung!');</script>\n";
+$logmsg		= "Ungueltige Anmeldung!";
 
 // Befehlsrückmeldungen
 $upokmsg	= "aktualisiert!\n";

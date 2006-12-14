@@ -58,7 +58,11 @@ sub Identify {
 		}else{
 			$name =~  s/^(.*?)\.(.*)/$1/;							# Domain confuses CDP links!		
 		}
-		printf ("%-12.12s\t",$name);
+		if($main::opt{d} or $main::opt{v}){
+			print "$name\t";
+		}else{
+			printf ("%-12.12s\t",$name);
+		}
 		($session, $error) = Net::SNMP->session(-hostname  => $peer,
 							-community => $comm,
 							-timeout   => $misc::timeout,

@@ -178,7 +178,7 @@ function selectbox($type,$sel="") {
 	}elseif($type == "nodes"){
 		$options = array("name"=>"Name","ip"=>"IP address","ipupdate"=>"IP Update","ipchanges"=>"IP Changes","iplost"=>"IP Lost","mac"=>"MAC address","oui"=>"Vendor","device"=>"Device","ifname"=>"Interface",   "vlanid"=>"Vlan","ifmetric"=>"IF Metric","ifchanges"=>"IF Changes","ifupdate"=>"IF Update","firstseen"=>"First Seen","lastseen"=>"Last Seen");
 	}elseif($type == "devices"){
-		$options = array("name"=>"Name","ip"=>"IP address","serial"=>"Serial #","type"=>"Type","services"=>"Services","description"=>"Description",   "os"=>"OS","bootimage"=>"Bootimage","location"=>"Location","contact"=>"Contact","vtpdomain"=>"VTP Domain","vtpmode"=>"VTP Mode","snmpversion"=>"SNMP Ver","community"=>"Community","tport"=>"CLI port","login"=>"Login","firstseen"=>"First Seen", "lastseen"=>"Last Seen");
+		$options = array("name"=>"Name","ip"=>"IP address","serial"=>"Serial #","type"=>"Type","services"=>"Services","description"=>"Description",   "os"=>"OS","bootimage"=>"Bootimage","location"=>"Location","contact"=>"Contact","vtpdomain"=>"VTP Domain","vtpmode"=>"VTP Mode","snmpversion"=>"SNMP Ver","community"=>"Community","cliport"=>"CLI port","login"=>"Login","firstseen"=>"First Seen", "lastseen"=>"Last Seen");
 	}elseif($type == "messages"){
 		$options = array("id"=>"ID","level"=>"Level","time"=>"Time","source"=>"Source","info"=>"Info");
 	}elseif($type == "limit"){

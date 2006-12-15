@@ -171,10 +171,9 @@ if($res){
 #				$hint = "<img src=img/bulbr.png hspace=6>";
 #			}
 		}elseif(preg_match("/Config(ured from| changed)/",$m[4]) ){
-#		}elseif(strstr($m[4],"Config changed") or strstr($m[4],"Configured from") ){ optimizing attempt, but isn't faster...
 			echo "<a href=Devices-Config.php?shc=$usrc><img src=img/16/cfg2.png hspace=8 border=0></a>";
 		}elseif(strstr($m[4],"not discoverable!")){
-			echo "<img src=img/16/bstp.png hspace=8 border=0 title=\"No action possible\">";
+			echo "<a href=Nodes-List.php?ina=ip&opa==&sta=$m[3]><img src=img/16/cubs.png hspace=8 border=0></a>";
 		}elseif(preg_match("/reappeared!/",$m[4]) ){
 			echo "<a href=Nodes-Status.php?mac=$m[3]><img src=img/16/ngrn.png hspace=8 border=0></a>";
 		}else{

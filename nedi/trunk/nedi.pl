@@ -12,6 +12,7 @@
 # 30/03/06	v1.0.w rrd integration, .def philosopy, monitoring (RC1)
 # 30/06/06	v1.0.w system rrd, modules, monitoring, discovery (RC2)
 # 3/11/06		v1.0.w  1st SSH implementation, link mgmt, defgen(RC3)
+# 15/12/06	Relase! Cleanup and bugfixes. RRDs based on 1h interval
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -233,5 +234,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w (X-mas Edition) 14.Dez 2006\n";
+	die "NeDi 1.0.w (X-mas Edition) 15.Dez 2006\n";
 }

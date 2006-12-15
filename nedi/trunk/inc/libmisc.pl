@@ -8,12 +8,12 @@
 #============================================================================
 package misc;
 
-my $rrdpath	= "rrd";
+my $rrdpath	= "$main::p/rrd";
 my $rrdcmd	= "rrdtool";
 
 use vars qw($now $seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
 use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath);
-use vars qw($ignoredvlans $arpwatch $retire $timeout $rrdstep $redbuild);
+use vars qw($arpwatch $ignoredvlans $retire $timeout $rrdstep $redbuild);
 use vars qw($notify $thres $pause $smtpserver $mailfrom);
 use vars qw(%login %map %doip %dcomm %ouineb %cdplink %sysobj %ifmac); 
 use vars qw(%oui %arp %rarp %arpn %portprop %portnew);
@@ -280,7 +280,7 @@ sub InitSeeds {
 		print "$main::opt{t} added for testing\n" if $main::opt{t};
 		$s++;
 	}elsif (-e "$main::p/$seedlist"){
-		open  (LIST, $seedlist );
+		open  (LIST, "$main::p/$seedlist");
 		my @list = <LIST>;
 		close(LIST);
 		chomp @list;
@@ -792,8 +792,8 @@ sub ManageRRD {
 					"DS:memcpu:GAUGE:$ds:0:U",
 					"DS:memio:GAUGE:$ds:0:U",
 					"DS:temp:GAUGE:$ds:-100:100",
-					"RRA:AVERAGE:0.5:1:200",
-					"RRA:AVERAGE:0.5:6:360");
+					"RRA:AVERAGE:0.5:1:720",
+					"RRA:AVERAGE:0.5:24:720");
 		}
 		if($ok){
 			if ($main::opt{t}){
@@ -824,8 +824,8 @@ sub ManageRRD {
 						"DS:outoct:COUNTER:$ds:0:10000000000",
 						"DS:inerr:COUNTER:$ds:0:10000000000",
 						"DS:outerr:COUNTER:$ds:0:10000000000",
-						"RRA:AVERAGE:0.5:1:200",
-						"RRA:AVERAGE:0.5:6:360");
+						"RRA:AVERAGE:0.5:1:720",
+						"RRA:AVERAGE:0.5:24:720");
 			}
 			if($ok){
 				if ($main::opt{t}){

@@ -2,11 +2,31 @@
 /*
 //===============================
 # Program: drawrrd.php
-# use GET option d=1 to debug output.
+# Set $rrdpath properly, if it doesn't work.
+# use GET option d=1 to debug output, if you still encounter problems!
 //===============================
 */
 $rrdcmd  = "rrdtool";										# point to rrdtool
 $rrdpath = "/var/nedi/rrd";									# point to rrds
+
+# The above is the FASTEST way. People may argue to put this in nedi.conf. This enables 2 more ways, but I won't do it...
+# LITTLE SLOWER and as dirty as above:
+#if (file_exists('/etc/nedi.conf')) {
+#        $conf = file('/etc/nedi.conf');
+#}else{
+#        echo "Dude, where's nedi.conf?";
+#        die;
+#}
+#foreach ($conf as $cl) {
+#        $l = rtrim($cl);
+#        $v =  preg_split('/\s+/',$l);
+#        if ($v[0] == "path")         {$path = $v[1];}
+#}
+
+# EVEN SLOWER but proper:
+#include_once ('libmisc.php');
+#ReadConf('usr');
+# Now just imagine drawing 300 graphs....
 
 session_start(); 
 if( !$_SESSION['group'] ){

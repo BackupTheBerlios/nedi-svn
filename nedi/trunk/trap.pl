@@ -29,7 +29,7 @@
 
 use strict;
 
-use vars qw(%dev $p);
+use vars qw($p %dev);
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;

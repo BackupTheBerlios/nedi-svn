@@ -18,8 +18,8 @@ function ReadConf($group) {
 
 	if (file_exists('/etc/nedi.conf')) {
 		$conf = file('/etc/nedi.conf');
-	}elseif (file_exists('../nedi/nedi.conf')) {
-		$conf = file('../nedi/nedi.conf');
+	}elseif (file_exists('/var/nedi/nedi.conf')) {
+		$conf = file('/var/nedi/nedi.conf');
 	}else{
 		echo "Dude, where's nedi.conf?";
 		die;

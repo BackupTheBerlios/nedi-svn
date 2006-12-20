@@ -31,7 +31,7 @@ function ReadConf($group) {
 	foreach ($conf as $cl) {
 		if ( !preg_match("/^#|^$/",$cl) ){
 			$l = rtrim($cl);
-			$v =  preg_split('/\s+/',$l);
+			$v =  preg_split('/\t+/',$l);
 
 			if ($v[0] == "module"){
 				$v[4] = isset($v[4]) ? $v[4] : "usr";
@@ -58,10 +58,7 @@ function ReadConf($group) {
 			elseif ($v[0] == "locformat")	{$locformat = $v[1];}
 			elseif ($v[0] == "guiauth")	{$guiauth = $v[1];}
 			elseif ($v[0] == "redbuild")	{$redbuild = $v[1];}
-			elseif ($v[0] == "disc")	{
-				array_shift($v);
-				$disc = implode(" ",$v );
-			}
+			elseif ($v[0] == "disc")	{$disc = $v[1];}
 		}
 	}
 }

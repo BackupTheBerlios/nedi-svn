@@ -67,6 +67,8 @@ $query	= GenQuery('monitoring');
 $res	= @DbQuery($query,$link);
 if($res){
 	$nmon = 0;
+	$mavl	= array();
+	$topup	= array();
 	while( ($m = @DbFetchRow($res)) ){
 		if($m[8]){
 			$mavl[$m[0]] = (1 - $m[7] / $m[8]) * 100;
@@ -242,8 +244,8 @@ if ( in_array("mss",$rep) ){
 <th><img src=img/32/impt.png><br>Messages</th>
 </tr>
 <?
-	$rord = ($ord)? "desc" : "";
-	$query	= GenQuery('messages','c','source,level',"source $rord");
+	$rord = ($ord)? " desc" : "";
+	$query	= GenQuery('messages','c','source,level',"source$rord");
 	$res	= @DbQuery($query,$link);
 	if($res){
 		while( ($s = @DbFetchRow($res)) ){

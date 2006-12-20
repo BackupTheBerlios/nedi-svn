@@ -37,7 +37,7 @@ sub ReadConf {
 
 	foreach my $l (@conf){
 		if ($l !~ /^[#;]|^$/){
-			my @v  = split(/\s+/,$l);
+			my @v  = split(/\t+/,$l);
 			if ($v[0] eq "comm"){push (@comms,$v[1])}
 			if ($v[0] eq "usr"){
 				push (@users,$v[1]);
@@ -277,7 +277,7 @@ sub InitSeeds {
 	if($main::opt{t}){
 		push (@todo,"testing");
 		$doip{"testing"} = $main::opt{t};
-		print "$main::opt{t} added for testing\n" if $main::opt{t};
+		print "$main::opt{t} added for testing\n";
 		$s++;
 	}elsif (-e "$main::p/$seedlist"){
 		open  (LIST, "$main::p/$seedlist");
@@ -800,7 +800,7 @@ sub ManageRRD {
 				if ($main::opt{d}){
 					print "\n\nRRDs in $rrdpath/$dv would be filled with:\n";
 					print "CPU=$main::dev{$_[0]}{cpu} Mem=$main::dev{$_[0]}{mcp}/$main::dev{$_[0]}{mio}  TMP=$main::dev{$_[0]}{tmp}\n";
-					printf ("\n%12s %12s %12s %8s %8s\n", "Interface","Inoctet","Outoctet","Inerror","Outerror"  );
+					printf ("\n%18s %12s %12s %8s %8s\n", "Interface","Inoctet","Outoctet","Inerror","Outerror"  );
 				}
 			}else{
 				$ok = 1 + system ($rrdcmd,
@@ -829,7 +829,7 @@ sub ManageRRD {
 			}
 			if($ok){
 				if ($main::opt{t}){
-					printf ("%12s %12d %12d %8d %8d\n", $irf,$main::int{$_[0]}{$i}{ioc},$main::int{$_[0]}{$i}{ooc},$main::int{$_[0]}{$i}{ier},$main::int{$_[0]}{$i}{oer}  ) if $main::opt{d};
+					printf ("%-18s %12d %12d %8d %8d\n", $irf,$main::int{$_[0]}{$i}{ioc},$main::int{$_[0]}{$i}{ooc},$main::int{$_[0]}{$i}{ier},$main::int{$_[0]}{$i}{oer}  ) if $main::opt{d};
 				}else{
 					$ok = 1 + system ($rrdcmd,
 							"update",

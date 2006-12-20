@@ -62,7 +62,7 @@ sub ReadConf {
 
 	foreach my $l (@conf){
 		if ($l !~ /^[#;]|^$/){
-			my @v  = split(/\s+/,$l);
+			my @v  = split(/\t+/,$l);
 			if ($v[0] eq "usr"){
 				$login{$v[1]}{pw} = $v[2];
 				$login{$v[1]}{en} = $v[3];

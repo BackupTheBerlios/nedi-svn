@@ -64,6 +64,9 @@ $query	= GenQuery('incidents');
 $res	= @DbQuery($query,$link);
 if($res){
 	$tinc = 0;
+	$numdv	= array();
+	$numcat	= array();
+	$insta	= array();
 	while( ($i = @DbFetchRow($res)) ){
 		$numdv[$i[2]]++;
 		$numcat[$i[8]]++;

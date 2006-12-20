@@ -10,7 +10,7 @@ on a Ubuntu system, run contrib/install.sh (thanks Tristan)
 
 <h2>Even Quicker Install</h2>
 
-Download NeDio4 the OpenBSD4 based NeDi appliance image...
+Download NeDio4 the OpenBSD4 based NeDi appliance image (out soon)...
 
 <h2>Manual Install & Configuration</h2>
 
@@ -23,7 +23,7 @@ Download NeDio4 the OpenBSD4 based NeDi appliance image...
 <p>
 <li>Extract the NeDi archive (e.g. to /var/nedi). Move the files in html to your webserver's document root (e.g. /var/www/htdocs). If your path is not /var/nedi you'll need to edit html/inc/drawrrd.php and set the absolute path for $rrdpath. If rrdtool is not found, specify path as well. 
 <p>
-<li>Edit nedi.conf to fit your needs. If you get 'Dude, where is nedi.conf?' link it to /etc.
+<li>Edit nedi.conf to fit your needs (Please use the new one as copying your existing config may lead to errors, if you're not careful). Make sure you use <b>tabs</b> to separate key/values! If you get 'Dude, where is nedi.conf?' link it to /etc.
 <p>
 <li>Cd to /var/nedi (or whatever you chose) and type ./nedi.pl -i to initialize the backend. I recommend to dump users and monitoring before that, if your upgrading from an older version:
 mysqldump nedi monitoring user -u nedi -p > nedi-mon-usr.sql

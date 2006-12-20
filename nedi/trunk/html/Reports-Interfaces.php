@@ -62,6 +62,7 @@ $res	= @DbQuery($query,$link);
 if($res){
 	$nif = 0;
 	$ndif = 0;
+	$nummo	= array();
 	while( ($i = @DbFetchRow($res)) ){
 		$numif[$i[0]]++;
 		$topino["$i[0];;$i[1]"] = $i[12];						# Using a flat array for sorting on counter values
@@ -343,10 +344,11 @@ if ( in_array("lmi",$rep) ){
 		die;
 	}
 	$row = 0;
-	foreach(array_keys($lidu) as $dv){
-		foreach(array_keys($lidu[$dv]) as $if){
-			foreach(array_keys($lidu[$dv][$if]) as $nb){
-				foreach(array_keys($lidu[$dv][$if][$nb]) as $ni){
+	$libw	= array();
+	foreach(array_keys($libw) as $dv){
+		foreach(array_keys($libw[$dv]) as $if){
+			foreach(array_keys($libw[$dv][$if]) as $nb){
+				foreach(array_keys($libw[$dv][$if][$nb]) as $ni){
 					$ud = urlencode($dv);
 					$un = urlencode($nb);
 					if($ord or $libw[$dv][$if][$nb][$ni] and $libw[$nb][$ni][$dv][$if]){

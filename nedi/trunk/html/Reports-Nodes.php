@@ -69,6 +69,9 @@ $res	= @DbQuery($query,$link);
 		$tnod   = 0;
 		$lip    = 0;
 		$nswift = 0;
+		$nodif	= array();
+		$nonf	= array();
+		$nodip['0'] = 0;
 		while( ($n = @DbFetchRow($res)) ){
 			if(!$n[0]){$nodns++;}
 			if($n[14]){$lip++;}
@@ -340,6 +343,7 @@ if ( in_array("vln",$rep) ){
 	if($res){
 		$nvl = 0;
 		$nunvl = 0;
+		$uvlandev = array();
 		while( ($vl = @DbFetchRow($res)) ){
 			if(! $uvlid[$vl[0]][$vl[1]] and ! preg_match("/$ignoredvlans/",$vl[1]) ){
 				$uvlandev[$vl[1]] .= "<a href=Devices-Status.php?dev=$vl[0]>$vl[0]</a> ($vl[2]) ";

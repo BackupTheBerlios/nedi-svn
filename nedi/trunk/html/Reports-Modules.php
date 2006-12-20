@@ -71,6 +71,7 @@ if ( in_array("mty",$_GET['rep']) ){
 	$res	= @DbQuery($query,$link);
 	if($res){
 		$nmod = 0;
+		$nummo	= array();
 		while( ($m = @DbFetchRow($res)) ){
 			if( preg_match("/^[0-9]+$/",$m[2]) ){
 				$mdl = $m[3];

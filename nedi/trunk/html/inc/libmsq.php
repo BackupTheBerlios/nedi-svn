@@ -121,7 +121,7 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 		if('d' == $do){
 			return "DELETE FROM $tab $w $l";
 		}elseif('c' == $do){
-			return "SELECT $col,count($col) FROM  $tab $w GROUP BY $col $o $l";
+			return "SELECT $col,count(*) FROM  $tab $w GROUP BY $col $o $l";
 		}else{
 			return "SELECT $col FROM $tab $w $o $l";
 		}

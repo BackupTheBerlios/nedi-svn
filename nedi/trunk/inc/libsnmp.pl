@@ -834,7 +834,7 @@ sub CDP {
 					if (!$main::dev{$renam}{fs}){$main::dev{$renam}{fs} = $misc::now}
 					$main::dev{$renam}{ls} = $misc::now;
 					$misc::portprop{$_[0]}{$lif}{pho} = 1;
-					print "Qp\t";
+					#print "Qp\t";
 				}else{									# none of the above...let's queue it!
 					$misc::portprop{$_[0]}{$lif}{upl} = 1;
 					if (grep /^\Q$rci\E$/,(@misc::donecdp,@misc::donenam,@misc::todo) ){	# Don't queue if done or already queued... (The \Q \E is to prevent interpreting the CDPid as a regexp)

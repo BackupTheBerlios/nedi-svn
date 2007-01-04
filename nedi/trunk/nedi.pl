@@ -9,10 +9,11 @@
 # 21/12/04	v1.0.e first alpha^17 version.
 # 22/02/05	v1.0.p alpha^5 version.
 # 27/04/05	v1.0.s alpha^2 version (1 timestamp per discovery for coherence).
-# 30/03/06	v1.0.w rrd integration, .def philosopy, monitoring (RC1)
-# 30/06/06	v1.0.w system rrd, modules, monitoring, discovery (RC2)
-# 3/11/06		v1.0.w  1st SSH implementation, link mgmt, defgen(RC3)
-# 15/12/06	Relase! Cleanup and bugfixes. RRDs based on 1h interval
+# 30/03/06	v1.0.w rrd integration, .def philosopy, monitoring 		(RC1)
+# 30/06/06	v1.0.w system rrd, modules, monitoring, discovery		(RC2)
+# 3/11/06		v1.0.w  1st SSH implementation, link mgmt, defgen	(RC3)
+# 15/12/06	v1.0.w Cleanup and bugfixes. RRDs based on 1h interval 	(RC4)
+# x/01/07		Relase!
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -234,5 +235,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w (X-mas Edition) 20.Dez 2006\n";
+	die "NeDi 1.0.w x.Jan 2007\n";
 }

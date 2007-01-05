@@ -65,7 +65,7 @@ if ($uok == 1) {
 <h1>User Profile</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="pro">
 <table bgcolor=#000000 <?=$tabtag?> >
-<tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/smil.png border=0 title="Set your personal information"></a>
+<tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=<?=Smilie($name)?> border=0 title="Set your personal information"></a>
 <br><?=$name?></th>
 <th valign=top align=right>
 Password <input type="password" name="pass" size="12"><p>

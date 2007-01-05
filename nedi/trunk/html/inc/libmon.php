@@ -15,10 +15,12 @@ $mico['250'] = "ford";
 // Assign an icon to a node.
 function Cimg($cat) {
 
-	if($cat < 10)		{return "fiqu";}
-	elseif($cat == 11)	{return "powr";}
-	elseif($cat == 13)	{return "cach";}
+	if($cat == 0)		{return "star";}
+	elseif($cat < 10)	{return "fiqu";}
+	elseif($cat == 11)	{return "glof";}
+	elseif($cat == 13)	{return "ele";}
 	elseif($cat < 20)	{return "home";}
+	elseif($cat == 21)	{return "powr";}
 	elseif($cat == 23)	{return "nic";}
 	elseif($cat < 30)	{return "dev";}
 	elseif($cat == 32)	{return "cfg2";}

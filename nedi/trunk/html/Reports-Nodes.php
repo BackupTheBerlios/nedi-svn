@@ -106,11 +106,11 @@ $res	= @DbQuery($query,$link);
 	}
 }
 if ( in_array("sum",$rep) ){
-	$nodb = Bar($nodns,0);
-	$noib = Bar($nodip['0'],0);
-	$lipb = Bar($lip,0);
-	$swib = Bar($nswift,0);
-	$totb = Bar($tnod,0);
+	$nodb = Bar($nodns);
+	$noib = Bar($nodip['0']);
+	$lipb = Bar($lip);
+	$swib = Bar($nswift);
+	$totb = Bar($tnod);
 
 ?>
 <table cellspacing=10 width=100%>
@@ -144,7 +144,7 @@ if ( in_array("sum",$rep) ){
 	foreach ($oui as $o => $nn){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
-		$obar = Bar($nn,0);
+		$obar = Bar($nn);
 		$img  = Nimg($o);
 		$uo = str_replace(" ","%20",$o);
 
@@ -180,7 +180,7 @@ if ( in_array("ips",$rep) ){
 	foreach ($ipchg as $c => $nc){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
-		$cbar = Bar($nc,0);
+		$cbar = Bar($nc);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$c times</th><td>$cbar <a href=Nodes-List.php?ina=ipchanges&opa==&sta=$c>$nc</a></td></tr>\n";
 		if($row == $lim){break;}
@@ -204,7 +204,7 @@ if ( in_array("ips",$rep) ){
 	foreach ($iplost as $c => $nc){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
-		$cbar = Bar($nc,0);
+		$cbar = Bar($nc);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$c times</th><td>$cbar <a href=Nodes-List.php?ina=iplost&opa==&sta=$c>$nc</a></td></tr>\n";
 		if($row == $lim){break;}
@@ -298,7 +298,7 @@ if ( in_array("ifs",$rep) ){
 	foreach ($ifchg as $c => $nc){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
-		$cbar = Bar($nc,0);
+		$cbar = Bar($nc);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$c times</th><td>$cbar <a href=Nodes-List.php?ina=ifchanges&opa==&sta=$c>$nc</a></td></tr>\n";
 		if($row == $lim){break;}
@@ -319,7 +319,7 @@ if ( in_array("ifs",$rep) ){
 	foreach ($ival as $v => $nn){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
-		$vbar = Bar($nn,0);
+		$vbar = Bar($nn);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$v</th><td>$vbar <a href=Nodes-List.php?ina=ifmetric&opa==&sta=$v>$nn</a></td></tr>\n";
 	}

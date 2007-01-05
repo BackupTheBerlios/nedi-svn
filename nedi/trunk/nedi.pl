@@ -12,8 +12,8 @@
 # 30/03/06	v1.0.w rrd integration, .def philosopy, monitoring 		(RC1)
 # 30/06/06	v1.0.w system rrd, modules, monitoring, discovery		(RC2)
 # 3/11/06		v1.0.w  1st SSH implementation, link mgmt, defgen	(RC3)
-# 15/12/06	v1.0.w Cleanup and bugfixes. RRDs based on 1h interval 	(RC4)
-# x/01/07		Relase!
+# 15/12/06	v1.0.w Cleanup and bugfixes. RRDs based on 1h interval 	(RC4-Xmas edition)
+# x/01/07		v1.0.w More cleanup. Find best IP for devices		(Relase)
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ use Getopt::Std;
 use vars qw($p $nediconf $cdp $lldp $oui);
 use vars qw(%nod %dev %int %mod %link %vlan %opt %net %usr); 
 
-getopts('AbcdDilLnost:u:vw:y',\%opt) or &Help();
+getopts('AbcdDiIlLnost:u:vw:y',\%opt) or &Help();
 #if (! keys %opt ){&Help()}
 
 $p = $0;
@@ -203,6 +203,7 @@ sub Help {
 	print "-o	OUI discovery (based on ARP chache entries of the above\n";
 	print "-b	backup running configs\n";
 	print "-A 	append to networks, links, vlans, interfaces and modules tables.\n";
+	print "-I 	don't try to find best suited IP addresses for devices.\n";
 	print "-L 	don't touch links, so you can maintain them manually.\n";
 	print "Other Options -------------------------------------------------------------\n";
 	print "-i	initialize database and start all over\n";
@@ -235,5 +236,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w x.Jan 2007\n";
+	die "NeDi 1.0.w 5.Jan 2007\n";
 }

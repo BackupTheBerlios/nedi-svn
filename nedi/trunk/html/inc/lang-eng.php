@@ -29,17 +29,17 @@ $mlvl['250']	= "Emergency";
 
 // Monitoring Terms
 $icat['0']	= "-";
-$icat['1']	= "Under Investigation";
+$icat['1']	= "Unclassified";
 $icat['2']	= "Unkown";
-$icat['10']	= "Facility - General";
+$icat['10']	= "General Facility";
 $icat['11']	= "Power Outtage";
 $icat['12']	= "Construction Work";
 $icat['13']	= "Force of Nature";
-$icat['20']	= "Hardware - General";
+$icat['20']	= "General Hardware";
 $icat['21']	= "Power Supply";
 $icat['22']	= "Chassis";
 $icat['23']	= "Module";
-$icat['30']	= "People - General";
+$icat['30']	= "General People";
 $icat['31']	= "Maintenance";
 $icat['32']	= "Configuration";
 $icat['33']	= "Customer";

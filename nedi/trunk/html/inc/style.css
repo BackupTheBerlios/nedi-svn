@@ -5,27 +5,33 @@ TD {
 	FONT: 11px verdana, arial, sans-serif; COLOR: #222222
 }
 TD.red {
-	FONT: 11px lucida console, fixedsys; color: red;
+	FONT: 11px lucida console, fixedsys; color: red
 }
 TD.drd {
-	FONT: 11px lucida console, fixedsys; color: darkred;
+	FONT: 11px lucida console, fixedsys; color: darkred
 }
 TD.grn {
-	FONT: 11px lucida console, fixedsys; color: green;
+	FONT: 11px lucida console, fixedsys; color: green
 }
 TD.blu {
-	FONT: 11px lucida console, fixedsys; color: blue;
+	FONT: 11px lucida console, fixedsys; color: blue
 }
 TD.prp {
-	FONT: 11px lucida console, fixedsys; color: purple;
+	FONT: 11px lucida console, fixedsys; color: purple
 }
 TD.blk {
-	FONT: 11px lucida console, fixedsys; color: black;
+	FONT: 11px lucida console, fixedsys; color: black
 }
-
 TH {
 	FONT: 11px verdana, arial, sans-serif; COLOR: #333333;  font-weight: bold
 }
+TH.red {
+	FONT: 11px lucida console, fixedsys; max-width:100px; color: red
+}
+TH.blu {
+	FONT: 11px lucida console, fixedsys; max-width:100px; color: blue
+}
+
 H1   {
 	FONT: 14px verdana, arial, sans-serif; COLOR: #333333; font-weight: bold; text-align: center
 }

@@ -30,7 +30,7 @@ $vln = isset($_GET['vln']) ? $_GET['vln'] : "";
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="stree">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=<?=$bg1?> ><th width=80><a href=<?=$_SERVER['PHP_SELF']?> >
-<img src=img/32/cach.png border=0 title="Select VLAN for VLAN indexing devices only">
+<img src=img/32/tabt.png border=0 title="Select VLAN for VLAN indexing devices only">
 </a></th>
 <th>
 Switch

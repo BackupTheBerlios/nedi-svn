@@ -631,7 +631,7 @@ sub Interfaces {
 }
 
 #===================================================================
-# Get IP address tables.
+# Get IP address tables and tries to find best mgmt IP (based on code of Duane Walker)
 #===================================================================
 
 sub IfAddresses {
@@ -645,6 +645,7 @@ sub IfAddresses {
 
 	my $notice	= 0;
 	my $nia		= 0;
+	my $iptyp	= 0;
 
 	my $iaixO	= "1.3.6.1.2.1.4.20.1.2";
 	my $ianmO	= "1.3.6.1.2.1.4.20.1.3";
@@ -678,8 +679,21 @@ sub IfAddresses {
 		$main::net{$dv}{$iaddr}{ifn} = $main::int{$dv}{$aifx{$k}}{ina};
 		$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
 		print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
+		if(!$main::opt{I} and $iaddr !~ /^127.0.0|^0/){					
+			if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
+				$iptyp = 1;
+				$main::dev{$dv}{ip} = $iaddr;
+			}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $iptyp != 1){		# 2nd priority, use virtual IF
+				$iptyp = 2;
+				$main::dev{$dv}{ip} = $iaddr;
+			}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $iptyp < 3){	# 3rd  priority, use ethernet IF
+				$iptyp = 3;
+				$main::dev{$dv}{ip} = $iaddr;
+			}
+		}
 		$nia++;
 	}
+	print "\n New IP:$main::dev{$dv}{ip} (Priority $iptyp)" if ($main::opt{v} and $iptyp);
 	print " p$nia" if !$main::opt{v};
 	return $notice;
 }

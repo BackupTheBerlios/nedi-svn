@@ -190,8 +190,7 @@ function selectbox($type,$sel="") {
 
 //===================================================================
 // Generate coloured bar for html
-function Bar($length,$tresh) {
-	if(!$length){$length = 0;}
+function Bar($length=1,$tresh=0) {
 	if($tresh > 0){
 		if($length < $tresh){
 			$img = "grn";
@@ -227,7 +226,6 @@ function Bar($length,$tresh) {
 		$length = intval($length);
 		return "<img src=img/$img.png width=$length height=20 hspace=2 border=1>";
 	}
-
 }
 
 //===================================================================
@@ -244,6 +242,15 @@ function Nettype($nt) {
 	}else{$img = "brgt";$tit="Public";}
 	
 	return array("$img.png",$tit);
+}
+
+//===================================================================
+// Return Smilie based on name
+function Smilie($n) {
+	
+		$si = ord(substr(strtolower($n), 0, 1)) + ord(substr(strtolower($n), 1, 1)) + ord(substr(strtolower($n), 2, 1)) - 291;
+		if($si < 1 or $si > 70){$si = "36";}
+		return "img/smiles/$si.png";
 }
 
 //===================================================================

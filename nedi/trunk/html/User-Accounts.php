@@ -92,10 +92,8 @@ if($res){
 		if ($row % 2){$bg = $bgb; $bi = $bib;}else{$bg = $bga; $bi = $bia;}
 		$row++;
 		list($cc,$lc) = Agecol($u[10],$u[11],$row % 2);
-		$si = ord(substr(strtolower($u[0]), 0, 1)) + ord(substr(strtolower($u[0]), 1, 1)) + ord(substr(strtolower($u[0]), 2, 1)) - 291;
-		if($si < 1 or $si > 70){$si = "36";}
 		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bi><img src=img/smiles/$si.png title=\"Smile Index $si\"'><br>$u[0]</th>\n";
+		echo "<th bgcolor=#$bi><img src=".Smilie($u[0])." title=\"Hello I'm $u[0]\"'><br>$u[0]</th>\n";
 		echo "<td>$u[8]</td><td align=center>$u[9]</td><td>$u[12]</td><td align=center>$u[13]</td>\n";
 		echo "<td bgcolor=#$cc>".date("j. M Y",$u[10])."</td>\n";
 		echo "<td bgcolor=#$lc>".date("j. M (G:i)",$u[11])."</td><th>\n";

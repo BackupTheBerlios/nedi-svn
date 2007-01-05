@@ -125,7 +125,7 @@ if ($shd){
 <?
 			if($dev[6] & 2){
 ?>
-<a href=Realtime-Spanningtree.php?dev=<?=$ud?> ><img src=img/16/cach.png hspace=<?=$hs?> border=0 title="Spanningtree info on switch"></a>
+<a href=Realtime-Spanningtree.php?dev=<?=$ud?> ><img src=img/16/tabt.png hspace=<?=$hs?> border=0 title="Spanningtree info on switch"></a>
 <?
 			}
 			if($dev[6] > 3){

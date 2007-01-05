@@ -7,6 +7,7 @@
 # DATE		COMMENT
 # -----------------------------------------------------------
 # 08/07/06	initial version.
+# 05/01/07	variables cleanup.
 */
 
 $bg1	 = "ddbb99";
@@ -42,13 +43,13 @@ if( isset($_GET['p']) ){
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if($dli){
-	$query	= GenQuery('incidents','d','','','',array('id'),array('='),array($_GET['dli']) );
-	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Incident $_GET[dli] $delokmsg</h3>";}
+	$query	= GenQuery('incidents','d','','','',array('id'),array('='),array($dli) );
+	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Incident $dli $delokmsg</h3>";}
 }elseif($uca){
-	$query	= GenQuery('incidents','u','id',$uca,'',array('who','time','category'),'',array($_GET['who'],$_GET['now'],$cat) );
+	$query	= GenQuery('incidents','u','id',$uca,'',array('who','time','category'),'',array($_GET['who'],$_GET['tme'],$cat) );
 	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3> Incident $uca $upokmsg</h3>";}
 }elseif($ucm){
-	$query	= GenQuery('incidents','u','id',$ucm,'',array('comment'),'',array($cmt) );
+	$query	= GenQuery('incidents','u','id',$ucm,'',array('who','comment'),'',array($_GET['who'],$cmt) );
 	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3> Incident $ucm $upokmsg</h3>";}
 }
 
@@ -61,7 +62,6 @@ if($dli){
 </a></th>
 <th>
 Filter <select size=1 name="cat">
-<option value="">--------
 <?
 foreach (array_keys($icat) as $ic){
 	echo "<option value=\"$ic\" ";
@@ -89,7 +89,7 @@ foreach (array_keys($icat) as $ic){
 <th width=80 colspan=2><img src=img/32/eyes.png><br>Incident</th>
 <th colspan=2><img src=img/32/dev.png><br>Device</th>
 <th colspan=2><img src=img/32/clock.png><br>Timeframe</th>
-<th colspan=2><img src=img/32/user.png><br>Agent</th>
+<th colspan=2><img src=img/32/smil.png><br>Agent</th>
 <th colspan=2><img src=img/32/find.png><br>Info</th>
 </tr>
 
@@ -126,8 +126,8 @@ if($res){
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <img src=img/16/<?=Cimg($i[8])?>.png>
 <input type="hidden" name="uca" value="<?=$i[0]?>">
-<input type="hidden" name="who" value="<?=$_SESSION['user']?>">
-<input type="hidden" name="now" value="<?=($i[7])?$i[7]:time()?>">
+<input type="hidden" name="who" value="<?=($i[6])?$i[6]:$_SESSION['user']?>">
+<input type="hidden" name="tme" value="<?=($i[7])?$i[7]:time()?>">
 <select size=1 name="cat" onchange="this.form.submit();" title="categorize incident for reporting">
 <?
 foreach (array_keys($icat) as $ic){
@@ -140,7 +140,7 @@ foreach (array_keys($icat) as $ic){
 </td><td>
 </form>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
-<input type="hidden" name="cat" value="<?=$cat?>">
+<input type="hidden" name="who" value="<?=($i[6])?$i[6]:$_SESSION['user']?>">
 <input type="hidden" name="ucm" value="<?=$i[0]?>">
 <input type="text" name="cmt" size=40 value="<?=$i[9]?>" onchange="this.form.submit();">
 <a href=<?=$_SERVER['PHP_SELF']?>?dli=<?=$i[0]?>><img src=img/16/bcnl.png border=0 hspace=8 onclick="return confirm('Delete incident?');" title="Delete Incident"></a>

@@ -151,7 +151,7 @@ if($mal == 1){
 
 <h3>Messages</h3><p>
 <?
-$query	= GenQuery('messages','c','level','level desc');
+$query	= GenQuery('messages','g','level','level desc');
 $res	= @DbQuery($query,$link);
 if($res){
 	$nlev = @DbNumRows($res);

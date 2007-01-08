@@ -183,7 +183,7 @@ function selectbox($type,$sel="") {
 	}
 	foreach ($options as $key => $txt){
 	       $selopt = ($sel == "$key")?"selected":"";
-	       print "<OPTION VALUE=\"$key\" $selopt >$txt\n";
+	       print "<option value=\"$key\" $selopt >$txt\n";
 	}
 
 }

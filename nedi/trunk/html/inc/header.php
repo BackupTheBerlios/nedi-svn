@@ -2,6 +2,9 @@
 //===============================
 // NeDi header.
 //===============================
+
+ini_set("memory_limit","16M");							# Added 8.1.2007 due to reporting problems on large networks
+
 session_start(); 
 
 $self = preg_replace("/.*\/(.+).php/","$1",$_SERVER['PHP_SELF']);

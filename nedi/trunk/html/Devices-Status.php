@@ -307,7 +307,7 @@ if ($shd){
 <?
 
 	if ($shp ){
-		$query	= GenQuery('nodes','c','ifname','','',array('device'),array('='),array($shd) );
+		$query	= GenQuery('nodes','g','ifname','','',array('device'),array('='),array($shd) );
 		$res	= @DbQuery($query,$link);
 		if($res){
 			while( ($nc = @DbFetchRow($res)) ){

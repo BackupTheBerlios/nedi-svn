@@ -4,9 +4,10 @@
 # Program: Other-Export.php
 # Programmer: Pascal Voegeli
 #
-# DATE     COMMENT
+# DATE     		COMMENT
 # -------- ------------------------------------------------------------------
-# 27/03/06 1.0		initial version.
+# 27/03/06	initial version.
+# 8/01/07		cosmetic changes, added DB layout (Remo Rickli).
 */
 
 //  These are the variables used for the table colours
@@ -56,16 +57,16 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 		<!-- This <th> contains the export part of the form -->
 		<th valign="top" width="35%" title="Alter the SQL query if you like. Only SELECT queries are allowed!">
 			<!-- If the module is loaded without any GET variables the selected action is "Export" -->
-			<input type="radio" name="action" value="export" <?=$action!="sqldump"?"checked":""?>>Export</input>
+			<input type="radio" name="action" value="export" <?=$action=="export"?"checked":""?>>Export</input>
 			<p><br>
-				<table border="0" align="center">
+				<table align="center">
 				<tr><td>Query Templates:</td>
 				<!-- There are 3 different types of things that can be selected in this box: -->
 				<!-- If a database table is selected, a "SELECT * FROM..." query is automatically written to the text box -->
 				<!-- If the "Device Config Files" entry is selected, the separator and quotes fields are disabled and a specific -->
 				<!-- query is written to the text box -->
 				<!-- If one of the meaningless entiries is selected nothing's changed in the text box -->
-				<td colspan="2"><select size="1" name="exptbl"  size=1 onchange="
+				<td><select size="1" name="exptbl"  size=1 onchange="
 					if(document.forms['export'].exptbl.options[document.forms['export'].exptbl.selectedIndex].value=='none') {
 						document.forms['export'].sep.disabled=false;
 						document.forms['export'].quotes.disabled=false;
@@ -94,7 +95,7 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 				?>
 				</select></td></tr>
 				<tr><td>SELECT Query:</td>
-				<td colspan="2"><input type="text" name="query" size="37" value="<?=$query?>"></input></td></tr>
+				<td><input type="text" name="query" size="37" value="<?=$query?>"></input></td></tr>
 				<tr><td>CSV Separator:</td>
 				<td><select size="1" name="sep">
 				<?  // Some PHP code
@@ -104,8 +105,8 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 						#echo "<option value=\"".$sep."\"".($s==$sep?" selected":"").">".$s."</option>\n";		<-- Pascals Kaese ;-)
 					}
 				?>
-				</select></td>
-				<td>&nbsp;&nbsp;<input type="checkbox" name="quotes" <?=$quotes?>>Use quotes for CSV elements</td></tr>
+				</select>
+				&nbsp;&nbsp;<input type="checkbox" name="quotes" <?=$quotes?>>Use quotes</td></tr>
 				</table>
 			</p>
 		</th>
@@ -113,6 +114,7 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 		<!-- This <th> contains the SQL dump part of the form -->
 		<th valign="top" width="25%" >
 			<input type="radio" name="action" value="sqldump" <?=$action=="sqldump"?"checked":""?>>SQL Dump</input>
+			<input type="radio" name="action" value="db" <?=$action=="db"?"checked":""?>>Layout</input><p>
 			<p>
 				Tables:
 			</p>
@@ -142,12 +144,8 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 				</table>
 			</p>
 		</th>
-
 		<th width="80">
-			<table border="0" align="center">
-				<tr valign="middle"><td><input type="submit" value="Download"></td></tr>
-				
-			</table>
+			<input type="submit" value="Create">
 		</th>
 	</tr>
 </table>
@@ -278,7 +276,26 @@ else if($action == "sqldump") {
 
 	echo "<meta http-equiv=\"refresh\" content=\"0; URL=".$archive."\">\n";
 }
-
+else if($action == "db") {
+echo "<h2>NeDi Database Layout</h2>\n";
+	$res = DbQuery(GenQuery("", "t"), $dblink);
+	$col = 0;
+	echo "<table width=100%><tr valign=top>\n";
+	while($tab = DbFetchRow($res)){
+		if($col == 4){echo "</tr><tr valign=top>\n";$col=0;}
+		echo "<td><table bgcolor=#666666 $tabtag><tr bgcolor=#$bg2><th colspan=2>$tab[0]</th><th>NULL</th><th>KEY</th></tr>\n";
+		$cres = DbQuery(GenQuery($tab[0], "c"), $dblink);
+		$row = 0;
+		while($c = DbFetchRow($cres)){
+			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+			$row++;
+			echo "<tr bgcolor=#$bg><th bgcolor=#$bi align=left>$c[0]</th><td>$c[1]</td><td>$c[2]</td><td>$c[3]</td></tr>\n";
+		}
+		echo "</table></td>";
+		$col++;
+	}
+	echo "</td></tr></table>\n";
+}
 // Now the database connection can be closed
 @DbClose($dblink);
 

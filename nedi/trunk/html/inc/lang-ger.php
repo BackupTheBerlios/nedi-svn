@@ -28,18 +28,20 @@ $mlvl['200']	= "Alarm";
 $mlvl['250']	= "Notfall";
 
 // Ueberwachungsbegriffe
-$icat['0']	= "-";
-$icat['1']	= "Unklassiert";
-$icat['2']	= "Unbekannt";
-$icat['10']	= "Generell Infrastruktur";
+$icat['1']	= "Neu";
+$icat['2']	= "Andere";
+$icat['3']	= "Unbekannt";
+$icat['10']	= "---Infrastruktur---";
 $icat['11']	= "Stromausfall";
 $icat['12']	= "Bauarbeiten";
 $icat['13']	= "Naturgewalt";
-$icat['20']	= "GenerellHardware";
+$icat['20']	= "---Equipment---";
 $icat['21']	= "Netzteil";
 $icat['22']	= "Chassis";
 $icat['23']	= "Modul";
-$icat['30']	= "Generell Menschen";
+$icat['24']	= "Software";
+$icat['25']	= "Traffic";
+$icat['30']	= "---Menschen---";
 $icat['31']	= "Wartung";
 $icat['32']	= "Konfiguration";
 $icat['33']	= "Kunde";

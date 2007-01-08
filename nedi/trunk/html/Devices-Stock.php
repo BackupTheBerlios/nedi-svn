@@ -59,7 +59,7 @@ if( isset($_GET['add']) or isset($_GET['del']) ){
 <th><img src=img/32/form.png><br>Quantity</th>
 
 <?
-$query	= GenQuery('stock','c','type');
+$query	= GenQuery('stock','g','type');
 $res	= @DbQuery($query,$link);
 if($res){
 	$row = 0;

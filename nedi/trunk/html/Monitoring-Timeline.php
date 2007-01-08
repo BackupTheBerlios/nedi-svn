@@ -82,7 +82,7 @@ while($istart < $to){
 	echo "<tr bgcolor=#$bg>\n";
 	echo "<th bgcolor=#$bi><a href=Monitoring-Messages.php?ina=time&opa=%3E=&sta=$fs&cop=AND&inb=time&opb=%3C&stb=$fe>".date("j.M G:i",$istart)."</a></th><td>\n";
 	if($det){
-		$query	= GenQuery('messages','c','level','','',array('time','time'),array('>=','<'),array($istart,$iend),array('AND'));
+		$query	= GenQuery('messages','g','level','','',array('time','time'),array('>=','<'),array($istart,$iend),array('AND'));
 		$res	= @DbQuery($query,$link);
 		if($res){
 			$nmsg = 0;

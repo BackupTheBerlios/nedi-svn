@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+#!/usr/bin/perl
 #============================================================================
 # Program: moni.pl
 # Programmer: Remo Rickli
@@ -189,7 +190,7 @@ while(1) {
 				if( ! &db::Insert('messages','level,time,source,info',"\"$lvl\",\"$now\",\"$d\",\"$downmsg (no answer for $misc::thres times) \"") ){
 					die "DB error messages!\n";
 				}
-				if( ! &db::Insert('incidents','level,device,deps,firstseen,lastseen,who,time,category,comment',"\"$lvl\",\"$d\",\"$depcount{$d}\",\"$now\",\"0\",\"\",\"0\",\"\",\"\"") ){
+				if( ! &db::Insert('incidents','level,device,deps,firstseen,lastseen,who,time,category,comment',"\"$lvl\",\"$d\",\"$depcount{$d}\",\"$now\",\"0\",\"\",\"0\",\"1\",\"\"") ){
 					die "DB error incidents!\n";
 				}
 				if( $mon{$d}{ss}){&mon::SendSMS("$now: $d is down!")}

@@ -245,7 +245,7 @@ if ( in_array("mss",$rep) ){
 </tr>
 <?
 	$rord = ($ord)? " desc" : "";
-	$query	= GenQuery('messages','c','source,level',"source$rord");
+	$query	= GenQuery('messages','g','source,level',"source$rord");
 	$res	= @DbQuery($query,$link);
 	if($res){
 		while( ($s = @DbFetchRow($res)) ){

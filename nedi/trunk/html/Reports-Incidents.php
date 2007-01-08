@@ -171,7 +171,7 @@ if ( in_array("agt",$rep) ){
 ?>
 <h3>Agents</h3><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th><img src=img/32/umgr.png><br>Name</th>
+<th><img src=img/32/smil.png><br>Name</th>
 <th width=50%><img src=img/32/bomb.png><br>Acknowledged Incidents</th>
 <th><img src=img/32/clock.png><br>Average Response Time</th>
 </tr>

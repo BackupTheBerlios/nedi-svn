@@ -645,7 +645,9 @@ sub IfAddresses {
 
 	my $notice	= 0;
 	my $nia		= 0;
-	my $iptyp	= 0;
+	
+	my $newip	= "";
+	my $ippri	= 5;
 
 	my $iaixO	= "1.3.6.1.2.1.4.20.1.2";
 	my $ianmO	= "1.3.6.1.2.1.4.20.1.3";
@@ -681,19 +683,24 @@ sub IfAddresses {
 		print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
 		if(!$main::opt{I} and $iaddr !~ /^127.0.0|^0/){					
 			if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
-				$iptyp = 1;
-				$main::dev{$dv}{ip} = $iaddr;
-			}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $iptyp != 1){		# 2nd priority, use virtual IF
-				$iptyp = 2;
-				$main::dev{$dv}{ip} = $iaddr;
-			}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $iptyp < 3){	# 3rd  priority, use ethernet IF
-				$iptyp = 3;
-				$main::dev{$dv}{ip} = $iaddr;
+				$ippri = 1;
+				$newip = $iaddr;
+			}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri != 1){		# 2nd priority, use virtual IF
+				$ippri = 2;
+				$newip = $iaddr;
+			}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 3){	# 3rd  priority, use ethernet IF (precedence of existing IP)
+				if($iaddr eq $main::dev{$dv}{ip}){
+					$ippri = 3;
+				}else{
+					$ippri = 4;
+				}
+				$newip = $iaddr;
 			}
 		}
 		$nia++;
 	}
-	print "\n New IP:$main::dev{$dv}{ip} (Priority $iptyp)" if ($main::opt{v} and $iptyp);
+	$main::dev{$dv}{ip} = $newip;
+	print "\n New Management IP:$main::dev{$dv}{ip} (Priority $ippri)" if ($main::opt{v} and $ippri);
 	print " p$nia" if !$main::opt{v};
 	return $notice;
 }

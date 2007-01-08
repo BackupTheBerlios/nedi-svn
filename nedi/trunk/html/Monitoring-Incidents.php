@@ -27,7 +27,7 @@ $dli = isset($_GET['dli']) ? $_GET['dli'] : "";
 $uca = isset($_GET['uca']) ? $_GET['uca'] : "";
 $ucm = isset($_GET['ucm']) ? $_GET['ucm'] : "";
 $cmt = isset($_GET['cmt']) ? $_GET['cmt'] : "";
-$cat = isset($_GET['cat']) ? $_GET['cat'] : "";
+$cat = isset($_GET['cat']) ? $_GET['cat'] : 0;
 $lim = isset($_GET['lim']) ? $_GET['lim'] : 10;
 $off = isset($_GET['off']) ? $_GET['off'] : 0;
 
@@ -48,11 +48,11 @@ if($dli){
 }elseif($uca){
 	$query	= GenQuery('incidents','u','id',$uca,'',array('who','time','category'),'',array($_GET['who'],$_GET['tme'],$cat) );
 	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3> Incident $uca $upokmsg</h3>";}
+	$cat = 0;
 }elseif($ucm){
 	$query	= GenQuery('incidents','u','id',$ucm,'',array('who','comment'),'',array($_GET['who'],$cmt) );
 	if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3> Incident $ucm $upokmsg</h3>";}
 }
-
 ?>
 <h1>Monitoring Incidents</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
@@ -61,20 +61,21 @@ if($dli){
 <img src=img/32/bomb.png border=0 title="Acknowledge and classify incidents">
 </a></th>
 <th>
-Filter <select size=1 name="cat">
+Category Filter <select size=1 name="cat">
+<option value="">-
 <?
 foreach (array_keys($icat) as $ic){
 	echo "<option value=\"$ic\" ";
 	if($ic == $cat){echo "selected";}
-	echo ">$icat[$ic]\n";
+	echo ">$icat[$ic] ($ic)\n";
 }
 ?>
-</SELECT>
+</select>
 </th>
 <th>Limit
-<SELECT size=1 name="lim">
+<select size=1 name="lim">
 <? selectbox("limit",$lim);?>
-</SELECT>
+</select>
 </th>
 <th width=80><input type="submit" name="sho" value="Show">
 <p>

@@ -40,15 +40,13 @@ function DbAffectedRows($l){
 function DbError($l){
         return @mysql_error($l);
 }
-function DbFields($table,$link,$config){
-        return @mysql_list_fields($config[sql_database],$table);
-}
 
 //===============================================================================
 // New approach for queries:
 //
 // $tab	= table to apply query to
-// $do 	= action: 's'= select (is default), 'i'=insert (using $in for columns and $st for values), 'c'=count ( $col is counted/grouped), 'u'=update (using $in,$st to set and $col,$ord to match), 'd'=delete
+// $do 	's'= select (is default), 'i'=insert (using $in for columns and $st for values), 't'=show tables, 'c'=show columns,
+//	'g'=group ( $col is counted/grouped), 'u'=update (using $in,$st to set and $col,$ord to match), 'd'=delete
 // $col	= column(s) to display (* is default), or to group by
 // $ord	= order by (where ifname takes into account the device column and an if like 0/4)
 // $lim	= limiting results
@@ -75,6 +73,8 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 		}
 	}elseif( 't' == $do ){
 		return "SHOW TABLES";
+	}elseif( 'c' == $do ){
+		return "SHOW COLUMNS FROM $tab";
 	}else{
 		$l = ($lim) ? "LIMIT $lim" : "";
 		if('ifname' == $ord){
@@ -120,7 +120,7 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 		}
 		if('d' == $do){
 			return "DELETE FROM $tab $w $l";
-		}elseif('c' == $do){
+		}elseif('g' == $do){
 			return "SELECT $col,count(*) FROM  $tab $w GROUP BY $col $o $l";
 		}else{
 			return "SELECT $col FROM $tab $w $o $l";

@@ -42,7 +42,7 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 
 <!-- Begin of the HTML part -->
 
-<h1>Data Export</h1>
+<h1>Export</h1>
 
 <form method="get" name="export" action="<?=$_SERVER['PHP_SELF']?>">
 
@@ -291,6 +291,8 @@ echo "<h2>NeDi Database Layout</h2>\n";
 			$row++;
 			echo "<tr bgcolor=#$bg><th bgcolor=#$bi align=left>$c[0]</th><td>$c[1]</td><td>$c[2]</td><td>$c[3]</td></tr>\n";
 		}
+		$nres = DbQuery(GenQuery($tab[0], "s"), $dblink);
+		echo "<tr bgcolor=#$bg2><th colspan=4>".DbNumRows($nres)." Records</th></tr>";
 		echo "</table></td>";
 		$col++;
 	}

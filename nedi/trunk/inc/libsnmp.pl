@@ -631,7 +631,7 @@ sub Interfaces {
 }
 
 #===================================================================
-# Get IP address tables and tries to find best mgmt IP (based on code of Duane Walker)
+# Get IP address tables and tries to find best mgmt IP (based on idea from Duane Walker)
 #===================================================================
 
 sub IfAddresses {
@@ -681,7 +681,7 @@ sub IfAddresses {
 		$main::net{$dv}{$iaddr}{ifn} = $main::int{$dv}{$aifx{$k}}{ina};
 		$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
 		print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
-		if(!$main::opt{I} and $iaddr !~ /^127.0.0|^0/){					
+		if($iaddr !~ /^127.0.0|^0/){					
 			if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
 				$ippri = 1;
 				$newip = $iaddr;
@@ -699,8 +699,8 @@ sub IfAddresses {
 		}
 		$nia++;
 	}
-	$main::dev{$dv}{ip} = $newip;
-	print "\n New Management IP:$main::dev{$dv}{ip} (Priority $ippri)" if ($main::opt{v} and $ippri);
+	if ($ippri < 5 and !$main::opt{I}){$main::dev{$dv}{ip} = $newip}
+	print "\n Management IP:$main::dev{$dv}{ip} (Priority $ippri)" if $main::opt{v};
 	print " p$nia" if !$main::opt{v};
 	return $notice;
 }

@@ -10,6 +10,7 @@
 # 14/04/05	initial version.
 # 1/03/06		offline functions, traffic graphs
 # 16/03/06	new SQL query support
+# 09/01/07	Minor improvements.
 */
 
 $bg1	= "99BBEE";
@@ -368,7 +369,7 @@ if($rrdstep and $shg){
 <?
 }
 ?>
-<th valign=bottom><img src=img/netg.png title="DB value"><br>IP Address</th>
+<th valign=bottom><img src=img/netg.png title="DB value"><br>Address</th>
 <?
 	if($uptime){
 		foreach (snmprealwalk("$ip","$comm",".1.3.6.1.2.1.2.2.1.8") as $ix => $val){
@@ -418,7 +419,7 @@ if($rrdstep and $shg){
 		list($ifimg,$iftit)	= Iftype($ift[$i]);
 
 		echo "<tr bgcolor=#$bg>";
-		echo "<th bgcolor=#$rs$gs$bg3><img src=img/$ifimg title=\"$i - $iftit ($ifm[$i])\" vspace=8></th>\n";
+		echo "<th bgcolor=#$rs$gs$bg3><img src=img/$ifimg title=\"$i - $iftit\" vspace=8></th>\n";
 		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui>$in</td>\n";
 		echo "<td align=center>$ifv[$i]</td><td>$ifi[$i]</td>\n";
 		echo "<td align=right>$ifs[$i]</td><td align=center>$ifd[$i]</td>\n";
@@ -445,6 +446,7 @@ if($rrdstep and $shg){
 			echo "<td bgcolor=#$boe$bg3$bg3 align=right>".$ote[$i]."</td>\n";
 		}
 		echo "<td>";
+		if($ifm[$i]){echo "<a href=Nodes-Status.php?mac=$ifm[$i]>$ifm[$i]</a><br>";}
 		foreach ($net[$in] as $ip => $dmsk){
 			list($pfix,$msk,$bmsk)	= Masker($dmsk);
 			echo long2ip($ip)."/$pfix ";

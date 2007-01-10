@@ -69,6 +69,7 @@ $res	= @DbQuery($query,$link);
 		$tnod   = 0;
 		$lip    = 0;
 		$nswift = 0;
+		$nodns  = 0;
 		$nodif	= array();
 		$nonf	= array();
 		$nodip['0'] = 0;

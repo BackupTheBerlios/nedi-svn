@@ -35,15 +35,15 @@
 use strict;
 use Getopt::Std;
  
-use vars qw($p $nediconf $cdp $lldp $oui);
+use vars qw($p $now $nediconf $cdp $lldp $oui);
 use vars qw(%nod %dev %int %mod %link %vlan %opt %net %usr); 
 
-getopts('AbcdDiIlLnost:u:vw:y',\%opt) or &Help();
+getopts('AbcdDiIlLnNost:u:vw:y',\%opt) or &Help();
 #if (! keys %opt ){&Help()}
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;
-$misc::now = time;
+$now = time;
 require "$p/inc/libmisc.pl";											# Use the miscellaneous nedi library
 &misc::ReadConf();
 require "$p/inc/libsnmp.pl";											# Use the SNMP function library
@@ -63,18 +63,16 @@ select(STDOUT); $| = 1;
 # This is the debug mode, using previousely saved vars instead of discovering...
 # -------------------------------------------------------------------
 if ($opt{D}){
-#	&cli::go();
-#	die;
-	#&misc::ReadOUIs();
-	#&db::ReadDev();
-#	&misc::RetrVar();
+	&misc::ReadOUIs();
+	&db::ReadDev();
+	&misc::RetrVar();
 # Functions to be debugged go here
 	#&db::UnStock();
 #	&db::WriteDev();
 #	&db::WriteVlan();
 #	&db::WriteInt();
 #	&db::WriteNet();
-#	&misc::Links();
+	&misc::Link();
 #	&db::WriteLink();
 
 #	&db::ReadNod();
@@ -103,29 +101,35 @@ if ($opt{w}) {
 	if ( $opt{c} or $opt{l} ) {												# Use seed(s) for CDP or LLDP discovery.
 		if($opt{c}){$cdp = 1}
 		if($opt{l}){$lldp = 1}
-		print "Dynamic discovery with $nseed seed(s) on ". localtime($misc::now)."\n";
+		print "Dynamic discovery with $nseed seed(s) on ". localtime($now)."\n";
 		print "===============================================================================\n";
 		print "Device				Status				     Todo/Done\n";
 		print "-------------------------------------------------------------------------------\n";
 		while ($#misc::todo ne "-1"){
+			my $start = time;
 			my $cdpid = shift(@misc::todo);
 			my $name = &misc::Discover($cdpid);
 			push (@misc::donenam, $name) if ($name);
 			push (@misc::donecdp,$cdpid);
 			push (@misc::doneip,$misc::doip{$cdpid});
+			my $dur = time - $start."sec ";
+			print $dur if $main::opt{d};
 			printf ("%4d/%d \n",scalar(@misc::todo),scalar(@misc::donenam) );
 		}
 	}else{
-		print "Static discovery with $nseed devices on ". localtime($misc::now)."\n";
+		print "Static discovery with $nseed devices on ". localtime($now)."\n";
 		print "===============================================================================\n";
 		print "Device				Status				     Todo/Done\n";
 		print "-------------------------------------------------------------------------------\n";
 		while ($#misc::todo ne "-1"){
+			my $start = time;
 			my $ip = shift(@misc::todo);
 			my $name = &misc::Discover($ip);
 			push (@misc::donenam,$name) if ($name);
 			push (@misc::doneoth,$name) if ($name);
 			push (@misc::doneip,$ip) if ($name);
+			my $dur = time - $start."sec ";
+			print $dur if $main::opt{d};
 			printf ("%4d/%d\n",scalar(@misc::todo),scalar(@misc::donenam) );
 		}
 	}
@@ -136,12 +140,15 @@ if ($opt{w}) {
 		if($noudo){
 			print "-  OUI Discovery with $noudo canditates - - - - - - - - - - - - - - - - - - - -\n";
 			while ($#misc::oudo ne "-1"){
+				my $start = time;
 				my $mac = shift(@misc::oudo);
 				my $name = &misc::Discover($mac);
 				push (@misc::donemac,$mac);
 				push (@misc::donenam,$name) if ($name);
 				push (@misc::doneoth,$name) if ($name);
 				push (@misc::doneip,$misc::doip{$mac}) if ($name);
+				my $dur = time - $start."sec ";
+				print $dur if $main::opt{d};
 				printf ("%4d/%d\n",scalar(@misc::oudo),scalar(@misc::donenam) );
 			}
 		}
@@ -149,7 +156,7 @@ if ($opt{w}) {
 	print "-------------------------------------------------------------------------------\n";
 	if (scalar @misc::donenam){
 		&misc::StorVar() if ($opt{d});
-		&misc::Links();
+		&misc::Link();
 	
 		print &db::ReadNod();
 		&misc::BuildNod();
@@ -205,6 +212,7 @@ sub Help {
 	print "-A 	append to networks, links, vlans, interfaces and modules tables.\n";
 	print "-I 	don't try to find best suited IP addresses for devices.\n";
 	print "-L 	don't touch links, so you can maintain them manually.\n";
+	print "-N 	don't exclude devices from nodes.\n";
 	print "Other Options -------------------------------------------------------------\n";
 	print "-i	initialize database and start all over\n";
 	print "-w<path>	add Kismet csv files in path to WLAN database.\n";
@@ -236,5 +244,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 9.Jan 2007\n";
+	die "NeDi 1.0.w 10.Jan 2007\n";
 }

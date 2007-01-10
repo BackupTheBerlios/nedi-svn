@@ -9,6 +9,7 @@
 # 14/04/05	initial version.
 #  9/05/05	improved probing & cosmetic changes.
 # 17/03/06	new SQL query support
+# 09/01/07	Minor improvements.
 */
 
 $bg1	= "BBDDCC";
@@ -109,7 +110,7 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 </td></tr>
 <tr><th bgcolor=#<?=$bg1?>>MAC Address</th>	<td bgcolor=#<?=$bgb?>><?=$n[2]?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>NIC Vendor</th>	<td bgcolor=#<?=$bgb?>><?=$n[3]?></td></tr>
-<tr><th bgcolor=#<?=$bg1?>>IP Address</th>	<td bgcolor=#<?=$bga?>><?=$ip?> (<?=gethostbyaddr($ip);?>)</td></tr>
+<tr><th bgcolor=#<?=$bg1?>>IP Address</th>	<td bgcolor=#<?=$bga?>><?=$ip?> (<?=($n[1])?gethostbyaddr($ip):"";?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IP Update</th>	<td bgcolor=#<?=$a1c?>><?=$au?> (<?=$n[13]?> Changes / <?=$n[14]?> Lost)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Device</th>		<td bgcolor=#<?=$bga?>><?=$n[6]?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Interface</th>	<td bgcolor=#<?=$bgb?>><?=$ifimg?> <?=$n[7]?> (<?=ZFix($if[9])?>-<?=$if[10]?>) <i><?=$if[7]?> <?=$if[16]?></i></td></tr>

@@ -327,13 +327,14 @@ if ( in_array("lmi",$rep) ){
 <th><img src=img/32/dev.png><br>Device</th>
 <th colspan=2><img src=img/32/dumy.png title="...IF related value in () just for reference"><br>Interface</th>
 <?
+	$libw	= array();
 	$query	= GenQuery('links');
 	$res	= @DbQuery($query,$link);
 	$nli    = @DbNumRows($res);
 	if($res){
 		$row = 0;
 		while( ($l = @DbFetchRow($res)) ){
-			$libw[$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
+			$libw[$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];		# BW is the only value, which is constructed from local IF in SNMP::CDP/LLDP
 			$lity[$l[3]][$l[4]][$l[1]][$l[2]] = $l[6];
 			$lidu[$l[3]][$l[4]][$l[1]][$l[2]] = $l[8];
 			$livl[$l[3]][$l[4]][$l[1]][$l[2]] = $l[9];
@@ -344,7 +345,6 @@ if ( in_array("lmi",$rep) ){
 		die;
 	}
 	$row = 0;
-	$libw	= array();
 	foreach(array_keys($libw) as $dv){
 		foreach(array_keys($libw[$dv]) as $if){
 			foreach(array_keys($libw[$dv][$if]) as $nb){

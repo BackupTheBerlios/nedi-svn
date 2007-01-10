@@ -8,16 +8,16 @@
 #============================================================================
 package misc;
 
-my $rrdpath	= "$main::p/rrd";
-my $rrdcmd	= "rrdtool";
-
-use vars qw($now $seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
+use vars qw($seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
 use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath);
 use vars qw($arpwatch $ignoredvlans $retire $timeout $rrdstep $redbuild);
 use vars qw($notify $thres $pause $smtpserver $mailfrom);
 use vars qw(%login %map %doip %dcomm %ouineb %cdplink %sysobj %ifmac); 
 use vars qw(%oui %arp %rarp %arpn %portprop %portnew);
 use vars qw(@todo @oudo @doneoth @donecdp @donenam @donemac @doneip @comms @seeds @users @devdel); 
+
+$rrdpath	= "$main::p/rrd";
+$rrdcmd		= "rrdtool";
 
 #===================================================================
 # Read and parse Configuration file.
@@ -62,7 +62,7 @@ sub ReadConf {
 			elsif ($v[0] eq "dbhost"){$dbhost = $v[1]}
 
 			elsif ($v[0] eq "ignoredvlans"){$ignoredvlans = $v[1]}
-			elsif ($v[0] eq "retire"){$retire = $misc::now - $v[1] * 86400;}
+			elsif ($v[0] eq "retire"){$retire = $main::now - $v[1] * 86400;}
 			elsif ($v[0] eq "timeout"){$timeout = $v[1]}
 			elsif ($v[0] eq "arpwatch"){$arpwatch = $v[1]}
 			elsif ($v[0] eq "rrdstep"){$rrdstep = $v[1]}
@@ -223,7 +223,7 @@ sub GetAp {
 	foreach my $l (@aps){
 			my @f = split(/;/,$l);
 			$f[3] =~ s/^(..):(..):(..):(..):(..):(..)/\L$1$2$3$4\E/;
-			$db::ap{lc($f[3])} = $now;
+			$db::ap{lc($f[3])} = $main::now;
    	}
 }
 
@@ -324,7 +324,7 @@ sub Discover {
 		$name  = &snmp::Identify($peer);
 	}else{
 		if($misc::notify =~ /d/){
-			if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$misc::now\",\"$peer\",\"netfilter $netfilter prevents discovery.\"") ){
+			if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$peer\",\"netfilter $netfilter prevents discovery.\"") ){
 				die "DB error messages!\n";
 			}
 		}
@@ -359,7 +359,7 @@ sub Discover {
 			}elsif(defined $main::dev{$name}{cp}){							# No port no name no service
 				$cnok = 2;
 			}
-			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  specified in .def
+			if($misc::sysobj{$main::dev{$name}{so}}{bf} ne "none"){					# Get mac address tables, if  specified in .def
 				if(defined $main::opt{s}){							# Force SNMP if opt_s or specified in .def
 					&snmp::MacTable($name);
 				}else{
@@ -393,14 +393,14 @@ sub Discover {
 					&db::BackupCfg( $name, &cli::GetProCfg($name) );
 				}
 			}
-			if (!exists $main::dev{$name}{fs}){$main::dev{$name}{fs} = $now}
-			$main::dev{$name}{ls} = $now;
+			if (!exists $main::dev{$name}{fs}){$main::dev{$name}{fs} = $main::now}
+			$main::dev{$name}{ls} = $main::now;
 			print "\t";
 			return $name;
 		}
 	}else{
 		if($misc::notify =~ /d/){
-			if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$misc::now\",\"$peer\",\"$_[0] is not discoverable!\"") ){
+			if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$peer\",\"$_[0] is not discoverable!\"") ){
 				die "DB error messages!\n";
 			}
 		}
@@ -450,7 +450,7 @@ sub LinkIf {
 # Figure out all possible uplinks and then connections.
 # Still rather experimental...next thing to be cleaned up in 2006!
 #===================================================================
-sub Links {
+sub Link {
 
 	my %devmac = ();
 	foreach my $dv (@donenam){										# Build array with device MACs
@@ -619,7 +619,7 @@ sub UpIpNod {
 	
 	$main::nod{$mc}{ip} = $arp{$mc};
 	$main::nod{$mc}{na} = gethostbyaddr(inet_aton($arp{$mc}), AF_INET) or $main::nod{$mc}{na} = "";
-	$main::nod{$mc}{au} = $now;
+	$main::nod{$mc}{au} = $main::now;
 	
 	print "IP:$arp{$mc} $main::nod{$mc}{na} "  if $main::opt{v};
 }
@@ -653,7 +653,7 @@ sub BuildNod {
 	print "Building Nodes (i:IP n:non-IP x:ignored p:no port):\n"  if $main::opt{d};
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
 	foreach my $mc (keys(%arp)){
-		if (!grep /^$arp{$mc}$/,@doneip){								# Don't use devices as nodes.
+		if (!grep /^$arp{$mc}$/,@doneip or $main::opt{N}){						# Don't use devices as nodes.
 			print "NOD:$mc [" if $main::opt{v};
 			if ( exists $portnew{$mc} ){
 				my $nodex = 0;
@@ -662,7 +662,7 @@ sub BuildNod {
 					if(exists $arpn{$mc}){							# Simple update, if ARPwatch got a name, ...
 						$main::nod{$mc}{ip} = $arp{$mc};
 						$main::nod{$mc}{na} = $arpn{$mc};
-						$main::nod{$mc}{au} = $now;
+						$main::nod{$mc}{au} = $main::now;
 					}elsif($main::nod{$mc}{ip} ne $arp{$mc}){				# ...IP changed...
 						&UpIpNod($mc);
 						$main::nod{$mc}{ac}++;
@@ -671,13 +671,13 @@ sub BuildNod {
 					}
 				}else{
 					&UpIpNod($mc);
-					$main::nod{$mc}{fs} = $now;
+					$main::nod{$mc}{fs} = $main::now;
 					$main::nod{$mc}{ic} = 0;
 					$main::nod{$mc}{ac} = 0;
 					$main::nod{$mc}{al} = 0;
 				}
 				$main::nod{$mc}{nv} = &GetOui($mc);
-				$main::nod{$mc}{ls} = $now;
+				$main::nod{$mc}{ls} = $main::now;
 				(my $dv, my $if, my $imet, my $vl) = &NodeIf($mc,$nodex);
 				if($dv){
 					$main::nod{$mc}{ic}++ if ($main::nod{$mc}{dv} and ($main::nod{$mc}{dv} ne $dv or $main::nod{$mc}{if} ne $if) );
@@ -685,7 +685,7 @@ sub BuildNod {
 					$main::nod{$mc}{dv} = $dv;
 					$main::nod{$mc}{if} = $if;
 					$main::nod{$mc}{vl} = $vl;
-					$main::nod{$mc}{iu} = $now;
+					$main::nod{$mc}{iu} = $main::now;
 					print "] $dv-$if\n" if $main::opt{v};
 				}else{
 					print "old IF kept $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
@@ -704,7 +704,7 @@ sub BuildNod {
 	print "Building non IP nodes from MAC tables:\n"  if $main::opt{v};
 
 	foreach my $mc (keys(%portnew)){
-		if (!(grep /^$mc$/,@donemac or exists $arp{$mc})){
+		if (!exists $arp{$mc}){
 			print "NOD:$mc " if $main::opt{v};
 			if(exists $ifmac{$mc}){
 				print "x"  if $main::opt{d};
@@ -714,19 +714,19 @@ sub BuildNod {
 				if(exists $main::nod{$mc}){
 					$nodex = 1;
 					if($main::nod{$mc}{ip} eq '0.0.0.0'){
-						$main::nod{$mc}{au} = $now;
+						$main::nod{$mc}{au} = $main::now;
 					}else{
 						$main::nod{$mc}{al}++;
 					}
 				}else{
-					$main::nod{$mc}{fs} = $now;
-					$main::nod{$mc}{au} = $now;
+					$main::nod{$mc}{fs} = $main::now;
+					$main::nod{$mc}{au} = $main::now;
 					$main::nod{$mc}{ic} = 0;
 					$main::nod{$mc}{ac} = 0;
 					$main::nod{$mc}{al} = 0;
 				}
 				$main::nod{$mc}{nv} = &GetOui($mc);
-				$main::nod{$mc}{ls} = $now;
+				$main::nod{$mc}{ls} = $main::now;
 				(my $dv, my $if, my $imet, my $vl) = &NodeIf($mc,$nodex);
 				if($dv){									# was a (better) IF found?
 					$main::nod{$mc}{nv} = &GetOui($mc);
@@ -735,7 +735,7 @@ sub BuildNod {
 					$main::nod{$mc}{dv} = $dv;
 					$main::nod{$mc}{if} = $if;
 					$main::nod{$mc}{vl} = $vl;
-					$main::nod{$mc}{iu} = $now;
+					$main::nod{$mc}{iu} = $main::now;
 					print "] $dv-$if\n" if $main::opt{v};
 				}else{
 					print "old IF kept $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};

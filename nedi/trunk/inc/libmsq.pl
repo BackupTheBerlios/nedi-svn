@@ -136,7 +136,7 @@ sub InitDB{
 						time INT unsigned,lastseen INT unsigned,
 						comment varchar(128) default NULL, language VARCHAR(8), PRIMARY KEY  (name) )");
 	$sth = $dbh->prepare("INSERT INTO user (name,password,adm,net,dsk,mon,mgr,oth,time,comment,language) VALUES ( ?,?,?,?,?,?,?,?,?,?,? )");
-	$sth->execute ( 'admin','21232f297a57a5a743894a0e4a801fc3','1','1','1','1','1','1',$misc::now,'default admin','eng' );
+	$sth->execute ( 'admin','21232f297a57a5a743894a0e4a801fc3','1','1','1','1','1','1',$main::now,'default admin','eng' );
  	$dbh->commit;
 
 	print "monitoring, ";
@@ -166,7 +166,7 @@ sub InitDB{
 		chomp(@wlan);
 	}
 	$sth = $dbh->prepare("INSERT INTO wlan (mac,time) VALUES ( ?,? )");
-	for my $mc (sort @wlan ){ $sth->execute ( $mc,$misc::now ) }
+	for my $mc (sort @wlan ){ $sth->execute ( $mc,$main::now ) }
  	$dbh->commit;
 
 	print "...done.\n";
@@ -266,7 +266,7 @@ sub BackupCfg {
 
 	if($sth->rows == 0 and !$main::opt{t}){										# no previous config found, therefore write new.
 		$sth = $dbh->prepare("INSERT INTO configs(device,config,changes,time) VALUES ( ?,?,?,? )");
-		$sth->execute ($na,$ncfg,$chg,$misc::now);
+		$sth->execute ($na,$ncfg,$chg,$main::now);
 		print "Bn";
 	}else{
 		while( my @crow = $sth->fetchrow_array ){								# should only yield 1 entry!
@@ -276,15 +276,15 @@ sub BackupCfg {
 		my @pcfg = split(/\n/,$pcfg);
 		my $achg = &misc::GetChanges(\@pcfg, \@_);
 		if($achg and !$main::opt{t}){										# Only write new, if changed
-			$chg  = $pchg . "#--- " . localtime($misc::now) ." ---#\n". $achg;
+			$chg  = $pchg . "#--- " . localtime($main::now) ." ---#\n". $achg;
 			$dbh->do("DELETE FROM configs where device = \"$na\"");
 			$sth = $dbh->prepare("INSERT INTO configs(device,config,changes,time) VALUES ( ?,?,?,? )");
-			$sth->execute ($na,$ncfg,$chg,$misc::now);
+			$sth->execute ($na,$ncfg,$chg,$main::now);
 			print "Bu";
 			if($misc::notify =~ /c/){
 				my $len = length($achg);
 				$sth = $dbh->prepare("INSERT INTO messages(level,time,source,info) VALUES ( ?,?,?,? )");
-				$sth->execute ('50',$misc::now,$na,"Config changed ($len chars)");
+				$sth->execute ('50',$main::now,$na,"Config changed ($len chars)");
 			}
 		}
 	}
@@ -326,7 +326,7 @@ sub WriteDev {
 				print "RRDs and dir $misc::rrdpath/$na deleted!\n"  if $main::opt{d};
 			}
 			if($misc::notify =~ /d/){
-				if( ! &Insert('messages','level,time,source,info',"\"100\",\"$misc::now\",\"$na\",\"Device deleted by $devdel{$na}\"") ){
+				if( ! &Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$na\",\"Device deleted by $devdel{$na}\"") ){
 					die "DB error messages!\n";
 				}
 			}
@@ -557,7 +557,7 @@ sub UnStock {
 			$dbh->do("DELETE FROM stock where serial = \"$main::dev{$na}{sn}\"");
 			$nrm++;
 			if($misc::notify =~ /d/){
-				if( ! &Insert('messages','level,time,source,info',"\"50\",\"$misc::now\",\"$na\",\"Discovered device $main::dev{$na}{sn} removed from stock.\"") ){
+				if( ! &Insert('messages','level,time,source,info',"\"50\",\"$main::now\",\"$na\",\"Discovered device $main::dev{$na}{sn} removed from stock.\"") ){
 					die "DB error messages!\n";
 				}
 			}
@@ -594,7 +594,7 @@ sub WriteNod {
 
 	foreach my $mc ( sort keys(%main::nod) ){
 		if (exists $stomac{$mc} and $misc::notify =~ /n/){
-			if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$misc::now\",\"$mc\",\"Node has reappeared!\"") ){
+			if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$main::now\",\"$mc\",\"Node has reappeared!\"") ){
 				die "DB error messages!\n";
 			}
 			&mon::SendMail("Stolen Node Alert!","Node $mc has reappeared with $main::nod{$mc}{ip} on $main::nod{$mc}{dv} $main::nod{$mc}{if}!");
@@ -641,7 +641,7 @@ sub WlanUp {
 
 	while ((my @wrow) = $sth->fetchrow_array) {
 			my $mc = $wrow[0];
-			$ap{$mc} = $misc::now;
+			$ap{$mc} = $main::now;
 	}
 	my $wprev = keys %ap;
 	print "$wprev	old Wlan entries read.\n";

@@ -7,6 +7,7 @@
 # DATE		COMMENT
 # -----------------------------------------------------------
 # 02/11/06	initial version.
+# 09/01/07	Minor improvements.
 */
 
 $bg1	= "aa8866";
@@ -174,9 +175,8 @@ Duplex  Vlan<br>
 }
 ?>
 <th width=80>
-Show<br>
 <select size=1 name="typ" onchange="this.form.submit();">
-<option value="">Type
+<option value="">Show
 <option value="S">Static
 <option value="C">CDP
 <option value="L">LLDP
@@ -190,7 +190,7 @@ Show<br>
 <?
 if ($dv or $typ){
 ?>
-<h2><?=$dv?> - Links</h2>
+<h2><?=($typ)?$typ:$dv?> - Links</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Interface</th>

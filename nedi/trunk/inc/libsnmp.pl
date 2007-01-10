@@ -699,8 +699,10 @@ sub IfAddresses {
 		}
 		$nia++;
 	}
-	if ($ippri < 5 and !$main::opt{I}){$main::dev{$dv}{ip} = $newip}
-	print "\n Management IP:$main::dev{$dv}{ip} (Priority $ippri)" if $main::opt{v};
+	if ($ippri < 5 and !$main::opt{I}){
+		$main::dev{$dv}{ip} = $newip;
+		print "\n New IP:$main::dev{$dv}{ip} (Priority $ippri)" if $main::opt{v};
+	}
 	print " p$nia" if !$main::opt{v};
 	return $notice;
 }
@@ -797,7 +799,7 @@ sub CDP {
 			if ($_[1] eq $rci){								# is it me?
 				$main::int{$_[0]}{$i}{com} .= "CDP seeing itself! ";
 				if($misc::notify =~ /d/){
-					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$misc::now\",\"$_[0]\",\"CDP seeing itself!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$main::now\",\"$_[0]\",\"CDP seeing itself!\"") ){
 						die "DB error messages!\n";
 					}
 				}
@@ -819,10 +821,10 @@ sub CDP {
 					$main::dev{$renam}{lo} = "$main::dev{$_[0]}{lo} (from $_[0])";
 					$main::dev{$renam}{co} = "$main::dev{$_[0]}{co} (from $_[0])";
 					$main::dev{$renam}{vd} = $rvtd;
-					if (!$main::dev{$renam}{fs}){$main::dev{$renam}{fs} = $misc::now}
-					$main::dev{$renam}{ls} = $misc::now;
+					if (!$main::dev{$renam}{fs}){$main::dev{$renam}{fs} = $main::now}
+					$main::dev{$renam}{ls} = $main::now;
 					if($misc::notify =~ /d/){
-						if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$misc::now\",\"$_[0]\",\"CDP device $renam with IP 0.0.0.0 on $rif!\"") ){
+						if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$_[0]\",\"CDP device $renam with IP 0.0.0.0 on $rif!\"") ){
 							die "DB error messages!\n";
 						}
 					}
@@ -852,8 +854,8 @@ sub CDP {
 					}elsif($rtyp =~ /AIR-AP/){
 						$main::dev{$renam}{ic} = "adgn";				
 					}
-					if (!$main::dev{$renam}{fs}){$main::dev{$renam}{fs} = $misc::now}
-					$main::dev{$renam}{ls} = $misc::now;
+					if (!$main::dev{$renam}{fs}){$main::dev{$renam}{fs} = $main::now}
+					$main::dev{$renam}{ls} = $main::now;
 					$misc::portprop{$_[0]}{$lif}{pho} = 1;
 					#print "Qp\t";
 				}else{									# none of the above...let's queue it!
@@ -955,7 +957,7 @@ sub ArpTable {
 					}else{
 						if ($misc::arp{$mc} eq '0.0.0.0'){			# Add to queue, if IP is set
 							if($misc::notify =~ /d/){
-								if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$misc::now\",\"$mc\",\"OUI device ($oui) with IP of 0.0.0.0!\"") ){
+								if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$mc\",\"OUI device ($oui) with IP of 0.0.0.0!\"") ){
 									die "DB error messages!\n";
 								}
 							}

@@ -246,7 +246,6 @@ sub GetChanges {
 			}
 		}
 	}
-
 	return $chg;
 }
 
@@ -287,17 +286,25 @@ sub InitSeeds {
 		foreach my $l (@list){
 			if ($l !~ /^#|^$/){
 				my @f  = split(/\s+|,|;/,$l);
-				my $ip = $f[0];
+				my $ip = "";
 				if ($f[0] !~ /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/){			# Resolve name if it's not an IP.
 					(my $a, my $b, my $c, my $d) = unpack( 'C4',gethostbyname($f[0]) );
-					$ip = join('.',$a,$b,$c,$d);
-					print "($f[0]) " if $main::opt{v};
+					if(defined $a){
+						$ip = join('.',$a,$b,$c,$d);
+						print "($f[0]) " if $main::opt{v};
+					}
+				}else{
+					$ip = $f[0];
 				}
-				if ($f[1]){$dcomm{$ip} = $f[1]}
-				push (@todo,"seed$s");
-				$doip{"seed$s"} = $ip;
-				print "$ip seed$s added\n" if $main::opt{v};
-				$s++;
+				if($ip){
+					if ($f[1]){$dcomm{$ip} = $f[1]}
+					push (@todo,"seed$s");
+					$doip{"seed$s"} = $ip;
+					print "$ip seed$s added\n" if $main::opt{v};
+					$s++;
+				}else{
+					print "Error resolving $f[0]!\n" if $main::opt{v};
+				}
 			}
 		}
 	}
@@ -356,14 +363,16 @@ sub Discover {
 			}
 			if($main::dev{$name}{us}){								# Don't prep if name exists
 				$cnok = 0;
-			}elsif(defined $main::dev{$name}{cp}){							# No port no name no service
+			}elsif(defined $main::dev{$name}{cp} and $main::dev{$name}{cp} == 0){			# No name but port is 0 means a previous run failed
 				$cnok = 2;
 			}
-			if($misc::sysobj{$main::dev{$name}{so}}{bf} ne "none"){					# Get mac address tables, if  specified in .def
+#			print "---- $cnok:$main::dev{$name}{us}:$main::dev{$name}{cp} ----";
+
+			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  specified in .def
 				if(defined $main::opt{s}){							# Force SNMP if opt_s or specified in .def
 					&snmp::MacTable($name);
 				}else{
-					if($cnok != 2){$cnok = &cli::PrepDev($name)}				# PrepDev returns 2, if failed
+					if($cnok == 1){$cnok = &cli::PrepDev($name)}				# PrepDev returns 2, if failed
 					if(!$cnok and $main::dev{$name}{os} eq "IOS"){
 						if( &cli::GetIosMacTab($name) ){				# Fall back to SNMP if telnet fails.
 							&snmp::MacTable($name);
@@ -381,16 +390,18 @@ sub Discover {
 			}
 			if($cnok != 2 and $main::opt{b}){
 				if($cnok){$cnok = &cli::PrepDev($name)}						# prep if cnok is 1
-				if(!$cnok and $main::dev{$name}{os} eq "IOS"){
-					&db::BackupCfg( $name, &cli::GetIosCfg($name) );
-				}elsif(!$cnok and $main::dev{$name}{os} eq "CatOS"){
-					&db::BackupCfg( $name, &cli::GetCatCfg($name) );
-				}elsif(!$cnok and $main::dev{$name}{os} eq "Cat1900"){
-					&db::BackupCfg( $name, &cli::GetC19Cfg($name) );
-				}elsif(!$cnok and $main::dev{$name}{os} eq "Ironware"){
-					&db::BackupCfg( $name, &cli::GetIronCfg($name) );
-				}elsif(!$cnok and $main::dev{$name}{os} eq "ProCurve"){
-					&db::BackupCfg( $name, &cli::GetProCfg($name) );
+				if(!$cnok){
+					if($main::dev{$name}{os} eq "IOS"){
+						&db::BackupCfg( $name, &cli::GetIosCfg($name) );
+					}elsif($main::dev{$name}{os} eq "CatOS"){
+						&db::BackupCfg( $name, &cli::GetCatCfg($name) );
+					}elsif($main::dev{$name}{os} eq "Cat1900"){
+						&db::BackupCfg( $name, &cli::GetC19Cfg($name) );
+					}elsif($main::dev{$name}{os} eq "Ironware"){
+						&db::BackupCfg( $name, &cli::GetIronCfg($name) );
+					}elsif($main::dev{$name}{os} eq "ProCurve"){
+						&db::BackupCfg( $name, &cli::GetProCfg($name) );
+					}
 				}
 			}
 			if (!exists $main::dev{$name}{fs}){$main::dev{$name}{fs} = $main::now}
@@ -407,6 +418,31 @@ sub Discover {
 		print " is not discoverable!\t";
 		return '';
 	}
+}
+
+#===================================================================
+# Build arp table from Arpwatch
+#===================================================================
+sub BuildArp {
+
+	my $nad = 0;
+	open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";					# read arp.dat
+	
+	my @adat = <ARPDAT>;
+	close("ARPDAT");
+	chomp @adat;
+	foreach my $l (@adat){
+		my @ad = split(/\s/,$l);
+		if($ad[2] > $retire){									# Only add current entries
+			my $m = sprintf "%02s%02s%02s%02s%02s%02s",split(/:/,$ad[0]);
+			$arp{$m}  = $ad[1];
+			$rarp{$ad[1]}  = $m;
+			print " AWA:$m $arp{$m}\n" if $main::opt{v};
+			if($ad[3]){$arpn{$m} = $ad[3]}
+			$nad++;
+		}
+	}
+	print "$nad	arpwatch entries used.\n"  if $main::opt{d};
 }
 
 #===================================================================
@@ -461,15 +497,13 @@ sub Link {
 	}
 	foreach my $dmc ( keys %devmac ){									# Use any device MACs to identify uplinks
 		if(exists $portnew{$dmc}){
-			print "Dev MAC $dmc:" if $main::opt{v};
 			foreach my $dv (keys(%{$portnew{$dmc}}) ){
 				my $if = $portnew{$dmc}{$dv}{po};
 				if(!$portprop{$dv}{$if}{upl}){
 					$portprop{$dv}{$if}{upl} = 1;
-					print " $dv-$if" if $main::opt{v};
+					print "UPL:$dv-$if (sees $dmc)\n" if $main::opt{v};
 				}
 			}
-			print "\n" if $main::opt{v};
 		}
 	}
 	foreach my $dv (@donenam){
@@ -608,6 +642,30 @@ sub NodeIf {
 	return ($newdv, $newif, $metric, $vlan);
 }
 
+#===================================================================
+# Build arp table from Arpwatch
+#===================================================================
+sub BuildArp {
+
+	my $nad = 0;
+	open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";					# read arp.dat
+	
+	my @adat = <ARPDAT>;
+	close("ARPDAT");
+	chomp @adat;
+	foreach my $l (@adat){
+		my @ad = split(/\s/,$l);
+		if($ad[2] > $retire){									# Only add current entries
+			my $m = sprintf "%02s%02s%02s%02s%02s%02s",split(/:/,$ad[0]);
+			$arp{$m}  = $ad[1];
+			$rarp{$ad[1]}  = $m;
+			print " AWA:$m $arp{$m}\n" if $main::opt{v};
+			if($ad[3]){$arpn{$m} = $ad[3]}
+			$nad++;
+		}
+	}
+	print "$nad	arpwatch entries used.\n"  if $main::opt{d};
+}
 
 #===================================================================
 # IP update of a node
@@ -632,24 +690,6 @@ sub BuildNod {
 	my $nnip = 0;
 	my $nip  = 0;
 
-	if(defined $arpwatch){
-		my $nad = 0;
-		open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";					# read arp.dat
-		
-		my @adat = <ARPDAT>;
-		close("ARPDAT");
-		chomp @adat;
-		foreach my $l (@adat){
-			my @ad = split(/\s/,$l);
-			if($ad[2] > $retire){									# Only add current entries
-				my $m = sprintf "%02s%02s%02s%02s%02s%02s",split(/:/,$ad[0]);
-				$arp{$m}  = $ad[1];
-				if($ad[3]){$arpn{$m} = $ad[3]}
-				$nad++;
-			}
-		}
-		print "$nad arpwatch entries used.\n"  if $main::opt{d};
-	}
 	print "Building Nodes (i:IP n:non-IP x:ignored p:no port):\n"  if $main::opt{d};
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
 	foreach my $mc (keys(%arp)){
@@ -692,7 +732,7 @@ sub BuildNod {
 				}
 				print "i"  if $main::opt{d};
 			}else{
-				print " no new IF??? ]\n" if $main::opt{v};
+				print " no new IF ]\n" if $main::opt{v};					# Should only happen when Arpwatch is used
 				print "p"  if $main::opt{d};
 			}
 			$nip++;

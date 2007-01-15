@@ -21,14 +21,14 @@
 package cli;
 use Net::Telnet::Cisco;
 
-use vars qw($ssh);
+use vars qw($sshnet);
 
 eval 'use Net::SSH::Perl';
 if ($@){
-	$ssh = 0;
+	$sshnet = 0;
 	print "SSH not available\n" if $main::opt{d};
 }else{
-	$ssh = 1;
+	$sshnet = 1;
 	print "Net::SSH::Perl loaded\n" if $main::opt{d};
 }
 # original my $prompt = '/(?m:^[\w.-]+\s?(?:\(config[^\)]*\))?\s?[\$#>]\s?(?:\(enable\))?\s*$)/';
@@ -91,7 +91,7 @@ sub PrepDev{
 		do {
 			$us = shift (@users);
 			print " U:$us" if $main::opt{d};
-			if($ssh){
+			if($sshnet){
 				eval {
 				my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip}, options => ["BatchMode yes", 
 												"RhostsAuthentication no",
@@ -111,7 +111,7 @@ sub PrepDev{
 			}else{
 				$@ = " Hs";
 			}
-			print $@ if $main::opt{v};
+			print $@ if $main::opt{d};
 			if ($@){		
 				my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 									Port	=> $cp,
@@ -143,7 +143,7 @@ sub PrepDev{
 		do {
 			$us = shift (@users);
 			print " U:$us" if $main::opt{d};
-			if($ssh){
+			if($sshnet){
 				eval {
 					my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip}, options => ["BatchMode yes", 
 													"RhostsAuthentication no",
@@ -163,7 +163,7 @@ sub PrepDev{
 			}else{
 				$@ = " Hs";
 			}
-			print $@ if $main::opt{v};
+			print $@ if $main::opt{d};
 			if ($@){		
 				my $session = Net::Telnet->new(	Host	=> $main::dev{$_[0]}{ip},
 								Port	=> $cp,

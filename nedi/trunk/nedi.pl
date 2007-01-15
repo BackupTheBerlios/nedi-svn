@@ -13,7 +13,7 @@
 # 30/06/06	v1.0.w system rrd, modules, monitoring, discovery		(RC2)
 # 3/11/06		v1.0.w  1st SSH implementation, link mgmt, defgen	(RC3)
 # 15/12/06	v1.0.w Cleanup and bugfixes. RRDs based on 1h interval 	(RC4-Xmas edition)
-# x/01/07		v1.0.w More cleanup. Find best IP for devices		(Relase)
+# 15/01/07	v1.0.w More cleanup, -I and -N			(Relase)
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -67,7 +67,8 @@ if ($opt{D}){
 	&db::ReadDev();
 	&misc::RetrVar();
 # Functions to be debugged go here
-	#&db::UnStock();
+#	&db::UnStock();
+	&misc::BuildArp() if(defined $misc::arpwatch);								# Needs to be built before Links!
 #	&db::WriteDev();
 #	&db::WriteVlan();
 #	&db::WriteInt();
@@ -156,6 +157,7 @@ if ($opt{w}) {
 	print "-------------------------------------------------------------------------------\n";
 	if (scalar @misc::donenam){
 		&misc::StorVar() if ($opt{d});
+		&misc::BuildArp() if(defined $misc::arpwatch);								# Needs to be built before Links!
 		&misc::Link();
 	
 		print &db::ReadNod();
@@ -244,5 +246,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 10.Jan 2007\n";
+	die "NeDi 1.0.w 15.Jan 2007\n";
 }

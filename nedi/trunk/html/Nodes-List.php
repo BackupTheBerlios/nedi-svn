@@ -126,7 +126,7 @@ if ($ina){
 	if( in_array("firstseen",$col) ){echo "<th>First seen</th>";}
 	if( in_array("lastseen",$col) ){echo "<th>Last seen</th>";}
 	if( in_array("ssh",$col) ){echo "<th>SSH server</th>";}
-	if( in_array("ssh",$col) ){echo "<th>Telnet server</th>";}
+	if( in_array("tel",$col) ){echo "<th>Telnet server</th>";}
 	if( in_array("www",$col) ){echo "<th>Web server</th>";}
 	echo "</tr>\n";
 

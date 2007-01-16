@@ -219,7 +219,7 @@ sub GetIosMacTab{
 	my $cmd = "sh mac-address-table dyn";
 
 	if($misc::sysobj{$main::dev{$_[0]}{so}}{bf} eq "CAP"){
-		$cmd = "sh bridge | exclude \*\*\*";								# Work around aged (***) forwarding entries
+		$cmd = 'sh bridge | exclude \*\*\*';								# Work around aged (***) forwarding entries
 	}
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
@@ -270,8 +270,8 @@ sub GetIosMacTab{
 			my $vl = "";
 			my @mactab = split (/\s+/,$l);
 			foreach my $col (@mactab){
-				if ($col =~ /^(Gi|Fa|Do|Po)/){
-					$po = $col;
+				if ($col =~ /^(Gi|Fa|Do|Po|Vi)/){
+					$po = &misc::Shif($col);
 					if($po =~ /\.[0-9]/){							# Does it look like a subinterface?
 						my @subpo = split(/\./,$po);
 						$vl = $subpo[1];
@@ -279,12 +279,9 @@ sub GetIosMacTab{
 					}
 				}
 				elsif ($col =~ /^[0-9|a-f]{4}\./){$mc = $col}			
-				elsif ($col =~ /^[0-9]{1,4}$/ and !$vl){$vl = $col}
+				elsif ($col =~ /^[0-9]{1,4}$/ and !$vl){$vl = $col}				# Fails if there's an age column :-(
 			}
 			$mc =~ s/\.//g;
-			$po =~ s/FastEthernet/Fa/g;
-			$po =~ s/GigabitEthernet/Gi/g;
-			$po =~ s/Dot11Radio/Do/g;
 			if ($po =~ /^.EC-|^Po[0-9]|channel/){
 				$misc::portprop{$_[0]}{$po}{chn} = 1;
 			}
@@ -292,7 +289,7 @@ sub GetIosMacTab{
 				$misc::portprop{$_[0]}{$po}{pop}++;
 				$misc::portnew{$mc}{$_[0]}{po} = $po;
 				$misc::portnew{$mc}{$_[0]}{vl} = $vl;
-				print "\n FWT:$mc on $po vl$vl" if $main::opt{v};
+				print "\n FWC:$mc on $po vl$vl" if $main::opt{v};
 				$nspo++;
 			}
 		}
@@ -372,7 +369,7 @@ sub GetCatMacTab{
 				$misc::portprop{$_[0]}{$po}{pop}++;
 				$misc::portnew{$mc}{$_[0]}{po} = $po;
 				$misc::portnew{$mc}{$_[0]}{vl} = $vl;
-				print "\n FWT:$mc on $po vl $vl" if $main::opt{v};
+				print "\n FWC:$mc on $po vl $vl" if $main::opt{v};
 				$nspo++;
 			}
 		}

@@ -182,6 +182,7 @@ Duplex  Vlan<br>
 <option value="L">LLDP
 <option value="O">OUI
 <option value="M">MAC
+<option value="P">POP
 </select>
 <p>
 <input type="submit" name="add" value="Add">

@@ -163,6 +163,7 @@ sub Shif {
 		$n =~ s/fast[\s]{0,1}ethernet/Fa/i;
 		$n =~ s/^Ethernet/Et/;
 		$n =~ s/^Serial/Se/;
+		$n =~ s/^Dot11Radio/Do/;
 		$n =~ s/^[F|G]EC-//;										# Doesn't match telnet CAM table!
 		$n =~ s/^BayStack (.*?)- //;									# Nortel specific
 		$n =~ s/(Port\d): .*/$1/g;									# Ruby specific
@@ -446,7 +447,7 @@ sub BuildArp {
 }
 
 #===================================================================
-# Find most accurate port entry for a MAC address based on statistics.
+# Find most accurate port entry for a MAC address based on metric (rtr=50,upl=30) and population
 #===================================================================
 sub LinkIf {
 	
@@ -484,7 +485,7 @@ sub LinkIf {
 
 #===================================================================
 # Figure out all possible uplinks and then connections.
-# Still rather experimental...next thing to be cleaned up in 2006!
+# Still rather experimental...next thing to be cleaned up in 2007!
 #===================================================================
 sub Link {
 
@@ -501,6 +502,7 @@ sub Link {
 				my $if = $portnew{$dmc}{$dv}{po};
 				if(!$portprop{$dv}{$if}{upl}){
 					$portprop{$dv}{$if}{upl} = 1;
+					$main::int{$dv}{$portprop{$dv}{$if}{idx}}{com} .= "I:$devmac{$dmc} ";
 					print "UPL:$dv-$if (sees $dmc)\n" if $main::opt{v};
 				}
 			}
@@ -511,6 +513,7 @@ sub Link {
 			if (!$portprop{$dv}{$if}{rtr} and $portprop{$dv}{$if}{pop} > 24){			# A switchport with more than 24 macs is an uplink, because I say so...
 				if(!$portprop{$dv}{$if}{upl}){
 					$portprop{$dv}{$if}{upl} = 1;
+					$main::int{$dv}{$portprop{$dv}{$if}{idx}}{com} .= ">P: ";
 					print "UPL:$dv-$if ($portprop{$dv}{$if}{pop} MACs)\n" if $main::opt{v};
 				}
 			}
@@ -538,8 +541,8 @@ sub Link {
 					$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "M";
 					$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
 					$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-					$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "to $ndv-$nif ";
-					$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "to $na-$upl ";
+					$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "M:$ndv-$nif ";
+					$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "M:$na-$upl ";
 					print "$na:$upl <-> $ndv:$nif\n" if $main::opt{v};
 				}else{
 					my @dif = ();
@@ -560,8 +563,8 @@ sub Link {
 								$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "O";
 								$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
 								$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-								$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "to $ndv-$nif? ";# Problem with port channels on CatOS?
-								$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "to $na-$upl? ";
+								$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "O:$ndv-$nif ";# Problem with port channels on CatOS?
+								$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "O:$na-$upl ";
 								print "$na:$upl <-> $ndv:$nif?\n" if $main::opt{v};
 							}
 						}
@@ -587,8 +590,8 @@ sub Link {
 					$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "P";
 					$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
 					$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-					$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "to $na-$upl?? ";
-					$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "to $ndv-$nif?? ";
+					$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= "P:$na-$upl ";
+					$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= "P:$ndv-$nif ";
 					print "$na:$upl <-> $ndv:$nif??\n" if $main::opt{v};
 				}
 			}else{
@@ -601,7 +604,7 @@ sub Link {
 }
 
 #===================================================================
-# Find most appropriate interface for a MAC address based on its metric.
+# Find most appropriate interface for a MAC address based on metric (rtr=30,upl=50)
 #===================================================================
 sub NodeIf {
 	

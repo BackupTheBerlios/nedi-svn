@@ -334,10 +334,10 @@ if ( in_array("lmi",$rep) ){
 	if($res){
 		$row = 0;
 		while( ($l = @DbFetchRow($res)) ){
-			$libw[$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];		# BW is the only value, which is constructed from local IF in SNMP::CDP/LLDP
-			$lity[$l[3]][$l[4]][$l[1]][$l[2]] = $l[6];
-			$lidu[$l[3]][$l[4]][$l[1]][$l[2]] = $l[8];
-			$livl[$l[3]][$l[4]][$l[1]][$l[2]] = $l[9];
+			$libw[$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];		# Bandwidth is the only value, which is constructed from local IF in SNMP::CDP/LLDP
+			$lity[$l[1]][$l[2]][$l[3]][$l[4]] = $l[6];
+			$lidu[$l[1]][$l[2]][$l[3]][$l[4]] = $l[8];		# Duplex and Vlan are read via CDP from remote side
+			$livl[$l[1]][$l[2]][$l[3]][$l[4]] = $l[9];
 		}
 		@DbFreeResult($res);
 	}else{

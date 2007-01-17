@@ -9,6 +9,7 @@
 # -----------------------------------------------------------
 # 08/03/05	initial version.
 # 10/03/06	new SQL query support
+# 17/07/07	improved announcements
 */
 
 $bg1	= "DDBB99";
@@ -115,28 +116,37 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 	}
 
 ?>
-<h2>Announcemnet</h2>
-<form method="post" action="<?=$_SERVER['PHP_SELF']?>" name="msg">
+<form method="post" action="<?=$_SERVER['PHP_SELF']?>" name="ano">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#eeee88>
-<th>
-<textarea rows="16" name="msg" cols="80">
+<th width="80">
+<input type="button" value="Bold" OnClick='document.ano.msg.value = document.ano.msg.value + "<b></b>"';>
+<p>
+<input type="button" value="Italic" OnClick='document.ano.msg.value = document.ano.msg.value + "<i></i>"';>
+<p>
+<input type="button" value="Pre" OnClick='document.ano.msg.value = document.ano.msg.value + "<pre></pre>"';>
+<p>
+<input type="button" value="Break" OnClick='document.ano.msg.value = document.ano.msg.value + "<br>\n"';>
+</th><th>
+<textarea rows="16" name="msg" cols="100">
 <?
 	if (file_exists($msgfile)) {
 		readfile($msgfile);
 	};
 ?>
-</textarea></th>
+</textarea>
+</th>
 <th width="80">
 <input type="submit" name="dan" value="Delete">
 <p>
 <input type="submit" name="can" value="Create">
 </th></table>
 <?
-}elseif (file_exists('log/msg.txt')) {
-	echo "<h2>Announcemnet</h2><table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td><pre>\n";
+}
+if (file_exists('log/msg.txt')) {
+	echo "<h2>Announcemnet</h2><table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td>\n";
 	include_once ($msgfile);
-	echo "</pre></td></tr></table>";
+	echo "</td></tr></table>";
 }
 
 include_once ("inc/footer.php");

@@ -10,7 +10,7 @@
 # 14/04/05	initial version.
 # 1/03/06		offline functions, traffic graphs
 # 16/03/06	new SQL query support
-# 09/01/07	Minor improvements.
+# 17/01/07	Minor improvements.
 */
 
 $bg1	= "99BBEE";

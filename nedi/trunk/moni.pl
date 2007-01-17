@@ -8,6 +8,7 @@
 # ------------------------------------------------------------------------
 # 15/06/05	initial version
 # 17/05/06	non-blocking uptime queries and optimized dependency resolution
+# 17/01/07 v1.0.w updated path handling
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -37,6 +38,7 @@ getopts('DvV',\%opt) or &Help();
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;
+if($0 eq $p){$p = "."};
 require "$p/inc/libmisc.pl";										# Include required libraries
 &misc::ReadConf();
 require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";

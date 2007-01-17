@@ -7,6 +7,7 @@
 # -------- ------------------------------------------------------------------
 # 21/07/05 v0.1.s initial version
 # 2/03/06 v0.1.w sanitized and performance optimized message handling
+# 17/01/07 v1.0.w updated path handling
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -36,6 +37,7 @@ getopts('DvV',\%opt) or &Help();
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;
+if($0 eq $p){$p = "."};
 require "$p/inc/libmisc.pl";										# Use the miscellaneous nedi library
 &misc::ReadConf();
 require "$p/inc/libmon.pl";										# Use the SNMP function library

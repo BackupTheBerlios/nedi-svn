@@ -2,7 +2,7 @@ BODY {
 	FONT: 11px verdana, arial, sans-serif;BACKGROUND-REPEAT: REPEAT;BACKGROUND-IMAGE: URL(../img/bg.png);
 }
 TD {
-	FONT: 11px verdana, arial, sans-serif; COLOR: #222222
+	FONT: 11px verdana, arial, sans-serif; color: #222222
 }
 TD.red {
 	FONT: 11px lucida console, fixedsys; color: red

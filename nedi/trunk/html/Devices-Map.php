@@ -10,6 +10,7 @@
 # 6/05/05	initial version.
 # 10/03/06	new SQL query support
 # 17/07/06	enhanced info and new network filter
+# 17/01/07	refined link weight computation
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -394,7 +395,8 @@ function Map($lev) {
 	foreach(Arrange($ndev,"c") as $cty){
 		$phi = $cro * M_PI/180 + 2 * $ctynum * M_PI / $ncty;
 		$ctynum++;
-		$ctywght = $nctylink[$cty] * $cwt / 100 + 1;
+		$ncl = ($nctylink[$cty])?$nctylink[$cty]:1;
+		$ctywght = pow($ncl,$cwt/10);
 		$xct[$cty] = intval((intval($xm/2) + $xo) + $csi * cos($phi) * $ctyscalx / $ctywght);
 		$yct[$cty] = intval((intval($ym/2) + $yo) + $csi * sin($phi) * $ctyscaly / $ctywght);
 		$nbld = count($ndev[$cty]);
@@ -412,7 +414,8 @@ function Map($lev) {
 			foreach(Arrange($ndev[$cty],"b") as $bld){
 				$eps = $bro * M_PI/180 + 2 * $bldnum * M_PI / $nbld;
 				$bldnum++;
-				$bldwght = $nbldlink[$bld] * $bwt / 100 + 1;
+				$nbl = ($nbldlink[$bld])?$nbldlink[$bld]:1;
+				$bldwght = pow($nbl,$bwt/10);
 				$xbl[$bld] = intval($xct[$cty] + $bsi * cos($eps) * $bldscalx / $bldwght);
 				$ybl[$bld] = intval($yct[$cty] + $bsi * sin($eps) * $bldscaly / $bldwght);
 

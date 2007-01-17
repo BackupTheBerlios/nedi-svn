@@ -789,17 +789,17 @@ sub CDP {
 			my $renam = $rci;
 			my $rser  = $rci;
 			if($rdes =~ /^Revision /){							# Procurves reverse name and SN...of course
-				$renam    =~ s/(.*?)\((\S+)\)/$1/;					# Extract remote name from CatOS neighbours
-				$rser     =~ s/(.*?)\((\S+)\)/$2/;			
+				$renam    =~ s/(.*?)\((.*?)\)/$1/;					# Extract remote name from CatOS neighbours
+				$rser     =~ s/(.*?)\((.*?)\)/$2/;			
 			}else{			
-				$renam    =~ s/(.*?)\((\S+)\)/$2/;					# Extract remote name from CatOS neighbours
-				$renam    =~  s/^(.*?)\.(.*)/$1/;					# Domain part confuses CDP links!		
-				$rser     =~ s/(.*?)\((\S+)\)/$1/;
+				$renam    =~ s/(.*?)\((.*?)\)/$2/;					# Extract remote name from CatOS neighbours
+				$rser     =~ s/(.*?)\((.*?)\)/$1/;
 			}
+			$renam    =~  s/^(.*?)\.(.*)/$1/;						# Domain part confuses CDP links, sorry!
 			if ($_[1] eq $rci){								# is it me?
-				$main::int{$_[0]}{$i}{com} .= "CDP seeing itself! ";
+				$main::int{$_[0]}{$i}{com} .= " C:Loop?";
 				if($misc::notify =~ /d/){
-					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$main::now\",\"$_[0]\",\"CDP seeing itself!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$main::now\",\"$_[0]\",\"CDP:Loop seeing $rci?\"") ){
 						die "DB error messages!\n";
 					}
 				}
@@ -810,7 +810,7 @@ sub CDP {
 				$misc::cdplink{$_[0]}{$lif}{$renam}{$rif}{pr} = $rpwr;
 				$misc::cdplink{$_[0]}{$lif}{$renam}{$rif}{du} = $rdup;
 				$misc::cdplink{$_[0]}{$lif}{$renam}{$rif}{vl} = $rvln;
-				$main::int{$_[0]}{$i}{com} .= "CDP:$renam-$rif ";
+				$main::int{$_[0]}{$i}{com} .= " C:$renam-$rif";
 				if($rip eq "0.0.0.0"){							# ip not set?
 					$main::dev{$renam}{ip} = $rip;
 					$main::dev{$renam}{sn} = "($rser)";
@@ -830,10 +830,10 @@ sub CDP {
 					}
 					print "Q0\t";
 				}elsif(defined $misc::webdev and $rci =~ /$misc::webdev/ or defined $misc::leafdev and $rci =~ /$misc::leafdev/){
-					if(defined $misc::webdev and $rci =~ /$misc::webdev/){				# Try to get some info through the web interface
+					if(defined $misc::webdev and $rci =~ /$misc::webdev/){		# Try to get some info through the web interface
 					}
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{bw} = $main::int{$_[0]}{$i}{spd};
-					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{ty} = "V";
+					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{ty} = "C";
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{pr} = 0;
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{du} = $main::int{$_[0]}{$i}{dpx};
 					$misc::cdplink{$renam}{$rif}{$_[0]}{$lif}{vl} = $main::int{$_[0]}{$i}{vln};

@@ -31,9 +31,6 @@ $all = isset($_GET['all']) ? "checked" : "";
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
 <img src=img/32/dmobi.png border=0 title="Lists potential APs on ports seeing more than 1 MAC address (show all overrides this).">
 </a></th>
-<th>
-<INPUT type="checkbox" name="all" <?=$all?> > Show all
-</th>
 <th>Order by
 <SELECT name="ord" size=1>
 <OPTION VALUE="name" <?=($ord == "name")?"selected":""?> >Name
@@ -41,6 +38,9 @@ $all = isset($_GET['all']) ? "checked" : "";
 <OPTION VALUE="device" <?=($ord == "device")?"selected":""?> >Device
 
 </SELECT>
+</th>
+<th>
+<INPUT type="checkbox" name="all" <?=$all?> > Show all
 </th>
 <th width=80><input type="submit" value="Show"></th>
 </tr></table></form><p>

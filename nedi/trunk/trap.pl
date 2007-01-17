@@ -9,6 +9,7 @@
 # DATE     COMMENT
 # -------- ------------------------------------------------------------------
 # 10/06/05 v1.0.s initial version
+# 17/01/07 v1.0.w updated path handling
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -33,6 +34,7 @@ use vars qw($p %dev);
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;
+if($0 eq $p){$p = "."};
 require "$p/inc/libmisc.pl";											# Use the miscellaneous nedi library
 &misc::ReadConf();
 require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";

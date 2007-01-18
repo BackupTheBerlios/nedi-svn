@@ -103,7 +103,7 @@ if(isset( $_POST['user'])  ){
 <p>
 <form name="login" method="post" action="<?=$_SERVER['PHP_SELF']?>">
 <table border=0 cellspacing=1 cellpadding=8 bgcolor=#000000 width=50% align=center>
-<tr background=img/blubg.png><td align=center colspan=3><img src=img/nedib.png border=0></td></tr>
+<tr><td align=center colspan=3 background=img/blubg.png><img src=img/nedib.png border=0></td></tr>
 <tr bgcolor=#D0D0D0>
 <th align=center colspan=3>
 <img src=img/nedie.jpg border=0>
@@ -111,10 +111,10 @@ if(isset( $_POST['user'])  ){
 <p><hr>
 <?=$disc?>
 </th></tr>
-<tr background=img/blubg.png>
-<th>User <input type="text" name="user" size="12"></th>
-<th>Pass <input type="password" name="pass" size="12"></th>
-<th>
+<tr>
+<th background=img/blubg.png>User <input type="text" name="user" size="12"></th>
+<th background=img/blubg.png>Pass <input type="password" name="pass" size="12"></th>
+<th background=img/blubg.png>
 <input type="submit" value="Login">
 </th>
 </tr>

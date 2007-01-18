@@ -196,7 +196,7 @@ function Floors($cty,$bld){
 				$ud = urlencode($d);
 				echo "<td bgcolor=#$bi valign=top><b>$rm</b> $rk<p><center>\n";
 				echo "<a href=Devices-Status.php?dev=$ud><img src=img/dev/$di.png border=0 vspace=4 ></a><br>\n";
-				echo "<a href=Nodes-List.php?ina=device&opa==&sta=$d&ord=ifname><b>$d</b></a><p>\n";
+				echo "<a href=Nodes-List.php?ina=device&opa==&sta=$d&ord=device><b>$d</b></a><p>\n";
 				echo "<a href=telnet://$ip>$ip</a><br>\n";
 				echo"$co</td>\n";
 				$col++;

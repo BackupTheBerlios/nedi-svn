@@ -68,6 +68,13 @@ if( isset($_GET['del']) ){
 	}
 }
 
+$cols = array(	"id"=>"ID",
+		"level"=>"Level",
+		"time"=>"Time",
+		"source"=>"Source",
+		"info"=>"Info"
+		);
+
 ?>
 <h1>Monitoring Messages</h1>
 <form method="get" name="list" action="<?=$_SERVER['PHP_SELF']?>">
@@ -77,7 +84,12 @@ if( isset($_GET['del']) ){
 </a></th>
 <th valign=top>Condition A<p>
 <SELECT size=1 name="ina">
-<? selectbox("messages",$ina);?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = ($ina == $k)?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+?>
 </SELECT>
 <SELECT size=1 name="opa">
 <? selectbox("oper",$opa);?>
@@ -92,7 +104,12 @@ if( isset($_GET['del']) ){
 </th>
 <th valign=top>Condition B<p>
 <SELECT size=1 name="inb">
-<? selectbox("messages",$inb);?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = ($inb == $k)?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+?>
 </SELECT>
 <SELECT size=1 name="opb">
 <? selectbox("oper",$opb);?>

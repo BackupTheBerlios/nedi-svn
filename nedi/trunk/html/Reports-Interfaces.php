@@ -356,7 +356,7 @@ if ( in_array("lmi",$rep) ){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
 							echo "<tr bgcolor=#$bg>\n";
-							echo "<th bgcolor=$bi><img src=img/spd.png></th>\n";
+							echo "<th bgcolor=$bi><img src=img/spd.png title=\"bandwidth\"></th>\n";
 							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if (".Zfix($ifsp["$dv;;$if"]).")</td>\n";
 							echo "<th>".Zfix($libw[$dv][$if][$nb][$ni])."</th>\n";
 							echo "<th bgcolor=$bi>".$lity[$dv][$if][$nb][$ni]."</th>\n";
@@ -369,7 +369,7 @@ if ( in_array("lmi",$rep) ){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
 							echo "<tr bgcolor=#$bg>\n";
-							echo "<th bgcolor=$bi><img src=img/dpx.png></th>\n";
+							echo "<th bgcolor=$bi><img src=img/dpx.png title=\"duplex\"></th>\n";
 							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if (".$ifdu["$dv;;$if"].")</td>\n";
 							echo "<th>".$lidu[$dv][$if][$nb][$ni]."</th>\n";
 							echo "<th bgcolor=$bi>".$lity[$dv][$if][$nb][$ni]."</th>\n";
@@ -382,7 +382,7 @@ if ( in_array("lmi",$rep) ){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
 							echo "<tr bgcolor=#$bg>\n";
-							echo "<th bgcolor=$bi><img src=img/16/stat.png></th>\n";
+							echo "<th bgcolor=$bi><img src=img/16/stat.png title=\"vlan\"></th>\n";
 							echo "<td><a href=Devices-Status.php?dev=$ud>$dv</a></td><td>$if (Vlan".$ifvl["$dv;;$if"].")</td>\n";
 							echo "<th>Vlan".$livl[$dv][$if][$nb][$ni]."</th>\n";
 							echo "<th bgcolor=$bi>".$lity[$dv][$if][$nb][$ni]."</th>\n";

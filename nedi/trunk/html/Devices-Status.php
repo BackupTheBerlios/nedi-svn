@@ -122,7 +122,7 @@ if ($shd){
 ?>
 <a href=Devices-Config.php?shc=<?=$ud?> ><img src=img/16/cfg2.png hspace=<?=$hs?> border=0 title="Config of device"></a>
 <a href=Devices-Graph.php?dv=<?=$ud?> ><img src=img/16/chart.png hspace=<?=$hs?> border=0 title="Graphs of device"></a>
-<a href=Nodes-List.php?ina=device&opa==&sta=<?=$ud?>&ord=ifname><img src=img/16/cubs.png hspace=<?=$hs?> border=0 title="Nodes on device"></a>
+<a href=Nodes-List.php?ina=device&opa==&sta=<?=$ud?>&ord=device><img src=img/16/cubs.png hspace=<?=$hs?> border=0 title="Nodes on device"></a>
 <?
 			if($dev[6] & 2){
 ?>
@@ -178,7 +178,7 @@ if ($shd){
 <tr><th bgcolor=#<?=$bg1?>>Location</th>	<td bgcolor=#<?=$bgb?>><?=$dev['10']?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Contact</th>		<td bgcolor=#<?=$bga?>><?=$dev['11']?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>VTP Info</th>	<td bgcolor=#<?=$bgb?>>Domain:<?=$dev['12']?> <?=VTPmod($dev['13'])?></td></tr>
-<tr><th bgcolor=#<?=$bg1?>>SNMP Access</th>	<td bgcolor=#<?=$bga?>><?=$dev['15']?> (Version <?=$ver?>)</td></tr>
+<tr><th bgcolor=#<?=$bg1?>>SNMP Access</th>	<td bgcolor=#<?=$bga?>><?=$dev['15']?> (Version <?=($ver  . (($dev[14] & 128)?" using HC-counters":""));?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>CLI Access</th>	<td bgcolor=#<?=$bga?>><?=$dev['17']?> (Port <?=($dev['16'])?$dev['16']:"-"?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>First Seen</td>	<td bgcolor=#<?=$fc?>><?=$fs?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Last Seen</td>	<td bgcolor=#<?=$lc?>><?=$ls?></td></tr>

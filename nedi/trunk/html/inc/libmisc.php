@@ -164,6 +164,30 @@ function Agecol($fs, $ls,$row) {
 
         return array ("$g$f$d","$l$g$d");
 }
+
+//===================================================================
+// Generate column headers with sorting
+function ColHead($n){
+
+global $ord,$cols;
+
+	if (!$ord){
+		echo "<th>$cols[$n]<a href=?$_SERVER[QUERY_STRING]&ord=$n><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
+	}elseif($n == $ord){
+		echo "<th class=blu>$cols[$n] <a href=?";
+		echo preg_replace('/&ord=(.*)/',"&ord=$n+desc",$_SERVER['QUERY_STRING']);
+		echo "><img src=img/up.png border=0 title=\"Reverse sort by $n\"></a></th>";
+	}elseif("$n desc" == $ord){
+		echo "<th class=blu>$cols[$n] <a href=?";
+		echo preg_replace('/&ord=(.*)/',"&ord=$n",$_SERVER['QUERY_STRING']);
+		echo "><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
+	}else{
+		echo "<th>$cols[$n] <a href=?";
+		echo preg_replace('/&ord=(.*)/',"&ord=$n",$_SERVER['QUERY_STRING']);
+		echo "><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
+	}
+}
+
 //===================================================================
 // Generate html select box
 function selectbox($type,$sel="") {
@@ -172,20 +196,13 @@ function selectbox($type,$sel="") {
 		$options = array("regexp"=>"regexp","not regexp"=>"not regexp",">"=>">","="=>"=","!="=>"!=",">="=>">=","<"=>"<");
 	}elseif($type == "comop"){
 		$options = array(""=>"A only","AND"=>"A and B","OR"=>"A or B",">"=>"colA > colB","="=>"colA = colB","<"=>"colA < colB");
-	}elseif($type == "nodes"){
-		$options = array("name"=>"Name","ip"=>"IP address","ipupdate"=>"IP Update","ipchanges"=>"IP Changes","iplost"=>"IP Lost","mac"=>"MAC address","oui"=>"Vendor","device"=>"Device","ifname"=>"Interface",   "vlanid"=>"Vlan","ifmetric"=>"IF Metric","ifchanges"=>"IF Changes","ifupdate"=>"IF Update","firstseen"=>"First Seen","lastseen"=>"Last Seen");
-	}elseif($type == "devices"){
-		$options = array("name"=>"Name","ip"=>"IP address","serial"=>"Serial #","type"=>"Type","services"=>"Services","description"=>"Description",   "os"=>"OS","bootimage"=>"Bootimage","location"=>"Location","contact"=>"Contact","vtpdomain"=>"VTP Domain","vtpmode"=>"VTP Mode","snmpversion"=>"SNMP Ver","community"=>"Community","cliport"=>"CLI port","login"=>"Login","firstseen"=>"First Seen", "lastseen"=>"Last Seen");
-	}elseif($type == "messages"){
-		$options = array("id"=>"ID","level"=>"Level","time"=>"Time","source"=>"Source","info"=>"Info");
 	}elseif($type == "limit"){
 		$options = array("10"=>"10","20"=>"20","50"=>"50","100"=>"100","500"=>"500","0"=>"none!");
 	}
 	foreach ($options as $key => $txt){
 	       $selopt = ($sel == "$key")?"selected":"";
-	       print "<option value=\"$key\" $selopt >$txt\n";
+	       echo "<option value=\"$key\" $selopt >$txt\n";
 	}
-
 }
 
 //===================================================================

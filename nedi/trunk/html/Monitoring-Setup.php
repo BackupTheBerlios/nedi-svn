@@ -204,7 +204,7 @@ if($loc){
 		
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bgm><a href=Devices-Status.php?dev=$ud><img src=img/dev/$ico.png title=\"$stat\" border=0></a><p>\n";
-		echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=ifname><b>$na</b></a></th><td>$dloc[$na]</td><td>$minfo[$na]</td>";
+		echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=device><b>$na</b></a></th><td>$dloc[$na]</td><td>$minfo[$na]</td>";
 
 		echo "<th>";
 		if($mdev[$na]){

@@ -127,6 +127,10 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 <input type="button" value="Pre" OnClick='document.ano.msg.value = document.ano.msg.value + "<pre></pre>"';>
 <p>
 <input type="button" value="Break" OnClick='document.ano.msg.value = document.ano.msg.value + "<br>\n"';>
+<p>
+<input type="button" value="Title" OnClick='document.ano.msg.value = document.ano.msg.value + "<h2></h2>\n"';>
+<p>
+<input type="button" value="List" OnClick='document.ano.msg.value = document.ano.msg.value + "<ul>\n<li>\n<li>\n</ul>\n"';>
 </th><th>
 <textarea rows="16" name="msg" cols="100">
 <?
@@ -144,7 +148,7 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 <?
 }
 if (file_exists('log/msg.txt')) {
-	echo "<h2>Announcemnet</h2><table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td>\n";
+	echo "<table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td>\n";
 	include_once ($msgfile);
 	echo "</td></tr></table>";
 }

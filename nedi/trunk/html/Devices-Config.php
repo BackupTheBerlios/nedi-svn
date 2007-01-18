@@ -142,7 +142,7 @@ if ($shl){
 			$ucon	= urlencode($con[0]);
 			echo "<tr bgcolor=#$bg>\n";
 			echo "<th bgcolor=#$bi><a href=Devices-Status.php?dev=$ucon><img src=img/dev/$img.png title=\"$typ\" border=0></a><br>\n";
-			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ucon&ord=ifname><b>$con[0]</b></a>\n";
+			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ucon&ord=device><b>$con[0]</b></a>\n";
 
 			echo "<td><a href=$_SERVER[PHP_SELF]?shc=$ucon&sln=$sln><pre>$cfg</pre></a></td>\n";
 			$cu	= date("j.M (G:i)",$con[3]);

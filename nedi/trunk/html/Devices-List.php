@@ -10,6 +10,7 @@
 # 04/03/05	Revised backend
 # 31/03/05	decimal IPs
 # 10/03/06	new SQL query support
+# 18/01/07	new Sorting approach
 */
 
 $bg1	 = "88AADD";
@@ -31,7 +32,27 @@ $opa = isset($_GET['opa']) ? $_GET['opa'] : "";
 $opb = isset($_GET['opb']) ? $_GET['opb'] : "";
 $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
-$col = isset($_GET['col']) ? $_GET['col'] : array('ip','location','contact','type');
+$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','location','contact','type');
+
+$cols = array(	"name"=>"Device",
+		"ip"=>"IP address",
+		"serial"=>"Serial #",
+		"type"=>"Type",
+		"services"=>"Services",
+		"description"=>"Description",
+		"os"=>"OS",
+		"bootimage"=>"Bootimage",
+		"location"=>"Location",
+		"contact"=>"Contact",
+		"vtpdomain"=>"VTP Domain",
+		"vtpmode"=>"VTP Mode",
+		"snmpversion"=>"SNMP Ver",
+		"community"=>"Community",
+		"cliport"=>"CLI port",
+		"login"=>"Login",
+		"firstseen"=>"First Seen",
+		"lastseen"=>"Last Seen"
+		);
 
 ?>
 <h1>Device List</h1>
@@ -42,7 +63,12 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('ip','location','contact','typ
 </a></th>
 <th valign=top>Condition A<p>
 <SELECT size=1 name="ina">
-<? selectbox("devices",$ina);?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = ($ina == $k)?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+?>
 </SELECT>
 <SELECT size=1 name="opa">
 <? selectbox("oper",$opa);?>
@@ -57,7 +83,12 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('ip','location','contact','typ
 </th>
 <th valign=top>Condition B<p>
 <SELECT size=1 name="inb">
-<? selectbox("devices",$inb);?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = ($inb == $k)?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+?>
 </SELECT>
 <SELECT size=1 name="opb">
 <? selectbox("oper",$opb);?>
@@ -67,36 +98,14 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('ip','location','contact','typ
 </th>
 <th valign=top>Display<p>
 <SELECT MULTIPLE name="col[]" size=4>
-<OPTION VALUE="ip" <?=(in_array("ip",$col))?"selected":""?> >IP address
-<OPTION VALUE="serial" <?=(in_array("serial",$col))?"selected":""?> >Serial#
-<OPTION VALUE="type" <?=(in_array("type",$col))?"selected":""?> >Type
-<OPTION VALUE="services" <?=(in_array("services",$col))?"selected":""?> >Services
-<OPTION VALUE="description" <?=(in_array("description",$col))?"selected":""?> >Description
-<OPTION VALUE="os" <?=(in_array("os",$col))?"selected":""?> >OS
-<OPTION VALUE="bootimage" <?=(in_array("bootimage",$col))?"selected":""?> >Bootimage
-<OPTION VALUE="location" <?=(in_array("location",$col))?"selected":""?> >Location
-<OPTION VALUE="contact" <?=(in_array("contact",$col))?"selected":""?> >Contact
-<OPTION VALUE="vtpdomain" <?=(in_array("vtpdomain",$col))?"selected":""?> >VTP domain
-<OPTION VALUE="vtpmode" <?=(in_array("vtpmode",$col))?"selected":""?> >VTP mode
-<OPTION VALUE="SNMP" <?=(in_array("SNMP",$col))?"selected":""?> >SNMP Access
-<OPTION VALUE="login" <?=(in_array("login",$col))?"selected":""?> >CLI Access
-<? if($rrdstep){ ?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = (in_array($k,$col))?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+if($rrdstep){ ?>
 <OPTION VALUE="graphs" <?=(in_array("graphs",$col))?"selected":""?> >Graphs
-<OPTION VALUE="seen" <?=(in_array("seen",$col))?"selected":""?> >Seen
 <? } ?>
-</SELECT>
-</th>
-<th valign=top>Order by<p>
-<SELECT name="ord" size=4>
-<OPTION VALUE="name" <?=($ord == "name")?"selected":""?> >Name
-<OPTION VALUE="ip" <?=($ord == "ip")?"selected":""?> >IP address
-<OPTION VALUE="serial" <?=($ord == "serial")?"selected":""?> >Serial #
-<OPTION VALUE="type" <?=($ord == "type")?"selected":""?> >Type
-<OPTION VALUE="bootimage" <?=($ord == "bootimage")?"selected":""?> >Bootimage
-<OPTION VALUE="location" <?=($ord == "location")?"selected":""?> >Location
-<OPTION VALUE="vtpdomain" <?=($ord == "vtpdomain")?"selected":""?> >VTP domain
-<OPTION VALUE="firstseen" <?=($ord == "firstseen")?"selected":""?> >First seen
-<OPTION VALUE="lastseen" <?=($ord == "lastseen")?"selected":""?> >Last seen
 </SELECT>
 </th>
 <th width=80><input type="submit" value="Search"></th>
@@ -105,22 +114,25 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('ip','location','contact','typ
 if ($ina){
 	echo "<table bgcolor=#666666 $tabtag><tr bgcolor=#$bg2>\n";
 
-	echo "<th width=80>Device</th>\n";
-	if( in_array("ip",$col) ){echo "<th>IP Address</th>";}
-	if( in_array("serial",$col) ){echo "<th>Serial #</th>";}
-	if( in_array("type",$col) ){echo "<th>Type</th>";}
-	if( in_array("services",$col) ){echo "<th>Services</th>";}
-	if( in_array("description",$col) ){echo "<th>Description</th>";}
-	if( in_array("os",$col) ){echo "<th>OS</th>";}
-	if( in_array("bootimage",$col) ){echo "<th>Bootimage</th>";}
-	if( in_array("location",$col) ){echo "<th>Location</th>";}
-	if( in_array("contact",$col) ){echo "<th>Contact</th>";}
-	if( in_array("vtpdomain",$col) ){echo "<th>VTPdomain</th>";}
-	if( in_array("vtpmode",$col) ){echo "<th>VTPmode</th>";}
-	if( in_array("SNMP",$col) ){echo "<th>SNMP Access</th>";}
-	if( in_array("login",$col) ){echo "<th>Login</th>";}
+	ColHead('name');
+	if( in_array("ip",$col) ){ColHead('ip');}
+	if( in_array("serial",$col) ){ColHead('serial');}
+	if( in_array("type",$col) ){ColHead('type');}
+	if( in_array("services",$col) ){ColHead('services');}
+	if( in_array("description",$col) ){ColHead('description');}
+	if( in_array("os",$col) ){ColHead('os');}
+	if( in_array("bootimage",$col) ){ColHead('bootimage');}
+	if( in_array("location",$col) ){ColHead('location');}
+	if( in_array("contact",$col) ){ColHead('contact');}
+	if( in_array("vtpdomain",$col) ){ColHead('vtpdomain');}
+	if( in_array("vtpmode",$col) ){ColHead('vtpmode');}
+	if( in_array("snmpversion",$col) ){ColHead('snmpversion');}
+	if( in_array("community",$col) ){ColHead('community');}
+	if( in_array("login",$col) ){ColHead('login');}
+	if( in_array("cliport",$col) ){ColHead('cliport');}
+	if( in_array("firstseen",$col) ){ColHead('firstseen');}
+	if( in_array("lastseen",$col) ){ColHead('lastseen');}
 	if( in_array("graphs",$col) ){echo "<th>Graphs</th>";}
-	if( in_array("seen",$col) ){echo "<th>First seen</th><th>Last seen</th>";}
 	echo "</tr>\n";
 
 	$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
@@ -133,9 +145,12 @@ if ($ina){
 			$row++;
 			$ip = long2ip($dev[1]);
 			$ud = urlencode($dev[0]);
-			echo "<tr bgcolor=#$bg>\n";
-			echo "<th bgcolor=#$bi><a href=Devices-Status.php?dev=$ud><img src=img/dev/$dev[18].png title=\"$dev[3]\" border=0 vspace=4></a><br>\n";
-			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=ifname><b>$dev[0]</b></a>\n";
+			list($fc,$lc) = Agecol($dev[4],$dev[5],$row % 2);
+			echo "<tr bgcolor=#$bg><th bgcolor=#$bi>\n";
+			if(in_array("name",$col)){
+				echo "<a href=Devices-Status.php?dev=$ud><img src=img/dev/$dev[18].png title=\"$dev[3]\" border=0 vspace=4></a><br>\n";
+				}
+			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=device><b>$dev[0]</b></a>\n";
 			if(in_array("ip",$col)){
 				echo "<td><a href=telnet://$ip>$ip</a></td>";
 			}
@@ -151,27 +166,29 @@ if ($ina){
 				$sv = Syssrv($dev[6]);
 				echo "<td>$sv ($dev[6])</td>";
 			}
-			if(in_array("description",$col)){ echo "<td>$dev[7]</td>";}
-			if(in_array("os",$col)){ echo "<td>$dev[8]</td>";}
-			if(in_array("bootimage",$col)){ echo "<td>$dev[9]</td>";}
-			if(in_array("location",$col)){ echo "<td>$dev[10]</td>";}
-			if(in_array("contact",$col)){ echo "<td>$dev[11]</td>";}
-			if(in_array("vtpdomain",$col)){ echo "<td>$dev[12]</td>";}
-			if(in_array("vtpmode",$col)){ echo "<td>".VTPmod($dev[13])."</td>";}
-			if(in_array("SNMP",$col)){$ver = $dev[14] & 127; echo "<td>$dev[15] Ver:$ver</td>";}
-			if(in_array("login",$col)){ echo "<td>$dev[17] (Port $dev[16])</td>";}
+			if(in_array("description",$col)){echo "<td>$dev[7]</td>";}
+			if(in_array("os",$col))		{echo "<td>$dev[8]</td>";}
+			if(in_array("bootimage",$col))	{echo "<td>$dev[9]</td>";}
+			if(in_array("location",$col))	{echo "<td>$dev[10]</td>";}
+			if(in_array("contact",$col))	{echo "<td>$dev[11]</td>";}
+			if(in_array("vtpdomain",$col))	{echo "<td>$dev[12]</td>";}
+			if(in_array("vtpmode",$col))	{echo "<td>".VTPmod($dev[13])."</td>";}
+			if(in_array("snmpversion",$col)){echo "<td>". ($dev[14] & 127) . (($dev[14] & 128)?"HC":"") ."</td>";}
+			if(in_array("community",$col))	{echo "<td>$dev[15]</td>";}
+			if(in_array("login",$col))	{echo "<td>$dev[17]</td>";}
+			if(in_array("cliport",$col))	{echo "<td>$dev[16]</td>";}
+			if( in_array("firstseen",$col) ){
+				$fs       = date("j.M G:i:s",$dev[4]);
+				echo "<td bgcolor=#$fc>$fs</td>";
+			}
+			if( in_array("lastseen",$col) ){
+				$ls       = date("j.M G:i:s",$dev[5]);
+				echo "<td bgcolor=#$lc>$ls</td>";
+			}
 			if(in_array("graphs",$col)){
 				echo "<th><a href=Devices-Graph.php?dv=$ud&cpu=on><img src=inc/drawrrd.php?dv=$ud&t=cpu&s=s border=0 title=\"CPU load\">";
 				echo "<a href=Devices-Graph.php?dv=$ud&mem=on><img src=inc/drawrrd.php?dv=$ud&t=mem&s=s border=0 title=\"Available Memory\">";
 				echo "<a href=Devices-Graph.php?dv=$ud&tmp=on><img src=inc/drawrrd.php?dv=$ud&t=tmp&s=s border=0 title=\"Temperature\"></th>";
-			}
-
-			if( in_array("seen",$col) ){
-				list($fc,$lc) = Agecol($dev[4],$dev[5],$row % 2);
-				$fs       = date("j.M G:i:s",$dev[4]);
-				echo "<td bgcolor=#$fc>$fs</td>";
-				$ls       = date("j.M G:i:s",$dev[5]);
-				echo "<td bgcolor=#$lc>$ls</td>";
 			}
 			echo "</tr>\n";
 		}

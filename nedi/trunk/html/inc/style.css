@@ -1,5 +1,5 @@
 BODY {
-	FONT: 11px verdana, arial, sans-serif;BACKGROUND-REPEAT: REPEAT;BACKGROUND-IMAGE: URL(../img/bg.png);
+	FONT: 11px verdana, arial, sans-serif;BACKGROUND-REPEAT: REPEAT;BACKGROUND-IMAGE: URL(../img/bg.jpg);
 }
 TD {
 	FONT: 11px verdana, arial, sans-serif; color: #222222
@@ -26,10 +26,10 @@ TH {
 	FONT: 11px verdana, arial, sans-serif; COLOR: #333333;  font-weight: bold
 }
 TH.red {
-	FONT: 11px lucida console, fixedsys; max-width:100px; color: red
+	color: red
 }
 TH.blu {
-	FONT: 11px lucida console, fixedsys; max-width:100px; color: blue
+	color: blue
 }
 
 H1   {
@@ -48,13 +48,13 @@ H5   {
 	FONT: 12px verdana, arial, sans-serif; COLOR: #006600; font-weight: bold; text-align: center
 }
 A:link {
-	FONT: 11px verdana, arial, sans-serif; COLOR: #0044AA; TEXT-DECORATION: none
+	FONT: 11px verdana, arial, sans-serif; COLOR: #0044AA; text-decoration: none
 }
 A:visited {
-	FONT: 11px verdana, arial, sans-serif; COLOR: #003399; TEXT-DECORATION: none
+	FONT: 11px verdana, arial, sans-serif; COLOR: #003399; text-decoration: none
 }
 A:active {
-	FONT: 11px verdana, arial, sans-serif; COLOR: #0088DD; TEXT-DECORATION: none
+	FONT: 11px verdana, arial, sans-serif; COLOR: #0088DD; text-decoration: none
 }
 A:hover {
 	FONT: 11px verdana, arial, sans-serif; COLOR: #FF4400

@@ -6,7 +6,7 @@
 #
 # DATE		COMMENT
 # -----------------------------------------------------------
-# 25/02/05	initial version.
+# 25/02/05	initial version
 # 04/03/05	Revised backend
 # 31/03/05	decimal IPs
 # 17/03/06	new SQL query support

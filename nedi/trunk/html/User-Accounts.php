@@ -6,8 +6,9 @@
 #
 # DATE     COMMENT
 # -------- ------------------------------------------------------------------
-# 10/03/05 v0.1		initial version.
-# 10/02/06 v0.2		
+# 10/03/05	initial version
+# 10/02/06	pw reset added
+# 19/01/07	new Sorting approach
 */
 
 $bg1	= "CCAA88";
@@ -23,18 +24,24 @@ include_once ("inc/header.php");
 $_GET = sanitize($_GET);
 $ord = isset( $_GET['ord']) ? $_GET['ord'] : "";
 $grp = isset( $_GET['grp']) ? $_GET['grp'] : "";
+
+$cols = array(	"name"=>"Name",
+		"email"=>"Email",
+		"phone"=>"Phone",
+		"time"=>"Creation",
+		"lastseen"=>"Lastseen",
+		"comment"=>"Comment",
+		"language"=>"Language",
+		);
+
 ?>
 <h1>User Accounts</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/user.png border=0></a></th>
-<th>User
-<input type="text" name="usr" size="12">
-<input type="submit" name="create" value="Create">
-</th>
 <th>Filter Group
-<SELECT size=1 name="grp">
-<OPTION VALUE="">----
+<SELECT size=1 name="grp" onchange="this.form.submit();">
+<OPTION VALUE="">None
 <OPTION VALUE="adm" <?=($grp == "adm")?"selected":""?> >Admin
 <OPTION VALUE="net" <?=($grp == "net")?"selected":""?> >Network
 <OPTION VALUE="dsk" <?=($grp == "dsk")?"selected":""?> >Helpdesk
@@ -42,13 +49,10 @@ $grp = isset( $_GET['grp']) ? $_GET['grp'] : "";
 <OPTION VALUE="mgr" <?=($grp == "mgr")?"selected":""?> >Manager
 <OPTION VALUE="oth" <?=($grp == "oth")?"selected":""?> >Other
 </SELECT>
-Sort by
-<SELECT name="ord" size=1>
-<OPTION VALUE="name" <?=($ord == "name")?"selected":""?> >Name
-<OPTION VALUE="time" <?=($ord == "time")?"selected":""?> >Creation Date
-<OPTION VALUE="lastseen" <?=($ord == "lastseen")?"selected":""?> >Lastseen
-</SELECT>
-<input type="submit" name="search" value="Search"><p>
+</th>
+<th>User
+<input type="text" name="usr" size="12">
+<input type="submit" name="create" value="Create">
 </th>
 </table></form>
 <p>
@@ -76,9 +80,15 @@ if (isset($_GET['usr']) and isset($_GET['create']) ){
 ?>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
-<th>Name</th><th>Email</th><th>Phone #</th><th>Comment</th><th>Language</th>
-<th>Created on</th><th>Last Login</th><th>Groups</th><th>Action</th>
 <?
+ColHead('name');
+ColHead('email');
+ColHead('phone');
+ColHead('comment');
+ColHead('language');
+ColHead('time');
+ColHead('lastseen');
+echo "<th>Groups</th><th>Action</th></tr>\n";
 
 if ($grp){
 	$query	= GenQuery('user','s','*',$ord,'',array($grp),array('='),array('1') );

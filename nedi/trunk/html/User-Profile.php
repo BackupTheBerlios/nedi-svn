@@ -107,9 +107,9 @@ Comment <input type="text" name="comment" size="50" value="<?=$u[12]?>" >
 
 <?
 if(preg_match("/adm/",$_SESSION['group']) ){
-	if(isset($_POST['dan']) ){
+	if(isset($_POST['cme']) ){
 		unlink($msgfile);
-	}elseif(isset($_POST['can']) ){
+	}elseif(isset($_POST['sme']) ){
 		$fh = fopen($msgfile, 'w') or die("Cannot write $msgfile!");
 		fwrite($fh, "$msg");
 		fclose($fh);
@@ -141,14 +141,14 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 </textarea>
 </th>
 <th width="80">
-<input type="submit" name="dan" value="Delete">
+<input type="submit" name="cme" value="Clear">
 <p>
-<input type="submit" name="can" value="Create">
+<input type="submit" name="sme" value="Save">
 </th></table>
 <?
 }
 if (file_exists('log/msg.txt')) {
-	echo "<table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td>\n";
+	echo "<h2>Admin Message</h2><table bgcolor=#666666 $tabtag ><tr bgcolor=#eeee88 ><td>\n";
 	include_once ($msgfile);
 	echo "</td></tr></table>";
 }

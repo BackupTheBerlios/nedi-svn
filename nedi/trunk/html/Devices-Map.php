@@ -10,7 +10,7 @@
 # 6/05/05	initial version.
 # 10/03/06	new SQL query support
 # 17/07/06	enhanced info and new network filter
-# 17/01/07	refined link weight computation
+# 17/01/07	refined link weight computation, more hints
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -106,11 +106,11 @@ if($res){
 <form method="get" name="map" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<? echo $bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/paint.png border=0 title="Draws image of your network"></a></th>
-<th valign=top title="size & depth of your map">Image
+<th valign=top title="Size & depth of image">Image
 <table>
 <tr><td>Size</td><td>
 <select size=1 name="res">
-<option value="">size presets
+<option value="">preset
 <option value="vga">640x480
 <option value="svga">800x600
 <option value="xga">1024x768
@@ -121,19 +121,19 @@ if($res){
 <tr><td>or XY</td><td><input type="text" name="x" value="<?=$xm?>" size=4> <input type="text" name="y" value="<?=$ym?>" size=4>
 </td></tr>
 <tr><td>Depth</td><td>
-<input type="radio" name="dep" value="8" <?=($dep == 8)?"checked":""?>>8-bit
-<input type="radio" name="dep" value="24"<?=($dep == 24)?"checked":""?>>24-bit
+<input type="radio" name="dep" value="8" <?=($dep == 8)?"checked":""?>>8bit
+<input type="radio" name="dep" value="24"<?=($dep == 24)?"checked":""?>>24bit
 </td></tr>
 </table>
 </th>
 
-<th valign=top title="What is to be displayed...">Map
+<th valign=top title="Select detail levels">Layers
 <table>
-<tr><td>Title</td><td><input type="text" name="tit" value="<?=$tit?>" size=20></td></tr>
+<tr><td>Title</td><td><input type="text" name="tit" value="<?=$tit?>" size=18></td></tr>
 <tr><td>Level</td><td><select size=1 name="lev">
 <?=$levopt ?>
 </select>
-Wt <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
+W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 </td></tr>
 <tr><td>Show</td><td>
 <INPUT type="checkbox" name="bwi" <?=$bwi?>> BW
@@ -143,22 +143,22 @@ Wt <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 </table>
 </th>
 
-<th valign=top title='size,link-weight (Wt), rotation (@) and offset'>Layout
+<th valign=top title='Object placement properties'>Layout
 <table>
 <tr><td>City</td><td>
-<input type="text" name="csi" value="<?=$csi?>" size=3>Size
-<input type="text" name="cwt" value="<?=$cwt?>" size=2>Wt
-<input type="text" name="cro" value="<?=$cro?>" size=3>@
+<input type="text" name="csi" value="<?=$csi?>" size=3 title="Length of city links">L
+<input type="text" name="cwt" value="<?=$cwt?>" size=2 title="Weight of cities based on # of links">W
+<input type="text" name="cro" value="<?=$cro?>" size=3 title="Rotation of city circle">@
 </td></tr>
 <tr><td>Bld</td><td>
-<input type="text" name="bsi" value="<?=$bsi?>" size=3>Size
-<input type="text" name="bwt" value="<?=$bwt?>" size=2>Wt
-<input type="text" name="bro" value="<?=$bro?>" size=3>@
+<input type="text" name="bsi" value="<?=$bsi?>" size=3 title="Length of building links">L
+<input type="text" name="bwt" value="<?=$bwt?>" size=2 title="Weight of buildings based on # of links">W
+<input type="text" name="bro" value="<?=$bro?>" size=3 title="Rotation of building circle">@
 </td></tr>
 <tr><td>Floor</td><td>
-<input type="text" name="fsi" value="<?=$fsi?>" size=3>Size
-<input type="text" name="xo" value="<?=$xo?>" size=2> Xo
-<input type="text" name="yo" value="<?=$yo?>" size=2> Yo
+<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor spacing">S
+<input type="text" name="xo" value="<?=$xo?>" size=2 title="Map X offset"> X
+<input type="text" name="yo" value="<?=$yo?>" size=2 title="Map Y offset"> Y
 </td></tr>
 </table>
 </th>
@@ -172,7 +172,7 @@ Wt <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 <option value="network" <?=($ina == "network")?"selected":""?>>Network
 </select>
 </td></tr>
-<tr><td><input type="text" name="flt" value="<?=$flt?>" size=20></td></tr>
+<tr><td><input type="text" name="flt" value="<?=$flt?>" size=16></td></tr>
 <tr><td><select size=1 name="cs" onchange="document.map.flt.value=document.map.cs.options[document.map.cs.selectedIndex].value">
 <option value="">or select
 <?

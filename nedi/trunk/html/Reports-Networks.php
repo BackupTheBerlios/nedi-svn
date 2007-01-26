@@ -53,7 +53,7 @@ if ($shw) {
 	$res	= @DbQuery($query,$link);
 	if ($res) {
 		while( ($n = @DbFetchRow($res)) ){
-			$n[2]	= ip2long(long2ip($n[2]));									// Hack to fix signing issue for 32bit vars in PHP!
+			$n[2]	= ip2long(long2ip($n[2]));								// Hack to fix signing issue for 32bit vars in PHP!
 			$n[3]	= ip2long(long2ip($n[3]));
 			$dnet	= sprintf("%u",$n[2] & $n[3]);
 
@@ -78,7 +78,7 @@ if ($shw) {
 				$nquery	= GenQuery('nodes','s','*','ip','',array("ip & $n[3]"),array('='),array($dnet) );
 				$nodres	= @DbQuery($nquery,$link);
 				while( ($nod = @DbFetchRow($nodres)) ){
-					$pop[$dnet]++;
+					if($n[3]){$pop[$dnet]++;}							//  Only count if mask is not 0!
 					$age[$dnet] += $nod[5] - $nod[4];
 				}
 				@DbFreeResult($nodres);

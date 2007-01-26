@@ -108,7 +108,7 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 }
 ?>
 </td></tr>
-<tr><th bgcolor=#<?=$bg1?>>MAC Address</th>	<td bgcolor=#<?=$bgb?>><b><?=implode("-",str_split($n[2],2))?></b> or <b><?=implode(".",str_split($n[2],4))?></b></td></tr>
+<tr><th bgcolor=#<?=$bg1?>>MAC Address</th>	<td bgcolor=#<?=$bgb?>><b><?=rtrim(chunk_split($n[2],2,"-"),"-")?></b> or <b><?=rtrim(chunk_split($n[2],4,"."),".")?></b></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>NIC Vendor</th>	<td bgcolor=#<?=$bgb?>><?=$n[3]?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IP Address</th>	<td bgcolor=#<?=$bga?>><?=$ip?> (<?=($n[1])?gethostbyaddr($ip):"";?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IP Update</th>	<td bgcolor=#<?=$a1c?>><?=$au?> (<?=$n[13]?> Changes / <?=$n[14]?> Lost)</td></tr>

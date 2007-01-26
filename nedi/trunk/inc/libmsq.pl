@@ -65,7 +65,7 @@ sub InitDB{
 						location VARCHAR(255),contact VARCHAR(255),
 						vtpdomain VARCHAR(32),vtpmode TINYINT unsigned,snmpversion TINYINT unsigned,
 						community VARCHAR(32),cliport SMALLINT unsigned,login VARCHAR(32),
-						icon VARCHAR(16),index (name(8)) )");
+						icon VARCHAR(16),origip INT unsigned,index (name(8)) )");
  	$dbh->commit;
 						
 	print "devdel, ";
@@ -99,7 +99,8 @@ sub InitDB{
  	$dbh->commit;
 
 	print "configs, ";
-	$dbh->do("CREATE TABLE configs	(	device VARCHAR(64) UNIQUE,config TEXT,changes TEXT,time INT unsigned,index (device(8)) )");
+	$dbh->do("CREATE TABLE configs	(	device VARCHAR(64) UNIQUE,config MEDIUMTEXT,changes MEDIUMTEXT ,time INT unsigned,
+						index (device(8)) )");
  	$dbh->commit;
 
 	print "nodes, ";
@@ -190,6 +191,7 @@ sub ReadDev {
 	while ((my @f) = $sth->fetchrow_array) {
 		my $na = $f[0];
 		$main::dev{$na}{ip} = &misc::Dec2Ip($f[1]);
+		$main::dev{$na}{oi} = &misc::Dec2Ip($f[19]);								# Used for community tracking too
 		$main::dev{$na}{sn} = $f[2];
 		$main::dev{$na}{ty} = $f[3];
 		$main::dev{$na}{fs} = $f[4];
@@ -204,7 +206,9 @@ sub ReadDev {
 		$main::dev{$na}{vm} = $f[13];
 		$main::dev{$na}{sp} = $f[14] & 127;
 		$main::dev{$na}{hc} = $f[14] & 128;
-		$main::dev{$na}{cm} = $misc::dcomm{$main::dev{$na}{ip}} = $f[15];					# Tie community to IP. That's all we'll know prior querying.
+		$main::dev{$na}{cm} = $f[15];
+		$misc::dcomm{$main::dev{$na}{ip}} = $f[15];								# Tie community to IPs,
+		$misc::dcomm{$main::dev{$na}{oi}} = $f[15];								# that's all we'll know at first
 		$main::dev{$na}{cp} = $f[16];
 		$main::dev{$na}{us} = $f[17];
 		$main::dev{$na}{ic} = $f[18];
@@ -313,7 +317,7 @@ sub WriteDev {
 							description,os,bootimage,
 							location,contact,
 							vtpdomain,vtpmode,snmpversion,
-							community,cliport,login,icon) VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
+							community,cliport,login,icon,origip) VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
 
 	foreach my $na ( sort keys(%main::dev) ){
 		if (exists $devdel{$na}){
@@ -336,6 +340,7 @@ sub WriteDev {
 			if(!defined $main::dev{$na}{cp}){$main::dev{$na}{cp}	= 0}
 			if(!defined $main::dev{$na}{sp}){$main::dev{$na}{sp}	= 0}
 			if(!defined $main::dev{$na}{hc}){$main::dev{$na}{hc}	= 0}
+			if(!defined $main::dev{$na}{oi}){$main::dev{$na}{oi}	= 0}
 			if(!$main::dev{$na}{ic}){
 				if($main::dev{$na}{sv} > 8){
 					$main::dev{$na}{ic} = 'geng';
@@ -349,6 +354,7 @@ sub WriteDev {
 			}
 			my $sphc = $main::dev{$na}{sp} + $main::dev{$na}{hc};
 			my $dip = &misc::Ip2Dec($main::dev{$na}{ip});
+			my $doi = &misc::Ip2Dec($main::dev{$na}{oi});
 
 			$sth->execute (	$na,
 					$dip,
@@ -368,7 +374,8 @@ sub WriteDev {
 					$main::dev{$na}{cm},
 					$main::dev{$na}{cp},
 					$main::dev{$na}{us},
-					$main::dev{$na}{ic}	);
+					$main::dev{$na}{ic},
+					$doi	);
 			$ndev++;
 		}
 	}

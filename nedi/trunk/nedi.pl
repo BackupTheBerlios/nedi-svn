@@ -70,16 +70,17 @@ if ($opt{D}){
 # Functions to be debugged go here
 #	&db::UnStock();
 	&misc::BuildArp() if(defined $misc::arpwatch);								# Needs to be built before Links!
+	&misc::Link();
+
+	print &db::ReadNod();
+	&misc::BuildNod();
+	&misc::RetireNod();
+
 #	&db::WriteDev();
 #	&db::WriteVlan();
 #	&db::WriteInt();
 #	&db::WriteNet();
-	&misc::Link();
 #	&db::WriteLink();
-
-#	&db::ReadNod();
-#	&misc::BuildNod();
-#	&misc::RetireNod();
 #	&db::WriteNod();
 
 	die "\n=== Debugging ended! ===\n";
@@ -220,7 +221,7 @@ sub Help {
 	print "-i	initialize database and start all over\n";
 	print "-w<path>	add Kismet csv files in path to WLAN database.\n";
 	print "-t<ip>	test IP only, but don't write anything\n";
-	print "-d/D	store (and verbose discovery)/retrieve vars in debug mode\n";
+	print "-d/D	store internal variables and print debug info/debug mode (check lines 66-86)\n";
 	print "-v	verbose output\n";
 	print "-y	show supported devices based on .def files (in sysobj)\n\n";
 	print "\nOutput Legend -----------------------------------------------------------\n";
@@ -247,5 +248,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 18.Jan 2007\n";
+	die "NeDi 1.0.w 26.Jan 2007\n";
 }

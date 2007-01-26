@@ -11,6 +11,7 @@
 # 04/03/05	revised backend
 # 13/05/05	added line#
 # 10/03/06	new SQL query support
+# 25/01/07	suppres motd char option
 */
 
 $bg1	= "99AACC";
@@ -26,6 +27,7 @@ $_GET = sanitize($_GET);
 $shl = isset($_GET['shl']) ? $_GET['shl'] : "";
 $shc = isset($_GET['shc']) ? $_GET['shc'] : "";
 $sln = isset($_GET['sln']) ? $_GET['sln'] : "";
+$smo = isset($_GET['smo']) ? $_GET['smo'] : "";
 $dch = isset($_GET['dch']) ? $_GET['dch'] : "";
 $dco = isset($_GET['dco']) ? $_GET['dco'] : "";
 $str = isset($_GET['str']) ? $_GET['str'] : "";
@@ -52,7 +54,7 @@ if($shl == 'Inverted'){
 <option value="">----------
 <?
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
-$query	= GenQuery('configs','s','device','device');
+$query	= GenQuery('configs');
 $res	= @DbQuery($query,$link);
 if($res){
 	while( ($d = @DbFetchRow($res)) ){
@@ -144,7 +146,7 @@ if ($shl){
 			echo "<th bgcolor=#$bi><a href=Devices-Status.php?dev=$ucon><img src=img/dev/$img.png title=\"$typ\" border=0></a><br>\n";
 			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ucon&ord=device><b>$con[0]</b></a>\n";
 
-			echo "<td><a href=$_SERVER[PHP_SELF]?shc=$ucon&sln=$sln><pre>$cfg</pre></a></td>\n";
+			echo "<td><a href=$_SERVER[PHP_SELF]?shc=$ucon><pre>$cfg</pre></a></td>\n";
 			$cu	= date("j.M (G:i)",$con[3]);
 			list($u1c,$u2c) = Agecol($con[3],$con[3],$row % 2);
 			echo "<td><pre>$chg</pre></td><td>".$devos[$con[0]]."</td><td bgcolor=#$u1c>$cu</td>\n";
@@ -203,6 +205,8 @@ if ($shl){
 			$l = "<font style='color: olive'>$l</font>";
 		elseif( preg_match("/^router|^ network|vlan/",$l) )
 			$l = "<font style='color: green'>$l</font>";
+		elseif($smo)
+			$l = preg_replace("/ (\^)([\w])$/"," $1",$l);
 		if($sln)
 			$config .= sprintf("<i>%3d</i> $l\n",$lnr);
 		else
@@ -224,6 +228,7 @@ if(preg_match("/adm/",$_SESSION['group']) )
 #if ( file_exists("log/$ucfg.cfg") )
 #	echo "<a href=\"log/$ucfg.conf\"><img src=img/16/flop.png align=right border=0 title=\"Save link as...\"></a>\n";
 echo "<a href=$_SERVER[PHP_SELF]?shc=$ucfg&sln=" . (!$sln) . "><img src=img/16/form.png align=right border=0 title=\"Toggle Line#\"></a>\n";
+echo "<a href=$_SERVER[PHP_SELF]?shc=$ucfg&smo=" . (!$smo) . "><img src=img/16/say.png align=right border=0 title=\"Suppress motd character\"></a>\n";
 echo "<ul><pre>$config</pre></ul>\n";
 echo "</td><td align=left valign=top  bgcolor=#$bib >";
 if(preg_match("/adm/",$_SESSION['group']) )

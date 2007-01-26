@@ -195,7 +195,7 @@ function selectbox($type,$sel="") {
 	if($type == "oper"){
 		$options = array("regexp"=>"regexp","not regexp"=>"not regexp",">"=>">","="=>"=","!="=>"!=",">="=>">=","<"=>"<");
 	}elseif($type == "comop"){
-		$options = array(""=>"A only","AND"=>"A and B","OR"=>"A or B",">"=>"colA > colB","="=>"colA = colB","<"=>"colA < colB");
+		$options = array(""=>"A only","AND"=>"A and B","OR"=>"A or B",">"=>"colA > colB","="=>"colA = colB","!="=>"colA != colB","<"=>"colA < colB");
 	}elseif($type == "limit"){
 		$options = array("10"=>"10","20"=>"20","50"=>"50","100"=>"100","500"=>"500","0"=>"none!");
 	}

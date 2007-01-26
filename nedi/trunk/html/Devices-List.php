@@ -34,8 +34,9 @@ $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
 $col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','location','contact','type');
 
-$cols = array(	"name"=>"Device",
-		"ip"=>"IP address",
+$cols = array(	"name"=>"Name",
+		"ip"=>"Main IP",
+		"origip"=>"Original IP",
 		"serial"=>"Serial #",
 		"type"=>"Type",
 		"services"=>"Services",
@@ -116,6 +117,7 @@ if ($ina){
 
 	ColHead('name');
 	if( in_array("ip",$col) ){ColHead('ip');}
+	if( in_array("origip",$col) ){ColHead('origip');}
 	if( in_array("serial",$col) ){ColHead('serial');}
 	if( in_array("type",$col) ){ColHead('type');}
 	if( in_array("services",$col) ){ColHead('services');}
@@ -144,6 +146,7 @@ if ($ina){
 			if ($row % 2){$bg = $bgb; $bi = $bib;}else{$bg = $bga; $bi = $bia;}
 			$row++;
 			$ip = long2ip($dev[1]);
+			$oi = long2ip($dev[19]);
 			$ud = urlencode($dev[0]);
 			list($fc,$lc) = Agecol($dev[4],$dev[5],$row % 2);
 			echo "<tr bgcolor=#$bg><th bgcolor=#$bi>\n";
@@ -153,6 +156,9 @@ if ($ina){
 			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=device><b>$dev[0]</b></a>\n";
 			if(in_array("ip",$col)){
 				echo "<td><a href=telnet://$ip>$ip</a></td>";
+			}
+			if(in_array("origip",$col)){
+				echo "<td><a href=telnet://$oi>$oi</a></td>";
 			}
 			if(in_array("serial",$col)){ echo "<td>$dev[2]</td>";}
 			if(in_array("type",$col)){ 

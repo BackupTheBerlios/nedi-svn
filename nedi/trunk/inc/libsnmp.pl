@@ -169,7 +169,7 @@ sub Identify {
 			}else{
 				$main::dev{$name}{sv} = &misc::Strip($r->{$srvO});
 			}
-			print "SV=$main::dev{$name}{sv} $so=$misc::sysobj{$so}{ty} " if $main::opt{d};
+			print "SV=$main::dev{$name}{sv} TY:$main::dev{$name}{ty} " if $main::opt{d};
 		}
 		$session->close;
 	}
@@ -337,7 +337,7 @@ sub Interfaces {
 	my $myioc	= "";
 	my $myooc	= "";
 	
-	my $notice	= 0;
+	my $warn	= 0;
 	my $ni		= 0;
 
 	my %ifde	= ();
@@ -401,27 +401,27 @@ sub Interfaces {
 
 	$r = $session->get_table($ifdesO);								# Walk interface description.
 	$err = $session->error;
-	if ($err){print "Id";print "$err\n" if $main::opt{d};$notice++}else{%ifde  = %{$r}}
+	if ($err){print "Id";print "$err\n" if $main::opt{d};$warn++}else{%ifde  = %{$r}}
 
 	$r = $session->get_table($ifnamO);								# Walk interface name.
 	$err = $session->error;
-	if ($err){print "In";print "$err\n" if $main::opt{d};$notice++}else{ %ifna = %{$r}}
+	if ($err){print "In";print "$err\n" if $main::opt{d};$warn++}else{ %ifna = %{$r}}
 
 	$r = $session->get_table($iftypO);								# Walk interface type.
 	$err = $session->error;
-	if ($err){print "It";print "$err\n" if $main::opt{d};$notice++}else{%iftp  = %{$r}}
+	if ($err){print "It";print "$err\n" if $main::opt{d};$warn++}else{%iftp  = %{$r}}
 
 	$r = $session->get_table($ifspdO);								# Walk interface speed.
 	$err = $session->error;
-	if ($err){print "Is";print "$err\n" if $main::opt{d};$notice++}else{%ifsp  = %{$r}}
+	if ($err){print "Is";print "$err\n" if $main::opt{d};$warn++}else{%ifsp  = %{$r}}
 
 	$r = $session->get_table($ifmacO);								# Walk interface mac address.
 	$err = $session->error;
-	if ($err){print "Im";print "$err\n" if $main::opt{d};$notice++}else{%ifmc  = %{$r}}
+	if ($err){print "Im";print "$err\n" if $main::opt{d};$warn++}else{%ifmc  = %{$r}}
 
 	$r = $session->get_table($ifadmO);								# Walk interface admin status
 	$err = $session->error;
-	if ($err){print "Ia";print "$err\n" if $main::opt{d};$notice++}else{%ifas  = %{$r}}
+	if ($err){print "Ia";print "$err\n" if $main::opt{d};$warn++}else{%ifas  = %{$r}}
 
 	if($misc::sysobj{$main::dev{$_[0]}{so}}{hc}){							# Walk interface HC in .def
 		$r = $session->get_table($ifhioO);
@@ -429,13 +429,13 @@ sub Interfaces {
 		if ($err){
 			print "Ih";
 			print "$err\n" if $main::opt{d};
-			$notice++;
+			$warn++;
 		}else{
 			$myioc = $ifhioO;
 			%ifio  = %{$r};
 			$r = $session->get_table($ifhooO);						# Walk interface HC out octets
 			$err = $session->error;
-			if ($err){print "IH";$notice++}else{
+			if ($err){print "IH";$warn++}else{
 				$main::dev{$dv}{hc} = 128;						# Remember HC support for future reference
 				$myooc = $ifhooO;
 				%ifoo  = %{$r};
@@ -448,7 +448,7 @@ sub Interfaces {
 		if ($err){
 			print "Io";
 			print "$err\n" if $main::opt{d};
-			$notice++;
+			$warn++;
 		}else{
 			$myioc = $ifinoO;
 			%ifio  = %{$r};
@@ -457,7 +457,7 @@ sub Interfaces {
 			if ($err){
 				print "IO";
 				print "$err\n" if $main::opt{d};
-				$notice++;
+				$warn++;
 			}else{
 				$myooc = $ifotoO;
 				%ifoo  = %{$r};
@@ -466,15 +466,15 @@ sub Interfaces {
 	}
 	$r = $session->get_table($ifineO);								# Walk interface in errors
 	$err = $session->error;
-	if ($err){print "Ie";print "$err\n" if $main::opt{d};$notice++}else{ %ifie  = %{$r}}
+	if ($err){print "Ie";print "$err\n" if $main::opt{d};$warn++}else{ %ifie  = %{$r}}
 
 	$r = $session->get_table($ifoteO);								# Walk interface in errors
 	$err = $session->error;
-	if ($err){print "IE";print "$err\n" if $main::opt{d};$notice++}else{ %ifoe  = %{$r}}
+	if ($err){print "IE";print "$err\n" if $main::opt{d};$warn++}else{ %ifoe  = %{$r}}
 
 	$r = $session->get_table($ifaliO);								# Walk interface alias.
 	$err = $session->error;
-	if ($err){print "Il";print "$err\n" if $main::opt{d};$notice++}else{ %ifal  = %{$r}}
+	if ($err){print "Il";print "$err\n" if $main::opt{d};$warn++}else{ %ifal  = %{$r}}
 	if($ifalxO){
 		$r = $session->get_table($ifalxO);							# Walk index table if specified...
 		$err = $session->error;
@@ -500,7 +500,7 @@ sub Interfaces {
 	if($ifvlaO){											# Same for IF vlans...
 		$r = $session->get_table($ifvlaO);
 		$err = $session->error;
-		if ($err){print "Iv";print "$err\n" if $main::opt{d};$notice++}else{ %ifvl  = %{$r}}
+		if ($err){print "Iv";print "$err\n" if $main::opt{d};$warn++}else{ %ifvl  = %{$r}}
 	}
 	if($ifvlxO){											# If vlans use a different index
 		if(exists $usedoid{$ifvlxO}){								# and if it's been used before
@@ -543,7 +543,7 @@ sub Interfaces {
 		}else{
 			$r = $session->get_table($ifdupO);
 			$err = $session->error;
-			if ($err){print "Id";print "$err\n" if $main::opt{d};$notice++}else{ %ifdp  = %{$r}}
+			if ($err){print "Id";print "$err\n" if $main::opt{d};$warn++}else{ %ifdp  = %{$r}}
 		}
 	}
 	if($ifduxO){											# If duplex uses a different index
@@ -581,7 +581,7 @@ sub Interfaces {
 		my $idn = &misc::Shif( "$ifde{$dek}" );
 		if ( $ifna{"$ifnamO.$i"} ){
 			if(exists $misc::portprop{$dv}{$ifna{"$ifnamO.$i"}} ){
-				$ina = $ifna{"$ifnamO.$i"} . "$i";
+				$ina = $ifna{"$ifnamO.$i"} . "-$i";
 			}else{
 				$ina = $ifna{"$ifnamO.$i"};
 			}
@@ -627,7 +627,7 @@ sub Interfaces {
 		$ni++;
 	}
 	print " i$ni" if !$main::opt{v};
-	return $notice;
+	return $warn;
 }
 
 #===================================================================
@@ -643,7 +643,7 @@ sub IfAddresses {
 	my %aifx	= ();
 	my %ainm	= ();
 
-	my $notice	= 0;
+	my $warn	= 0;
 	my $nia		= 0;
 	
 	my $newip	= "";
@@ -672,7 +672,7 @@ sub IfAddresses {
 
 	$r   = $session->get_table($ianmO);
 	$err = $session->error;
-	if ($err){print "Am";print "$err\n" if $main::opt{d};$notice++}else{%ainm = %{$r}}
+	if ($err){print "Am";print "$err\n" if $main::opt{d};$warn++}else{%ainm = %{$r}}
 	$session->close;
 
 	foreach my $k (keys %aifx){
@@ -700,11 +700,12 @@ sub IfAddresses {
 		$nia++;
 	}
 	if ($ippri < 5 and !$main::opt{I}){
+		$main::dev{$dv}{oi} = $main::dev{$dv}{ip};
 		$main::dev{$dv}{ip} = $newip;
 		print "\n New IP:$main::dev{$dv}{ip} (Priority $ippri)" if $main::opt{v};
 	}
 	print " p$nia" if !$main::opt{v};
-	return $notice;
+	return $warn;
 }
 
 #===================================================================
@@ -857,7 +858,6 @@ sub CDP {
 					if (!$main::dev{$renam}{fs}){$main::dev{$renam}{fs} = $main::now}
 					$main::dev{$renam}{ls} = $main::now;
 					$misc::portprop{$_[0]}{$lif}{pho} = 1;
-					#print "Qp\t";
 				}else{									# none of the above...let's queue it!
 					$misc::portprop{$_[0]}{$lif}{upl} = 1;
 					if (grep /^\Q$rci\E$/,(@misc::donecdp,@misc::donenam,@misc::todo) ){	# Don't queue if done or already queued... (The \Q \E is to prevent interpreting the CDPid as a regexp)
@@ -876,11 +876,10 @@ sub CDP {
 			print "\n CDP:$lif -> $rtyp $rip $renam (SV:$rsrv, P:$rpwr mW, SN:$rser) on $rif ($rdup) VL$rvln" if $main::opt{v};
 		}
 	}
-	if ($main::opt{d}){
-#		printf ("%4d+%d",$ad,$dn );
-		print " c$ad/$dn-b$bd";
+	if (!$main::opt{v}){
+		print " c$ad";
+		if ($bd){print " b$bd"}
 	}
-
 }
 
 #===================================================================
@@ -911,6 +910,8 @@ sub ArpTable {
 	my $bd		= 0;
 	my $dn		= 0;
 
+	my $warn	= 0;
+
 	my $NmifO	= "1.3.6.1.2.1.4.22.1.2";
 	
 	($session, $error) = Net::SNMP->session(-hostname  => $main::dev{$_[0]}{ip},
@@ -934,7 +935,7 @@ sub ArpTable {
 			$misc::rarp{"$i[11].$i[12].$i[13].$i[14]"} = $mc;				# will be needed to identify OUI uplinks;
 
 			my $po = "";
-			if(defined $main::int{$_[0]}{$i[10]} ){;
+			if(defined $main::int{$_[0]}{$i[10]} ){
 				$po = $main::int{$_[0]}{$i[10]}{ina};
 				$misc::portprop{$_[0]}{$po}{rtr} = 1;
 				$misc::portprop{$_[0]}{$po}{pop}++;
@@ -942,8 +943,13 @@ sub ArpTable {
 				$vl = ($po =~ /^Vl(\d+)$/) ? $1 : "";
 				$misc::portnew{$mc}{$_[0]}{vl} = $vl;
 				print "\n ARP:$mc=$misc::arp{$mc} on $po" if $main::opt{v};
-			}else{
+			}else{										# This can happen on loadbalancers, when IF is in AT table
 				print "An";
+				$warn++;
+				$misc::portprop{$_[0]}{'-'}{rtr} = 1;
+				$misc::portprop{$_[0]}{'-'}{chn} = 1;					# No IF, treat as channel to avoid MAC population
+				$misc::portprop{$_[0]}{'-'}{pop}++;
+				$misc::portnew{$mc}{$_[0]}{po} = '-';
 			}
 			$narp ++;
 
@@ -976,10 +982,11 @@ sub ArpTable {
 	if (!$main::opt{v}){
 		print " a$narp";
 		if ($main::opt{o}){
-			print " o$noui+$dn";
-			if ($bd){print " b$bd"}else{print "  "}
-		}else{print "  "}
+			print " o$noui";
+			if ($bd){print " b$bd"}
+		}else{print "   "}
 	}
+	return $warn;
 }
 
 #===================================================================
@@ -1064,7 +1071,7 @@ sub MacTable {
 
 sub Modules {
 
-	my $notice = 0;
+	my $warn = 0;
 	my $nmod   = 0;
 
 	my %mde = ();
@@ -1093,37 +1100,37 @@ sub Modules {
 	if($misc::sysobj{$so}{md}){
 		$r = $session->get_table($misc::sysobj{$so}{md});					# Walk module description
 		$err = $session->error;
-		if ($err){print "Md";print "$err\n" if $main::opt{d};$notice++}else{%mde  = %{$r}}
+		if ($err){print "Md";print "$err\n" if $main::opt{d};$warn++}else{%mde  = %{$r}}
 	}
 	if($misc::sysobj{$so}{mc}){
 		$r = $session->get_table($misc::sysobj{$so}{mc});					# Walk module classes
 		$err = $session->error;
-		if ($err){print "Mc";print "$err\n" if $main::opt{d};$notice++}else{%mcl  = %{$r}}
+		if ($err){print "Mc";print "$err\n" if $main::opt{d};$warn++}else{%mcl  = %{$r}}
 	}
 	if($misc::sysobj{$so}{mh}){
 		$r = $session->get_table($misc::sysobj{$so}{mh});					# Walk module hardware version
 		$err = $session->error;
-		if ($err){print "Mh";print "$err\n" if $main::opt{d};$notice++}else{%mhw  = %{$r}}
+		if ($err){print "Mh";print "$err\n" if $main::opt{d};$warn++}else{%mhw  = %{$r}}
 	}
 	if($misc::sysobj{$so}{ms}){
 		$r = $session->get_table($misc::sysobj{$so}{ms});					# Walk module software version
 		$err = $session->error;
-		if ($err){print "Ms";print "$err\n" if $main::opt{d};$notice++}else{%msw  = %{$r}}
+		if ($err){print "Ms";print "$err\n" if $main::opt{d};$warn++}else{%msw  = %{$r}}
 	}
 	if($misc::sysobj{$so}{mf}){
 		$r = $session->get_table($misc::sysobj{$so}{mf});					# Walk module firmware version
 		$err = $session->error;
-		if ($err){print "Mf";print "$err\n" if $main::opt{d};$notice++}else{%mfw  = %{$r}}
+		if ($err){print "Mf";print "$err\n" if $main::opt{d};$warn++}else{%mfw  = %{$r}}
 	}
 	if($misc::sysobj{$so}{mn}){
 		$r = $session->get_table($misc::sysobj{$so}{mn});					# Walk module serial number
 		$err = $session->error;
-		if ($err){print "Mn";print "$err\n" if $main::opt{d};$notice++}else{%msn  = %{$r}}
+		if ($err){print "Mn";print "$err\n" if $main::opt{d};$warn++}else{%msn  = %{$r}}
 	}
 	if($misc::sysobj{$so}{mm}){
 		$r = $session->get_table($misc::sysobj{$so}{mm});					# Walk module model
 		$err = $session->error;
-		if ($err){print "Mm";print "$err\n" if $main::opt{d};$notice++}else{%mmo  = %{$r}}
+		if ($err){print "Mm";print "$err\n" if $main::opt{d};$warn++}else{%mmo  = %{$r}}
 	}
 	$session->close;
 

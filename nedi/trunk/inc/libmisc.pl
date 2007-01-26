@@ -326,7 +326,6 @@ sub Discover {
 	my $peer  = $doip{$_[0]};
 	my @cfg   = ();
 	my $name  = "";
-	my $cnok = 1;
 	print "$peer\t";
 	if($peer =~ /$netfilter/){
 		$name  = &snmp::Identify($peer);
@@ -345,66 +344,50 @@ sub Discover {
 			return '';
 		}else{
 			&snmp::Enterprise($name);
-			my $w = 0;
 			if(&snmp::Interfaces($name)){print " "}else{print "\t"}					# Get interfaces and use less spacing, if we had warnings
 			if(&snmp::IfAddresses($name)){print " "}else{print "\t"}				# Get IP addresses and use less spacing, if we had warnings
 			if(defined $rrdstep){&ManageRRD($name)}
-			if($misc::sysobj{$main::dev{$name}{so}}{dp} eq "CDP"){
+			
+			if($misc::sysobj{$main::dev{$name}{so}}{dp} eq "CDP"){					# Even without -c to identify links
 				&snmp::CDP($name,$_[0]);
 			}elsif($misc::sysobj{$main::dev{$name}{so}}{dp} eq "LLDP"){
 				&snmp::LLDP($name,$_[0]);
 			}else{
 				print "   ";
 			}
-			if($misc::sysobj{$main::dev{$name}{so}}{mt}){&snmp::Modules($name)}
+			
+			if($misc::sysobj{$main::dev{$name}{so}}{mt}){
+				if(&snmp::Modules($name)){print " "}else{print "\t"};
+			}
+			
 			if ($main::dev{$name}{sv} > 3){
-				&snmp::ArpTable($name);
+				if(!&snmp::ArpTable($name)){print "\t"};
 			}else{
 				print "\t";									# Spacer instead of L3 info.
 			}
-			if($main::dev{$name}{us}){								# Don't prep if name exists
-				$cnok = 0;
-			}elsif(defined $main::dev{$name}{cp} and $main::dev{$name}{cp} == 0){			# No name but port is 0 means a previous run failed
-				$cnok = 2;
-			}
-#			print "---- $cnok:$main::dev{$name}{us}:$main::dev{$name}{cp} ----";
 
-			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  specified in .def
-				if(defined $main::opt{s}){							# Force SNMP if opt_s or specified in .def
-					&snmp::MacTable($name);
-				}else{
-					if($cnok == 1){$cnok = &cli::PrepDev($name)}				# PrepDev returns 2, if failed
-					if(!$cnok and $main::dev{$name}{os} eq "IOS"){
-						if( &cli::GetIosMacTab($name) ){				# Fall back to SNMP if telnet fails.
-							&snmp::MacTable($name);
-						}
-					}elsif(!$cnok and $main::dev{$name}{os} eq "CatOS"){
-						if( &cli::GetCatMacTab($name) ){				# Fall back to SNMP if telnet fails.
-							&snmp::MacTable($name);
-						}
-					}else{
-						&snmp::MacTable($name);						# Fall back to SNMP for unsupported switches
+			my $clibad = 1;
+			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  bridging is set in .def
+				if(!$main::opt{s}){
+					$clibad = &cli::PrepDev($name,"mac");					# PrepDev returns 2 upon failure
+					if(!$clibad){
+						$clibad = &cli::GetMacTab($name);
 					}
+				}
+				if($clibad){
+					&snmp::MacTable($name);							# Do SNMP if telnet fails or -s
 				}
 			}else{
 				print "  ";									# Spacer instead of L2 info.
 			}
-			if($cnok != 2 and $main::opt{b}){
-				if($cnok){$cnok = &cli::PrepDev($name)}						# prep if cnok is 1
-				if(!$cnok){
-					if($main::dev{$name}{os} eq "IOS"){
-						&db::BackupCfg( $name, &cli::GetIosCfg($name) );
-					}elsif($main::dev{$name}{os} eq "CatOS"){
-						&db::BackupCfg( $name, &cli::GetCatCfg($name) );
-					}elsif($main::dev{$name}{os} eq "Cat1900"){
-						&db::BackupCfg( $name, &cli::GetC19Cfg($name) );
-					}elsif($main::dev{$name}{os} eq "Ironware"){
-						&db::BackupCfg( $name, &cli::GetIronCfg($name) );
-					}elsif($main::dev{$name}{os} eq "ProCurve"){
-						&db::BackupCfg( $name, &cli::GetProCfg($name) );
-					}
+
+			if($main::opt{b}){
+				$clibad = &cli::PrepDev($name,"cfg");
+				if(!$clibad){
+					&cli::GetCfg($name);
 				}
 			}
+
 			if (!exists $main::dev{$name}{fs}){$main::dev{$name}{fs} = $main::now}
 			$main::dev{$name}{ls} = $main::now;
 			print "\t";
@@ -682,7 +665,7 @@ sub UpIpNod {
 	$main::nod{$mc}{na} = gethostbyaddr(inet_aton($arp{$mc}), AF_INET) or $main::nod{$mc}{na} = "";
 	$main::nod{$mc}{au} = $main::now;
 	
-	print "IP:$arp{$mc} $main::nod{$mc}{na} "  if $main::opt{v};
+	print " IP:$arp{$mc} $main::nod{$mc}{na} "  if $main::opt{v};
 }
 
 #===================================================================
@@ -697,7 +680,7 @@ sub BuildNod {
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
 	foreach my $mc (keys(%arp)){
 		if (!grep /^$arp{$mc}$/,@doneip or $main::opt{N}){						# Don't use devices as nodes.
-			print "NOD:$mc [" if $main::opt{v};
+			print " NOD:$mc [" if $main::opt{v};
 			if ( exists $portnew{$mc} ){
 				my $nodex = 0;
 				if(exists $main::nod{$mc}){
@@ -741,17 +724,17 @@ sub BuildNod {
 			$nip++;
 		}else{
 			print "x" if $main::opt{d};
-			print "Device $arp{$mc} not added to nodes!\n" if $main::opt{v};
+			print " NOD:$mc is device $arp{$mc} not added!\n" if $main::opt{v};
 		}
 	}
 	print "Building non IP nodes from MAC tables:\n"  if $main::opt{v};
 
 	foreach my $mc (keys(%portnew)){
 		if (!exists $arp{$mc}){
-			print "NOD:$mc " if $main::opt{v};
+			print " NOD:$mc " if $main::opt{v};
 			if(exists $ifmac{$mc}){
 				print "x"  if $main::opt{d};
-				print " device MAC!\n" if $main::opt{v};
+				print " is a device!\n" if $main::opt{v};
 			}else{
 				my $nodex = 0;
 				if(exists $main::nod{$mc}){
@@ -781,7 +764,7 @@ sub BuildNod {
 					$main::nod{$mc}{iu} = $main::now;
 					print "] $dv-$if\n" if $main::opt{v};
 				}else{
-					print "old IF kept $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
+					print "old IF $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
 				}
 				print "n"  if $main::opt{d};
 				$nnip++;

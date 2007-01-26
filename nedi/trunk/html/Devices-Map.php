@@ -243,6 +243,7 @@ function Writemap($usr,$nd) {
 			"\$bl1 = ImageColorAllocate(\$image, 0, 0, 200);",
 			"\$bl2 = ImageColorAllocate(\$image, 0, 100, 200);",
 			"\$bl3 = ImageColorAllocate(\$image, 100, 150, 220);",
+			"\$org = ImageColorAllocate(\$image, 220, 220, 0);",
 			"\$wte = ImageColorAllocate(\$image, 255, 255, 255);",
 			"\$blk = ImageColorAllocate(\$image, 0, 0, 0);",
 			"ImageFilledRectangle(\$image, 0, 0, $xm, $ym, \$wte);",
@@ -274,7 +275,9 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 
 	global $maplinks,$bwi,$lwt;
 
-	if($bw < 10000000){
+	if($bw == 11000000 or $bw == 54000000){
+		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$org);";
+	}elseif($bw < 10000000){
 		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$grn);";
 	}elseif($bw < 100000000){
 		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$bl2);";

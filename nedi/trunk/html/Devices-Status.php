@@ -91,6 +91,7 @@ if ($shd){
 
 	$ud		= rawurlencode($dev[0]);
 	$ip		= ($dev[1]) ? long2ip($dev[1]) : 0;
+	$oi		= ($dev[19]) ? long2ip($dev[19]) : 0;
 	$img		= $dev[18];
 	list($fc,$lc)	= Agecol($dev[4],$dev[5],0);
 	$fs		= date("r",$dev[4]);
@@ -170,7 +171,8 @@ if ($shd){
 ?>
 </td></tr></table>
 </td></tr>
-<tr><th bgcolor=#<?=$bg1?>>IP Address</th>	<td bgcolor=#<?=$bga?>><?=$ip?></td></tr>
+<tr><th bgcolor=#<?=$bg1?>>Main IP</th>		<td bgcolor=#<?=$bga?>><?=$ip?></td></tr>
+<tr><th bgcolor=#<?=$bg1?>>Original IP</th>	<td bgcolor=#<?=$bga?>><?=$oi?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Services</th>	<td bgcolor=#<?=$bgb?>><?=$sv?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Bootimage</th>	<td bgcolor=#<?=$bga?>><?=$dev['9']?> (<?=$os?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Serial #</th>	<td bgcolor=#<?=$bgb?>><?=$dev['2']?></td></tr>

@@ -49,23 +49,33 @@ sub MapTp{
 }
 
 #============================================================================
-# Find login that works.
-# This will only result in multiple tries on new devices, or if username pw changed.
+# Find login, if device is compatible for mac-address-table or config retrieval
 #============================================================================
 sub PrepDev{
 
-	my $nok = 2;
 	my $us  = "";
+	my $nok = 2;
+	my $na = $_[0];
+	my $op = $_[1];
 	my @users = @misc::users;
-	my $cp  = &MapTp($main::dev{$_[0]}{ip});
-#	if ( defined $main::dev{$_[0]}{us} and $main::dev{$_[0]}{us} ne ""){					# Build user list, with priority on db entry of device.
-#		unshift(@users,$main::dev{$_[0]}{us} );
-#	}
-	if($main::dev{$_[0]}{os} eq "Cat1900"){
+	my $cp  = &MapTp($main::dev{$na}{ip});
+
+	if($op eq "mac" and $main::dev{$na}{os} ne "IOS"){							# Only IOS has support for mac-address stuff
+		return 2;
+	}	
+	if($main::dev{$na}{cp}){										# If no port, device is new or set to be prepd
+		if($main::dev{$na}{us}){									# Do we have a user?
+			return 0;										# Lets use that then (clibad=false)
+		}else{												# No user but a port means it failed before
+			return 2;										#  clibad=very true ;-)
+		}
+	}
+	
+	if($main::dev{$na}{os} eq "Cat1900"){
 		do {
 			$us = shift (@users);
-			print "U:$us " if $main::opt{d};
-			my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
+			print "P:$us " if $main::opt{d};
+			my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$na}{ip},
 								Port	=> $cp,
 								Prompt  => $prompt,
 								Timeout => $misc::timeout,
@@ -86,14 +96,14 @@ sub PrepDev{
 				print "Tc";
 				return 2;
 			}
-		} while ($#users ne "-1" and $nok);								# And stop once a login worked or we ran out of them.
-	}elsif( $main::dev{$_[0]}{os} =~ /IOS|CatOS|Ironware/){
+		} while ($#users ne "-1" and $nok);								# And stop on ok or we ran out of logins
+	}elsif( $main::dev{$na}{os} =~ /IOS|CatOS|Ironware/){
 		do {
 			$us = shift (@users);
-			print " U:$us" if $main::opt{d};
+			print " P:$us" if $main::opt{d};
 			if($sshnet){
 				eval {
-				my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip}, options => ["BatchMode yes", 
+				my $ssh = Net::SSH::Perl->new($main::dev{$na}{ip}, options => ["BatchMode yes", 
 												"RhostsAuthentication no",
 												#"UserKnownHostFile /dev/null",
 												#"GlobalKnownHostFile /dev/null",
@@ -113,7 +123,7 @@ sub PrepDev{
 			}
 			print $@ if $main::opt{d};
 			if ($@){		
-				my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
+				my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$na}{ip},
 									Port	=> $cp,
 									Prompt  => $prompt,
 									Timeout	=> $misc::timeout,
@@ -139,13 +149,13 @@ sub PrepDev{
 				}
 			}
 		} while ($#users ne "-1" and $nok);								# And stop once a user worked or we ran out of them.
-	}elsif( $main::dev{$_[0]}{os} =~ /ProCurve/){								# ProCurves throw lots of escape sequences out, which confuse Net::Telnet::Cisco
+	}elsif( $main::dev{$na}{os} eq "ProCurve"){								# ProCurves throw lots of escape sequences out, which confuse Net::Telnet::Cisco
 		do {
 			$us = shift (@users);
-			print " U:$us" if $main::opt{d};
+			print " P:$us" if $main::opt{d};
 			if($sshnet){
 				eval {
-					my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip}, options => ["BatchMode yes", 
+					my $ssh = Net::SSH::Perl->new($main::dev{$na}{ip}, options => ["BatchMode yes", 
 													"RhostsAuthentication no",
 													#"UserKnownHostFile /dev/null",
 													#"GlobalKnownHostFile /dev/null",
@@ -165,7 +175,7 @@ sub PrepDev{
 			}
 			print $@ if $main::opt{d};
 			if ($@){		
-				my $session = Net::Telnet->new(	Host	=> $main::dev{$_[0]}{ip},
+				my $session = Net::Telnet->new(	Host	=> $main::dev{$na}{ip},
 								Port	=> $cp,
 								Prompt  => $prompt,
 								Timeout	=> $misc::timeout,
@@ -202,16 +212,16 @@ sub PrepDev{
 		print "Tu";
 	}else{
 		print ":$cp " if $main::opt{d};
-		$main::dev{$_[0]}{us} = $us;
+		$main::dev{$na}{us} = $us;
 	}
-	$main::dev{$_[0]}{cp} = $cp;
+	$main::dev{$na}{cp} = $cp;
 	return $nok;
 }
 
 #============================================================================
 # Get Ios mac address table.
 #============================================================================
-sub GetIosMacTab{
+sub GetMacTab{
 
 	my $line = "";
 	my $nspo = 0;
@@ -231,7 +241,7 @@ sub GetIosMacTab{
 		};
 		if ($@){
 			print "Ho";
-			return 1;
+			return 2;
 		}
 	}else{
 		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
@@ -246,7 +256,7 @@ sub GetIosMacTab{
 					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
 						$session->close;
 						print "Te";
-						return 1;
+						return 2;
 					}
 				}
 				$session->cmd("terminal len 0");
@@ -255,12 +265,12 @@ sub GetIosMacTab{
 			}else{
 				$session->close;
 				print "Tl";
-				return 1;
+				return 2;
 			}
 			$session->close;
 		}else{
 			print "Tc";
-			return 1;
+			return 2;
 		}
 	}
 	foreach my $l (@cam){
@@ -299,7 +309,7 @@ sub GetIosMacTab{
 }
 
 #============================================================================
-# Get CatOS mac address table.
+# Get CatOS mac address table. DECOMMISSIONED in .w due to inconsisting channel names (plus SNMP is faster!)
 #============================================================================
 sub GetCatMacTab{
 
@@ -369,13 +379,33 @@ sub GetCatMacTab{
 				$misc::portprop{$_[0]}{$po}{pop}++;
 				$misc::portnew{$mc}{$_[0]}{po} = $po;
 				$misc::portnew{$mc}{$_[0]}{vl} = $vl;
-				print "\n FWC:$mc on $po vl $vl" if $main::opt{v};
+				print "\n FWC:$mc on $po vl$vl" if $main::opt{v};
 				$nspo++;
 			}
 		}
 	}
 	print " f$nspo";
 	return 0;
+}
+
+#============================================================================
+# Wrapper to get the proper config
+#============================================================================
+sub GetCfg{
+
+	print " B:$main::dev{$_[0]}{us}:$main::dev{$_[0]}{cp} " if $main::opt{d};
+
+	if($main::dev{$_[0]}{os} eq "IOS"){
+		&db::BackupCfg( $_[0], &cli::GetIosCfg($_[0]) );
+	}elsif($main::dev{$_[0]}{os} eq "CatOS"){
+		&db::BackupCfg( $_[0], &cli::GetCatCfg($_[0]) );
+	}elsif($main::dev{$_[0]}{os} eq "Cat1900"){
+		&db::BackupCfg( $_[0], &cli::GetC19Cfg($_[0]) );
+	}elsif($main::dev{$_[0]}{os} eq "Ironware"){
+		&db::BackupCfg( $_[0], &cli::GetIronCfg($_[0]) );
+	}elsif($main::dev{$_[0]}{os} eq "ProCurve"){
+		&db::BackupCfg( $_[0], &cli::GetProCfg($_[0]) );
+	}
 }
 
 #============================================================================

@@ -2,15 +2,6 @@
 //===================================================================
 // Miscellaneous functions
 //===================================================================
-// Some defaults 
-
-$tabtag = "cellspacing=1 cellpadding=6 border=0 width=100%";
-$lang	= 'eng';
-
-$bga	= "D0D0D0";
-$bgb	= "C0C0C0";
-$bia	= "F0F0F0";
-$bib	= "E6E6E6";
 
 //===================================================================
 // Read configuration
@@ -167,22 +158,23 @@ function Agecol($fs, $ls,$row) {
 
 //===================================================================
 // Generate column headers with sorting
-function ColHead($n){
+function ColHead($n,$w=0){
 
 global $ord,$cols;
-
+	$wi="";
+	if($w){$wi="width=$w";}
 	if (!$ord){
-		echo "<th>$cols[$n]<a href=?$_SERVER[QUERY_STRING]&ord=$n><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
+		echo "<th $wi>$cols[$n]<a href=?$_SERVER[QUERY_STRING]&ord=$n><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
 	}elseif($n == $ord){
-		echo "<th class=blu>$cols[$n] <a href=?";
+		echo "<th $wi class=blu>$cols[$n] <a href=?";
 		echo preg_replace('/&ord=(.*)/',"&ord=$n+desc",$_SERVER['QUERY_STRING']);
 		echo "><img src=img/up.png border=0 title=\"Reverse sort by $n\"></a></th>";
 	}elseif("$n desc" == $ord){
-		echo "<th class=blu>$cols[$n] <a href=?";
+		echo "<th $wi class=blu>$cols[$n] <a href=?";
 		echo preg_replace('/&ord=(.*)/',"&ord=$n",$_SERVER['QUERY_STRING']);
 		echo "><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
 	}else{
-		echo "<th>$cols[$n] <a href=?";
+		echo "<th $wi>$cols[$n] <a href=?";
 		echo preg_replace('/&ord=(.*)/',"&ord=$n",$_SERVER['QUERY_STRING']);
 		echo "><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
 	}

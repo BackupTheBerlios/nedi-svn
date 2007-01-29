@@ -77,8 +77,10 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 		return "SHOW COLUMNS FROM $tab";
 	}else{
 		$l = ($lim) ? "LIMIT $lim" : "";
-		if('device' == $ord){
+		if('ifname' == $ord){
 			$o = "ORDER BY device,SUBSTRING_INDEX(ifname, '/', 1), SUBSTRING_INDEX(ifname, '/', -1)*1";
+		}elseif('ifname desc' == $ord){
+			$o = "ORDER BY device desc,SUBSTRING_INDEX(ifname, '/', 1), SUBSTRING_INDEX(ifname, '/', -1)*1";
 		}elseif($ord){
 			$o = "ORDER BY $ord";
 		}else{

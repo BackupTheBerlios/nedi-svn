@@ -10,7 +10,7 @@
 # 04/03/05	Revised backend
 # 31/03/05	decimal IPs
 # 10/03/06	new SQL query support
-# 18/01/07	new Sorting approach
+# 29/01/07	new Sorting approach
 */
 
 $bg1	 = "88AADD";
@@ -115,7 +115,7 @@ if($rrdstep){ ?>
 if ($ina){
 	echo "<table bgcolor=#666666 $tabtag><tr bgcolor=#$bg2>\n";
 
-	ColHead('name');
+	ColHead('name',80);
 	if( in_array("ip",$col) ){ColHead('ip');}
 	if( in_array("origip",$col) ){ColHead('origip');}
 	if( in_array("serial",$col) ){ColHead('serial');}

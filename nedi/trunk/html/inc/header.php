@@ -3,6 +3,17 @@
 // NeDi header.
 //===============================
 
+// Some defaults 
+
+$lang	= 'eng';
+
+$bga	= "D0D0D0";
+$bgb	= "C0C0C0";
+$bia	= "F0F0F0";
+$bib	= "E6E6E6";
+
+$tabtag = "cellspacing=1 cellpadding=6 border=0 width=100%";
+
 ini_set("memory_limit","16M");							# Added 8.1.2007 due to reporting problems on large networks
 
 session_start(); 

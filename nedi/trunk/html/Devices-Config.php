@@ -11,7 +11,7 @@
 # 04/03/05	revised backend
 # 13/05/05	added line#
 # 10/03/06	new SQL query support
-# 25/01/07	suppres motd char option
+# 29/01/07	suppres motd char, sorting
 */
 
 $bg1	= "99AACC";
@@ -32,6 +32,12 @@ $dch = isset($_GET['dch']) ? $_GET['dch'] : "";
 $dco = isset($_GET['dco']) ? $_GET['dco'] : "";
 $str = isset($_GET['str']) ? $_GET['str'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
+
+$cols = array(	"device"=>"Device",
+		"config"=>"Configuration",
+		"changes"=>"Changes",
+		"time"=>"Update",
+		);
 
 $target	='config';
 $opa	= 'regexp';
@@ -67,14 +73,6 @@ if($res){
 }
 ?>
 </SELECT>
-</th><th>
- Order by 
-<SELECT name="ord" size=1>
-<OPTION VALUE="">-
-<OPTION VALUE="device" <?=($ord == "name")?"selected":""?>>Device
-<OPTION VALUE="changes" <?=($ord == "name")?"selected":""?>>Changes
-<OPTION VALUE="time desc" <?=($ord == "name")?"selected":""?>>Update
-</SELECT>
 </th><th width=80>
 <input type="submit" value="Normal" name="shl" style="width:72px"><br>
 <input type="submit" value="Inverted" name="shl" style="width:72px"><br>
@@ -109,12 +107,12 @@ if ($shl){
 <h2>List</h2>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
-<th width=80><img src=img/32/dev.png><br>Device</th>
-<th><img src=img/32/dtxt.png><br>Config</th>
-<th><img src=img/32/cfg.png><br>Changes</th>
-<th><img src=img/32/cog.png><br>OS</th>
-<th><img src=img/32/clock.png><br>Updated</th></tr>
 <?
+ColHead('device',80);
+ColHead('config');
+ColHead('changes');
+?><th>OS</th><?
+ColHead('time');
 
 	$query	= GenQuery('devices');
 	$res	= @DbQuery($query,$link);

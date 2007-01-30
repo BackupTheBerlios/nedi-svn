@@ -248,5 +248,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 26.Jan 2007\n";
+	die "NeDi 1.0.w 30.Jan 2007\n";
 }

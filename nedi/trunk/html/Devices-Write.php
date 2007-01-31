@@ -40,6 +40,28 @@ $eint = isset( $_POST['eint']) ? $_POST['eint'] : "";
 $emod = isset( $_POST['emod']) ? $_POST['emod'] : "";
 $smod = isset( $_POST['smod']) ? $_POST['smod'] : "";
 $icfg = isset( $_POST['icfg']) ? $_POST['icfg'] : "";
+
+$cols = array(	"name"=>"Name",
+		"ip"=>"Main IP",
+		"origip"=>"Original IP",
+		"serial"=>"Serial #",
+		"type"=>"Type",
+		"services"=>"Services",
+		"description"=>"Description",
+		"os"=>"OS",
+		"bootimage"=>"Bootimage",
+		"location"=>"Location",
+		"contact"=>"Contact",
+		"vtpdomain"=>"VTP Domain",
+		"vtpmode"=>"VTP Mode",
+		"snmpversion"=>"SNMP Ver",
+		"community"=>"Community",
+		"cliport"=>"CLI port",
+		"login"=>"Login",
+		"firstseen"=>"First Seen",
+		"lastseen"=>"Last Seen"
+		);
+
 ?>
 <h1>Device Write</h1>
 
@@ -48,7 +70,12 @@ $icfg = isset( $_POST['icfg']) ? $_POST['icfg'] : "";
 <tr bgcolor=#<?=$bg1?>><th width=80 rowspan=3><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/wrte.png border=0 title="sends commands or configures devices. Warning: Use simulate first!"></a></th>
 <th valign=top>Condition A<p>
 <SELECT size=1 name="ina">
-<? selectbox("devices",$ina);?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = ($ina == $k)?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+?>
 </SELECT>
 <SELECT size=1 name="opa">
 <? selectbox("oper",$opa);?>
@@ -63,7 +90,12 @@ $icfg = isset( $_POST['icfg']) ? $_POST['icfg'] : "";
 </th>
 <th valign=top>Condition B<p>
 <SELECT size=1 name="inb">
-<? selectbox("devices",$inb);?>
+<?
+foreach ($cols as $k => $v){
+       $selopt = ($ina == $k)?"selected":"";
+       echo "<option value=\"$k\" $selopt >$v\n";
+}
+?>
 </SELECT>
 <SELECT size=1 name="opb">
 <? selectbox("oper",$opb);?>

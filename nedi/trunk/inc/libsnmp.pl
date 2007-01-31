@@ -169,7 +169,7 @@ sub Identify {
 			}else{
 				$main::dev{$name}{sv} = &misc::Strip($r->{$srvO});
 			}
-			print "SV=$main::dev{$name}{sv} TY:$main::dev{$name}{ty} " if $main::opt{d};
+			print "SV=$main::dev{$name}{sv} TY=$main::dev{$name}{ty} " if $main::opt{d};
 		}
 		$session->close;
 	}
@@ -185,6 +185,7 @@ sub Enterprise {
 	my $error	= "";
 	my $r		= "";
 	my $err		= "";
+	my $nv		= 0;
 	my $so		= $main::dev{$_[0]}{so};
 	
 	($session, $error) = Net::SNMP->session(-hostname  => $main::dev{$_[0]}{ip},
@@ -319,7 +320,9 @@ sub Enterprise {
 				my $vl = substr($vlO,rindex($vlO,'.') + 1);
 				$main::vlan{$_[0]}{$vl} = $na;
 				print "\n VL:$vl\t$na" if $main::opt{v};
+				$nv++;
 			}
+			print " v$nv" if !$main::opt{v};
 		}
 	}
 	$session->close;
@@ -751,7 +754,7 @@ sub CDP {
 	$err = $session->error;
 	if ($err){
 		$session->close;
-		print "Cd";
+		print "Qc";
 		print "$err\n" if $main::opt{d};
 		return 1;
 	}else{

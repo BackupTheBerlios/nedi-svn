@@ -6,8 +6,9 @@
 #
 # DATE		COMMENT
 # -----------------------------------------------------------
-# 04/07/06	initial version.
-# 08/30/06	formfill and SNMP OID check added.
+# 04/07/06	initial version
+# 08/30/06	formfill and SNMP OID check added
+# 31/01/07	added dot3 and baystack interface templates
 */
 
 $bg1	= "887766";
@@ -23,7 +24,7 @@ include_once ("inc/header.php");
 
 $_GET = sanitize($_GET);
 $c = isset($_GET['c']) ? $_GET['c'] : "public";
-$so = isset($_GET['so']) ? $_GET['so'] : "";
+$so = isset($_GET['so']) ? $_GET['so'] : "1.3.6.1.4.1.?";
 $ip = isset($_GET['ip']) ? $_GET['ip'] : "";
 $wr = isset($_POST['wr']) ? $_POST['wr'] : "";
 
@@ -62,8 +63,8 @@ $ial = "";
 $iax = "";
 $idu = "";
 $idx = "";
-$hdt = "";
-$fdo = "";
+$hdv = "";
+$fdv = "";
 $ivl = "";
 $ivx = "";
 
@@ -115,8 +116,8 @@ if ($so){
 				elseif($d[0] == 'IFalix'){$iax = $d[1];}
 				elseif($d[0] == 'IFdupl'){$idu = $d[1];}
 				elseif($d[0] == 'IFduix'){$idx = $d[1];}
-				elseif($d[0] == 'Halfdp' AND $d[1] == '2'){$hdt = 'selected';}
-				elseif($d[0] == 'Fulldp' AND $d[1] == '1'){$fdo = 'selected';}
+				elseif($d[0] == 'Halfdp'){$hdv = $d[1];}
+				elseif($d[0] == 'Fulldp'){$fdv = $d[1];}
 				elseif($d[0] == 'IFvlan'){$ivl = $d[1];}
 				elseif($d[0] == 'IFvlix'){$ivx = $d[1];}
 				elseif($d[0] == 'Modesc'){$mde = $d[1];}
@@ -175,7 +176,7 @@ function update() {
 		alert('Controls disabled!');
 	}else{
 		document.gen.so.value = document.bld.so.value;
-		document.gen.def.value = "# Definition for " + document.bld.so.value + " created by Defgen 1.1 on <?=$now?>\n" +
+		document.gen.def.value = "# Definition for " + document.bld.so.value + " created by Defgen 1.2 on <?=$now?>\n" +
 		"\n# General\n" +
 		"SNMPv\t" + document.bld.ver.options[document.bld.ver.selectedIndex].value + "\n" +
 		"Type\t" + document.bld.typ.value + "\n" +
@@ -196,8 +197,8 @@ function update() {
 		"IFvlix\t" + document.bld.ivx.value + "\n" +
 		"IFdupl\t" + document.bld.idu.value + "\n" +
 		"IFduix\t" + document.bld.idx.value + "\n" +
-		"Halfdp\t" + document.bld.hdu.options[document.bld.hdu.selectedIndex].value + "\n" +
-		"Fulldp\t" + document.bld.fdu.options[document.bld.fdu.selectedIndex].value + "\n" +
+		"Halfdp\t" + document.bld.hdv.value + "\n" +
+		"Fulldp\t" + document.bld.fdv.value + "\n" +
 		"\n# Modules\n" +
 		"Modesc\t" + document.bld.mde.value + "\n" +
 		"Moclas\t" + document.bld.mcl.value + "\n" +
@@ -268,28 +269,46 @@ function setint(typ) {
 	if ('1' == typ){
 		document.bld.ial.value = "";
 		document.bld.iax.value = "";
-		document.bld.idu.value = "1.3.6.1.4.1.9.9.87.1.4.1.1.32";
-		document.bld.idx.value = "1.3.6.1.4.1.9.9.87.1.4.1.1.25";
-		document.bld.hdu.selectedIndex  = 1;
-		document.bld.fdu.selectedIndex  = 1;
-		document.bld.ivl.value = "1.3.6.1.4.1.9.9.68.1.2.2.1.2";
+		document.bld.idu.value = "1.3.6.1.2.1.10.7.2.1.19";
+		document.bld.idx.value = "1.3.6.1.2.1.10.7.2.1.1";
+		document.bld.hdv.value = "2";
+		document.bld.fdv.value = "3";
+		document.bld.ivl.value = "";
 		document.bld.ivx.value = "";
 	}else if ('2' == typ){
+		document.bld.ial.value = "";
+		document.bld.iax.value = "";
+		document.bld.idu.value = "1.3.6.1.4.1.9.9.87.1.4.1.1.32";
+		document.bld.idx.value = "1.3.6.1.4.1.9.9.87.1.4.1.1.25";
+		document.bld.hdv.value = "2";
+		document.bld.fdv.value = "1";
+		document.bld.ivl.value = "1.3.6.1.4.1.9.9.68.1.2.2.1.2";
+		document.bld.ivx.value = "";
+	}else if ('3' == typ){
 		document.bld.ial.value = "1.3.6.1.4.1.9.5.1.4.1.1.4";
 		document.bld.iax.value = "1.3.6.1.4.1.9.5.1.4.1.1.11";
 		document.bld.idu.value = "1.3.6.1.4.1.9.5.1.4.1.1.10";
 		document.bld.idx.value = "1.3.6.1.4.1.9.5.1.4.1.1.11";
-		document.bld.hdu.selectedIndex  = 0;
-		document.bld.fdu.selectedIndex  = 0;
+		document.bld.hdv.value = "1";
+		document.bld.fdv.value = "2";
 		document.bld.ivl.value = "1.3.6.1.4.1.9.9.68.1.2.2.1.2";
 		document.bld.ivx.value = "";
-	}else if ('3' == typ){
+	}else if ('4' == typ){
+		document.bld.ial.value = "";
+		document.bld.iax.value = "";
+		document.bld.idu.value = "doublespeed";
+		document.bld.idx.value = "";
+		document.bld.hdv.value = "";
+		document.bld.fdv.value = "";
+		document.bld.ivl.value = "1.3.6.1.4.1.2272.1.3.3.1.7";
+		document.bld.ivx.value = "";
+	}else if ('5' == typ){
 		document.bld.ial.value = "";
 		document.bld.iax.value = "";
 		document.bld.idu.value = "1.3.6.1.4.1.1991.1.1.3.3.1.1.4";
 		document.bld.idx.value = "1.3.6.1.4.1.1991.1.1.3.3.1.1.38";
-		document.bld.hdu.selectedIndex  = 0;
-		document.bld.fdu.selectedIndex  = 0;
+		document.bld.hdv.value = "1";
+		document.bld.fdv.value = "2";
 		document.bld.ivl.value = "1.3.6.1.4.1.1991.1.1.3.3.1.1.50";
 		document.bld.ivx.value = "1.3.6.1.4.1.1991.1.1.3.3.1.1.38";
 	}else{
@@ -297,8 +316,8 @@ function setint(typ) {
 		document.bld.iax.value = "";
 		document.bld.idu.value = "";
 		document.bld.idx.value = "";
-		document.bld.hdu.selectedIndex  = 0;
-		document.bld.fdu.selectedIndex  = 0;
+		document.bld.hdv.value = "";
+		document.bld.fdv.value = "";
 		document.bld.ivl.value = "";
 		document.bld.ivx.value = "";
 	}
@@ -426,6 +445,7 @@ General</th></tr>
 <tr><th align=right>
 SysObjId</th><td>
 <input type="text" name="so" value="<?=$so?>" size="30" title="Enter the sysobj id, which will be used as filename" onfocus=select(); onchange="update();">
+<img src=img/16/brgt.png onClick="get('1.3.6.1.2.1.1.2.0');">
 </td><th align=right>
 SNMP version</th><td>
 <select size=1 name="ver" title="Use 2HC, if device supports 64-bit counters" onchange="update();">
@@ -469,10 +489,10 @@ Serial#</th><td>
 <img src=img/16/brgt.png onClick="get(document.bld.sn.value);">
 </td><th align=right>
 Discovery</th><td>
-<select size=1 name="dsp" title="Choose protocol (only CDP support for timebeing)" onfocus=select(); onchange="update();" >
+<select size=1 name="dsp" title="Choose discovery protocol" onfocus=select(); onchange="update();" >
 <option value="">none
 <option value="CDP" <?=$cdp?>>CDP
-<option value="LLDP" <?=$ldp?>>(LLDP)
+<option value="LLDP" <?=$ldp?>>LLDP
 </select>
 </td></tr>
 <tr><th align=right>
@@ -496,9 +516,11 @@ VTP Mode</th><td>
 
 <tr bgcolor=#<?=$bg2?>><th colspan=4>
 <img src="img/16/bcnl.png" align=left onClick="setint('0');" title="Clear Section">
-<img src="img/gsw.png" align=left onClick="setint('1');" title="Cisco c2900-MIB">
-<img src="img/gsw.png" align=left onClick="setint('2');" title="Cisco Stack-MIB">
-<img src="img/ksw.png" align=left onClick="setint('3');" title="Foundry-MIB">
+<img src="img/wsw.png" align=left onClick="setint('1');" title="Standard dot3">
+<img src="img/gsw.png" align=left onClick="setint('2');" title="Cisco c2900">
+<img src="img/gsw.png" align=left onClick="setint('3');" title="Cisco Stack">
+<img src="img/bsw.png" align=left onClick="setint('4');" title="Nortel">
+<img src="img/ksw.png" align=left onClick="setint('5');" title="Foundry">
 Interfaces</th></tr>
 <tr><th align=right>
 IF Alias</th><td>
@@ -520,16 +542,10 @@ Duplex Index</th><td>
 </td></tr>
 <tr><th align=right>
 Half Duplex</th><td>
-<select size=1 name="hdu" title="Mostly a value of 1 is used for half..." onchange="update();" >
-<option value="1" >1
-<option value="2" <?=$hdt?>>2
-</select>
+<input type="text" name="hdv" value="<?=$idx?>" size="2" title="Value used for half-duplex" onfocus=select(); onchange="update();">
 </td><th align=right>
 Full Duplex</th><td>
-<select size=1 name="fdu" title="...and 2 for full duplex in the MIB. If not, edit the text below." onchange="update();" >
-<option value="2" >2
-<option value="1" <?=$fdo?>>1
-</select>
+<input type="text" name="fdv" value="<?=$idx?>" size="2" title="Value used for full-duplex" onfocus=select(); onchange="update();">
 </td></tr>
 <tr><th align=right>
 IF Vlan</th><td>
@@ -543,7 +559,7 @@ Vlan Index</th><td>
 
 <tr bgcolor=#<?=$bg2?>><th colspan=4>
 <img src="img/16/bcnl.png" align=left onClick="setmod('0');" title="Clear Section">
-<img src="img/wsw.png" align=left onClick="setmod('1');" title="Standard Entidy MIB">
+<img src="img/wsw.png" align=left onClick="setmod('1');" title="Standard Entity MIB">
 <img src="img/gsw.png" align=left onClick="setmod('2');" title="Cisco Stack MIB">
 <img src="img/gsw.png" align=left onClick="setmod('3');" title="Older Cisco HW">
 <img src="img/bsw.png" align=left onClick="setmod('4');" title="Nortel Baystack MIB">

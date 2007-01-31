@@ -54,7 +54,7 @@ function DbError($l){
 // $co	= combines current values with the next series of $in,op,st
 //
 // SELECT and DELETE columns treatment: 
-// * ip:	Input will be converted to decimal and masked if a prefix is set.
+// * ip:	Input will be converted to decimal, in case of dotted notation and masked if a prefix is set.
 // * time:	Time will be turned into EPOC, if it's not a number already.
 // * mac:	. : - are removed
 //
@@ -98,7 +98,7 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 						$v = strtotime($v);
 					}elseif('mac' == $c){
 						$v = preg_replace("/[.:-]/","", $v);
-					}elseif('ip' == $c){
+					}elseif('ip' == $c and !preg_match('/^[0-9]+$/',$v) ){
 						if( strstr($v,'/') ){
 							list($ip, $prefix) = explode('/', $v);
 							$dip = sprintf("%u", ip2long($ip));

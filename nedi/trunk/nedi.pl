@@ -211,15 +211,15 @@ sub Help {
 	print "-u<file>	use specified seedlist\n";
 	print "-c	CDP discovery\n";
 	print "-l 	LLDP discovery\n";
-	print "-o	OUI discovery (based on ARP chache entries of the above\n";
+	print "-o	OUI discovery (based on ARP chache entries of the above)\n";
 	print "-b	backup running configs\n";
-	print "-A 	append to networks, links, vlans, interfaces and modules tables.\n";
-	print "-I 	don't try to find best suited IP addresses for devices.\n";
-	print "-L 	don't touch links, so you can maintain them manually.\n";
-	print "-N 	don't exclude devices from nodes.\n";
+	print "-A 	append to networks, links, vlans, interfaces and modules tables\n";
+	print "-I 	don't try to find best suited IP addresses for devices\n";
+	print "-L 	don't touch links, so you can maintain them manually\n";
+	print "-N 	don't exclude devices from nodes\n";
 	print "Other Options -------------------------------------------------------------\n";
 	print "-i	initialize database and start all over\n";
-	print "-w<path>	add Kismet csv files in path to WLAN database.\n";
+	print "-w<path>	add Kismet csv files in path to WLAN database\n";
 	print "-t<ip>	test IP only, but don't write anything\n";
 	print "-d/D	store internal variables and print debug info/debug mode (check lines 66-86)\n";
 	print "-v	verbose output\n";
@@ -231,9 +231,10 @@ sub Help {
 	print "a#	ARP entries\n";
 	print "f#	Forwarding entries\n";
 	print "m#	Modules\n";
+	print "v#	Vlans\n";
 	print "[clo]#/#	(CDP,LLDP or OUI) queueing (added/done already)\n";
 	print "b#	border hits\n";
-	print "\nNotifications (upper case letters):\n";
+	print "\nWarnings (upper case letters):\n";
 	print "Ax	Addresses (i=IF IP, m=IF mask, a=arptable, n=no IF)\n";
 	print "Bx	Backup configs (i=IOS, c=Cat, 9=C1900, n=new, u=updated)\n";
 	print "Fx(#)	Forwarding table (i=IF, p=Port, #=vlan)\n";
@@ -242,11 +243,12 @@ sub Help {
 	print "M#..	Mapping IP or telnet port according to config\n";
 	print "Mx	Modules (t=slot, d=desc, c=class, h=hw, f=fw, s=sw, n=SN, m=model)\n";
 	print "Qx	Queueing (c=CPD, l=LLDP, 0=IP is 0.0.0.0, s=seeing itself, d=desc filter, v=voip)\n";
+	print "Px	CLI preparing (u=no user, set retry in Devices-Status to prep again.)\n";
 	print "Rx	RRD (d=mkdir, u=update, s=create sys, i=create IF)\n";
 	print "Sx	SNMP (c=connect, n=SN, B=Bootimage,u=CPU util, m=CPUmem,i=IOmem,t=Temp)\n";
 	print "Tx	Telnet (c=connect,e=enable, l=login, u=no user, o=other\n";
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 30.Jan 2007\n";
+	die "NeDi 1.0.w 31.Jan 2007\n";
 }

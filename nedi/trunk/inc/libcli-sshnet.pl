@@ -17,6 +17,10 @@
 # SSH doesn't support enable at this stage (only 1 command per session)
 # Foundry only tested with simple telnet pw/en configs
 # HP Procurve is nasty due to lots of escape characters. Only simple telnet pw/en tested as well.
+#
+# GetCfg is a dummy function, with that there's no need to touch libmisc.pl in case more
+# devices are added. This will also help for a complete rewrite (e.g. with DIS)
+#
 #============================================================================
 package cli;
 use Net::Telnet::Cisco;
@@ -58,25 +62,26 @@ sub PrepDev{
 	my $na = $_[0];
 	my $op = $_[1];
 	my @users = @misc::users;
-	my $cp  = &MapTp($main::dev{$na}{ip});
 
 	if($op eq "mac" and $main::dev{$na}{os} ne "IOS"){							# Only IOS has support for mac-address stuff
 		return 2;
 	}	
-	if($main::dev{$na}{cp}){										# If no port, device is new or set to be prepd
+	if(defined $main::dev{$na}{cp} and $main::dev{$na}{cp} != 0){						# If port not defined, it's new or set to be prepd
 		if($main::dev{$na}{us}){									# Do we have a user?
 			return 0;										# Lets use that then (clibad=false)
-		}else{												# No user but a port means it failed before
-			return 2;										#  clibad=very true ;-)
+		}else{												# No user but a real port means it failed before
+			print " Pu";
+			return 2;										#  clibad=2 means very true ;-)
 		}
+	}else{
+		$main::dev{$na}{cp} = &MapTp($main::dev{$na}{ip});						# Go prep device
 	}
-	
 	if($main::dev{$na}{os} eq "Cat1900"){
 		do {
 			$us = shift (@users);
 			print "P:$us " if $main::opt{d};
 			my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$na}{ip},
-								Port	=> $cp,
+								Port	=> $main::dev{$na}{cp},
 								Prompt  => $prompt,
 								Timeout => $misc::timeout,
 								Errmode	=> 'return'
@@ -115,16 +120,16 @@ sub PrepDev{
 						print "Hl";
 					}else{
 						$nok = 0;
-						$cp  = 22;
+						$main::dev{$na}{cp} = 22;
 					}
 				};
 			}else{
 				$@ = " Hs";
 			}
 			print $@ if $main::opt{d};
-			if ($@){		
+			if ($@){
 				my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$na}{ip},
-									Port	=> $cp,
+									Port	=> $main::dev{$na}{cp},
 									Prompt  => $prompt,
 									Timeout	=> $misc::timeout,
 									Errmode	=> 'return'
@@ -165,7 +170,7 @@ sub PrepDev{
 					my ($stdout, $stderr, $exit) = $ssh->cmd("exit");
 					if ($exit == 0) {
 						$nok = 0;
-						$cp = 22;
+						$main::dev{$na}{cp} = 22;
 					}else{
 						print "Hl";
 					}
@@ -176,7 +181,7 @@ sub PrepDev{
 			print $@ if $main::opt{d};
 			if ($@){		
 				my $session = Net::Telnet->new(	Host	=> $main::dev{$na}{ip},
-								Port	=> $cp,
+								Port	=> $main::dev{$na}{cp},
 								Prompt  => $prompt,
 								Timeout	=> $misc::timeout,
 								input_record_separator => "\r",
@@ -211,10 +216,9 @@ sub PrepDev{
 	if($nok){
 		print "Tu";
 	}else{
-		print ":$cp " if $main::opt{d};
+		print ":$main::dev{$na}{cp} " if $main::opt{d};
 		$main::dev{$na}{us} = $us;
 	}
-	$main::dev{$na}{cp} = $cp;
 	return $nok;
 }
 
@@ -466,7 +470,7 @@ sub GetIosCfg{
 		if ($line =~ /^Current /){$go = 1}
 		if ($go){
 			$line =~ s/[\n\r]//g;
-			print " CFG:$line\n" if $main::opt{v};
+			print "\n CFG:$line" if $main::opt{v};
 			push @cfg,$line;
 			$cl++;
 		}
@@ -533,7 +537,7 @@ sub GetCatCfg{
 		if ($line =~ /^begin$/){$go = 1}
 		if ($go){
 			$line =~ s/[\n\r]//g;
-			print " CFG:$line\n" if $main::opt{v};
+			print "\n CFG:$line" if $main::opt{v};
 			push @cfg,$line;
 			$cl++;
 		}
@@ -577,7 +581,7 @@ sub GetC19Cfg{
 				print "-$cl" if $main::opt{d};
 			} else {
 				print "Te";
-				return "Couldn't enable!\n";
+				return "Enable failed!\n";
 			}
 		}else{
 			print "To";
@@ -647,7 +651,7 @@ sub GetIronCfg{
 		if ($line =~ /^Current /){$go = 1}
 		if ($go){
 			$line =~ s/[\n\r]//g;
-			print " CFG:$line\n" if $main::opt{v};
+			print "\n CFG:$line" if $main::opt{v};
 			push @cfg,$line;
 			$cl++;
 		}
@@ -704,6 +708,7 @@ print "E" if $main::opt{d};
 						$nok = 0;
 					}else{
 						print "Te";
+						return "Enable failed!\n";
 					}
 print "F" if $main::opt{d};
 				}
@@ -733,7 +738,7 @@ print "H" if $main::opt{d};
 		if ($line =~ /^Running /){$go = 1}
 		if ($go){
 			$line =~ s/[\n\r]//g;
-			print " CFG:$line\n" if $main::opt{v};
+			print "\n CFG:$line" if $main::opt{v};
 			push @cfg,$line;
 			$cl++;
 		}

@@ -89,6 +89,7 @@ if($_GET['t'] == 'cpu'){
 if($_GET['s'] == 's'){
 	$opts = "-w70 -h50 -g -s -$_GET[dur]d -L5";
 }elseif($_GET['s'] == 'm'){
+	$lbreak = $lb;
 	$opts = "-w320 -h100 -s -$_GET[dur]d";
 }elseif($_GET['s'] == 'l'){
 	$lbreak = $lb;

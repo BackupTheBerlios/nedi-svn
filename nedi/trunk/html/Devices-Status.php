@@ -26,6 +26,7 @@ include_once ('inc/libdev.php');
 
 $_GET = sanitize($_GET);
 $shd = isset($_GET['dev']) ? $_GET['dev'] : "";
+$rtl = isset($_GET['rtl']) ? 1:0;
 $dld = isset($_GET['del']) ? $_GET['del'] : "";
 $shg = isset($_GET['shg']) ? $_GET['shg'] : "";
 $shp = isset($_GET['shp']) ? $_GET['shp'] : "";
@@ -71,6 +72,14 @@ if($rrdstep){
 </tr></table></form><p>
 <?
 if ($shd){
+	if ($rtl){
+		if(preg_match("/adm/",$_SESSION['group']) ){
+			$query	= GenQuery('devices','u','name',$shd,'',array('cliport'),array('='),array('0') );
+			if( !@DbQuery($query,$link) ){echo "<h4 align=center>".DbError($link)."</h3>";}else{echo "<h3>$shd's cliport $upokmsg</h3>";}
+		}else{
+			echo $nokmsg;
+		}
+	}
 	$query	= GenQuery('devices','s','*','','',array('name'),array('='),array($shd) );
 	$res	= @DbQuery($query,$link);
 	$ndev	= @DbNumRows($res);
@@ -107,72 +116,67 @@ if ($shd){
 <h2>General Info</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr>
-<th bgcolor=#<?=$bia?> width=140><a href=<?=$_SERVER['PHP_SELF']?>?dev=<?=$ud?> ><img src=img/dev/<?=$img?>.png title="<?=$dev[3]?>" vspace=4 border=0></a><br><?=$dev[0]?></th>
+<th bgcolor=#<?=$bia?> width=140><a href=?dev=<?=$ud?> ><img src=img/dev/<?=$img?>.png title="<?=$dev[3]?>" vspace=4 border=0></a><br><?=$dev[0]?></th>
 <td bgcolor=#<?=$bg2?>>
-<table width=100%><tr><td>
+<table width=100%><tr><td valign=top>
 <?
 	if ($ip){
 ?>
-<a href=telnet://<?=$ip?>><img src=img/16/kons.png hspace=<?=$hs?> border=0 title="Telnet to device"></a>
-<a href=http://<?=$ip?> target=window><img src=img/16/glob.png hspace=<?=$hs?> border=0 title="HTTP to device"></a>
-<a href=https://<?=$ip?> target=window><img src=img/16/glok.png hspace=<?=$hs?> border=0 title="HTTPS to device"></a>
-<img src=img/sep.png hspace=6>
 <a href=Monitoring-Messages.php?ina=source&opa==&sta=<?=$ud?>><img src=img/16/info.png hspace=<?=$hs?> border=0 title="Messages"></a>
-<?
-		if ($ver){
-?>
 <a href=Devices-Config.php?shc=<?=$ud?> ><img src=img/16/cfg2.png hspace=<?=$hs?> border=0 title="Config of device"></a>
 <a href=Devices-Graph.php?dv=<?=$ud?> ><img src=img/16/chart.png hspace=<?=$hs?> border=0 title="Graphs of device"></a>
 <a href=Nodes-List.php?ina=device&opa==&sta=<?=$ud?>&ord=device><img src=img/16/cubs.png hspace=<?=$hs?> border=0 title="Nodes on device"></a>
 <?
-			if($dev[6] & 2){
+		if($dev[6] & 2){
 ?>
 <a href=Realtime-Spanningtree.php?dev=<?=$ud?> ><img src=img/16/tabt.png hspace=<?=$hs?> border=0 title="Spanningtree info on switch"></a>
 <?
-			}
-			if($dev[6] > 3){
+		}
+		if($dev[6] > 3){
 ?>
 <a href=Realtime-Routes.php?rtr=<?=$ud?> ><img src=img/16/rout.png hspace=<?=$hs?> border=0 title="Routes on device"></a>
 <a href=Realtime-Multicast.php?rtr=<?=$ud?> ><img src=img/16/cam.png hspace=<?=$hs?> border=0 title="Multicast routes on device"></a>
 <?
-			}
 		}
+	}
+	if(preg_match("/adm/",$_SESSION['group']) ){
+		if($os == "IOS"){
+			$shlog = "sh log";
+		}elseif($os == "CatOS"){
+			$shlog = "sh logg buf";
+		}else{
+			$shlog = "";
+		}
+		if($shlog){
 ?>
+</td><td>
+<form method="post" action="Devices-Write.php">
 <img src=img/sep.png hspace=6>
-<?
-		if(preg_match("/adm/",$_SESSION['group']) ){
-			if($os == "IOS"){
-				$shlog = "sh log";
-			}elseif($os == "CatOS"){
-				$shlog = "sh logg buf";
-			}else{
-				$shlog = "";
-			}
-			if($shlog){
-?>
-</td><td>&nbsp;<form method="post" action="Devices-Write.php">
 <input type="hidden" name="sta" value="<?=$dev[0]?>">
 <input type="hidden" name="cmd" value="<?=$shlog?>">
 <input type="hidden" name="ina" value="name">
 <input type="hidden" name="opa" value="=">
 <input type="hidden" name="scm" value="1">
 <input type="image" src="img/16/wrte.png" hspace=<?=$hs?> value="Submit" title="Show log">
-</form></td><td>
-<?
-			}
-		}
-	}
-	if(preg_match("/adm/",$_SESSION['group']) ){
-?>
+</form>
+<?		}?>
+</td><td valign=top>
 <a href=Other-Linked.php?dv=<?=$ud?> ><img src=img/16/wglb.png hspace=<?=$hs?> border=0 title="Edit Links"></a>
+<a href=?dev=<?=$ud?>&rtl="1"><img src=img/16/kons.png hspace=<?=$hs?> border=0 title="Retry login on next discovery"></a>
 <a href=<?=$_SERVER['PHP_SELF']?>?del=<?=$ud?>><img src=img/16/bcnl.png hspace=<?=$hs?> border=0 onclick="return confirm('Schedule for deletion?')"></a>
 <?
 	}
 ?>
 </td></tr></table>
 </td></tr>
-<tr><th bgcolor=#<?=$bg1?>>Main IP</th>		<td bgcolor=#<?=$bga?>><?=$ip?></td></tr>
-<tr><th bgcolor=#<?=$bg1?>>Original IP</th>	<td bgcolor=#<?=$bga?>><?=$oi?></td></tr>
+<tr><th bgcolor=#<?=$bg1?>>Main IP</th>		<td bgcolor=#<?=$bga?>><a href=telnet://<?=$ip?> title="Telnet"><?=$ip?></a>
+<a href=http://<?=$ip?> target=window><img src=img/16/glob.png hspace=<?=$hs?> border=0 title="HTTP"></a>
+<a href=https://<?=$ip?> target=window><img src=img/16/glok.png hspace=<?=$hs?> border=0 title="HTTPS"></a>
+</td></tr>
+<tr><th bgcolor=#<?=$bg1?>>Original IP</th>	<td bgcolor=#<?=$bga?>><a href=telnet://<?=$oi?> title="Telnet"><?=$oi?></a>
+<a href=http://<?=$oi?> target=window><img src=img/16/glob.png hspace=<?=$hs?> border=0 title="HTTP"></a>
+<a href=https://<?=$oi?> target=window><img src=img/16/glok.png hspace=<?=$hs?> border=0 title="HTTPS"></a>
+</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Services</th>	<td bgcolor=#<?=$bgb?>><?=$sv?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Bootimage</th>	<td bgcolor=#<?=$bga?>><?=$dev['9']?> (<?=$os?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Serial #</th>	<td bgcolor=#<?=$bgb?>><?=$dev['2']?></td></tr>

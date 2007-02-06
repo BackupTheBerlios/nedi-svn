@@ -47,7 +47,7 @@ require_once ("lib" . strtolower($backend) . ".php");
 <body <?=$btag?>>
 <table bgcolor=#000000 <?=$tabtag?>>
 <tr bgcolor=#<?="$bg1" ?>>
-<td align=center width=80><a href='http://nedi.sourceforge.net'><img src='img/n.png' border=0 hspace=10 valign=middle></a></td>
+<td align=center width=80><a href='http://www.nedi.ch'><img src='img/n.png' border=0 hspace=10 valign=middle></a></td>
 <td ID=MainMenuID></td><th width=80><?=$_SESSION['user']?></th></tr></table>
 
 <SCRIPT LANGUAGE="JavaScript"><!--

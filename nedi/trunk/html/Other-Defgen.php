@@ -23,7 +23,7 @@ $now = date ("j.M y G:i",time());
 include_once ("inc/header.php");
 
 $_GET = sanitize($_GET);
-$c = isset($_GET['c']) ? $_GET['c'] : "public";
+$co = isset($_GET['co']) ? $_GET['co'] : "public";
 $so = isset($_GET['so']) ? $_GET['so'] : "1.3.6.1.4.1.?";
 $ip = isset($_GET['ip']) ? $_GET['ip'] : "";
 $wr = isset($_POST['wr']) ? $_POST['wr'] : "";
@@ -434,7 +434,7 @@ function walk(oid) {
 <table width=100%>
 
 <tr><th align=right>IP</th><td><input type="text" name="ip" value="<?=$ip?>" size="20" onfocus=select(); title="target's IP address"></td>
-<th align=right>Community</th><td><input type="text" name="co" value="<?=$c?>" size="20" onfocus=select(); title="target's SNMP community"></td></tr>
+<th align=right>Community</th><td><input type="text" name="co" value="<?=$co?>" size="20" onfocus=select(); title="target's SNMP community"></td></tr>
 
 <tr bgcolor=#<?=$bg2?>><th colspan=4>
 <img src="img/16/bcnl.png" align=left onClick="setgen();" title="Clear General">
@@ -445,7 +445,7 @@ General</th></tr>
 <tr><th align=right>
 SysObjId</th><td>
 <input type="text" name="so" value="<?=$so?>" size="30" title="Enter the sysobj id, which will be used as filename" onfocus=select(); onchange="update();">
-<img src=img/16/brgt.png onClick="get('1.3.6.1.2.1.1.2.0');">
+<img src=img/16/brld.png title="Reload with current IP,Communtiy and Sysobjid" onClick="document.location.href='?ip='+document.bld.ip.value+'&co='+document.bld.co.value+'&so='+document.bld.so.value;">
 </td><th align=right>
 SNMP version</th><td>
 <select size=1 name="ver" title="Use 2HC, if device supports 64-bit counters" onchange="update();">

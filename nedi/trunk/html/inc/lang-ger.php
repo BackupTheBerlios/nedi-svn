@@ -11,7 +11,7 @@ $delokmsg	= "gelöscht!\n";
 
 // Verschiedene Meldungen
 $resmsg		= "<h4>Query liefert kein Resultat!</h4>\n";
-$toumsg		= "<h4>Zeitlimite von $timeout erreicht oder kein Resultat!</h4>\n";
+$toumsg		= "<h4>Zeitlimite erreicht oder kein Resultat!</h4>\n";
 $n1rmsg		= "<h4>kein eindeutiges Resultat!<h4>\n";
 $qrymsg		= "<h4>Bitte geben Sie eine gueltige SQL-Query ein!</h4>\n";
 $selmsg 	= "<h4>Nur SELECT-Queries sind erlaubt!</h4>\n";

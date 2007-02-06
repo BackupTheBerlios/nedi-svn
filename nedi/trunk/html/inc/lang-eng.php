@@ -11,7 +11,7 @@ $delokmsg	= "deleted!\n";
 
 // Misc messages
 $resmsg		= "<h4>Query yields no results!</h4>\n";
-$toumsg		= "<h4>Timeout of $timeout seconds exceeded or no result!</h4>\n";
+$toumsg		= "<h4>Timeout exceeded or no result!</h4>\n";
 $n1rmsg		= "<h4>no unique match!<h4>\n";
 $qrymsg		= "<h4>Please enter a valid SQL query!</h4>\n";
 $selmsg		= "<h4>Only SELECT queries are allowed!</h4>\n";

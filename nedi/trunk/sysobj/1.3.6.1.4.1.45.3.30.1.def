@@ -22,8 +22,8 @@ IFvlan
 IFvlix	
 IFdupl	doublespeed
 IFduix	
-Halfdp	1
-Fulldp	2
+Halfdp	
+Fulldp	
 
 # Modules
 Modesc	

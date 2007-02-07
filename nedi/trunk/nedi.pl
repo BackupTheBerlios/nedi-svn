@@ -244,11 +244,11 @@ sub Help {
 	print "Mx	Modules (t=slot, d=desc, c=class, h=hw, f=fw, s=sw, n=SN, m=model)\n";
 	print "Qx	Queueing (c=CPD, l=LLDP, 0=IP is 0.0.0.0, s=seeing itself, d=desc filter, v=voip)\n";
 	print "Px	CLI preparing (u=no user, set retry in Devices-Status to prep again.)\n";
-	print "Rx	RRD (d=mkdir, u=update, s=create sys, i=create IF)\n";
+	print "Rx	RRD (d=mkdir, u=update, s=create sys, i=create IF,n=IF name)\n";
 	print "Sx	SNMP (c=connect, n=SN, B=Bootimage,u=CPU util, m=CPUmem,i=IOmem,t=Temp)\n";
 	print "Tx	Telnet (c=connect,e=enable, l=login, u=no user, o=other\n";
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 31.Jan 2007\n";
+	die "NeDi 1.0.w 7.Feb 2007\n";
 }

@@ -532,15 +532,15 @@ sub Interfaces {
 		}
 	}
 	if($ifdupO){											# ...and IF duplex
-		if($ifdupO eq "doublespeed"){								# If duplex is indicated by doubling the speed...
+		if($ifdupO eq "doublespeed"){								# If duplex is shown by speed...
 			foreach my $x (keys (%ifsp)){
 				my $i = $x;
 				$i =~ s/$ifspdO\.//;
 				if($ifsp{$x} =~ /^20/){
 					$ifsp{$x} /= 2;
-					$duplex{$i} = 2;
-				}elsif($ifsp{$x} =~ /^10/){						# No speed, no duplex...
-					$duplex{$i} = 1;
+					$duplex{$i} = "FD";
+				}elsif($ifsp{$x} =~ /^10/){
+					$duplex{$i} = "HD";
 				}
 			}
 		}else{
@@ -582,7 +582,7 @@ sub Interfaces {
 		my $i   = $if[10];									# ...is the IF index
 		my $ina = $i;
 		my $idn = &misc::Shif( "$ifde{$dek}" );
-		if ( $ifna{"$ifnamO.$i"} ){
+		if ($ifna{"$ifnamO.$i"} ){
 			if(exists $misc::portprop{$dv}{$ifna{"$ifnamO.$i"}} ){
 				$ina = $ifna{"$ifnamO.$i"} . "-$i";
 			}else{
@@ -606,7 +606,6 @@ sub Interfaces {
 		$main::int{$dv}{$i}{ali} = (defined $alias{$i}?$alias{$i}:"");
 		$main::int{$dv}{$i}{vln} = (defined $vlid{$i}?$vlid{$i}:0);
 		$main::int{$dv}{$i}{com} = "";
-		$main::int{$dv}{$i}{dpx} = "-";
 		
 		if ( $ifmc{"$ifmacO.$i"} ){
 			my $imac = unpack('H12', $ifmc{"$ifmacO.$i"});
@@ -615,10 +614,14 @@ sub Interfaces {
 		}else{
 			$main::int{$dv}{$i}{mac} = "";
 		}
-		if (exists $duplex{$i} ){
-			if( $duplex{$i} eq $misc::sysobj{$main::dev{$_[0]}{so}}{fd} ){$main::int{$dv}{$i}{dpx} = "FD"}
-			elsif( $duplex{$i} eq $misc::sysobj{$main::dev{$_[0]}{so}}{hd} ){$main::int{$dv}{$i}{dpx} = "HD"}
-			else{$main::int{$dv}{$i}{dpx} = "?"}
+		if (exists $duplex{$i} ){								# Did we get a duplex value?
+			if ($duplex{$i} =~ /^[FH]D$/){							# Use if set properly already...
+				$main::int{$dv}{$i}{dpx} = $duplex{$i};
+			}else{										# ...or assign defined HD,FD key
+				if( $duplex{$i} eq $misc::sysobj{$main::dev{$_[0]}{so}}{fd} ){$main::int{$dv}{$i}{dpx} = "FD"}
+				elsif( $duplex{$i} eq $misc::sysobj{$main::dev{$_[0]}{so}}{hd} ){$main::int{$dv}{$i}{dpx} = "HD"}
+				else{$main::int{$dv}{$i}{dpx} = "?"}
+			}
 		}else{
 			$main::int{$dv}{$i}{dpx} = "-";
 		}
@@ -679,28 +682,30 @@ sub IfAddresses {
 	$session->close;
 
 	foreach my $k (keys %aifx){
-		my @i		= split(/\./,$k);
-		my $iaddr	= "$i[10].$i[11].$i[12].$i[13]";
-		$main::net{$dv}{$iaddr}{ifn} = $main::int{$dv}{$aifx{$k}}{ina};
-		$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
-		print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
-		if($iaddr !~ /^127.0.0|^0/){					
-			if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
-				$ippri = 1;
-				$newip = $iaddr;
-			}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri != 1){		# 2nd priority, use virtual IF
-				$ippri = 2;
-				$newip = $iaddr;
-			}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 3){	# 3rd  priority, use ethernet IF (precedence of existing IP)
-				if($iaddr eq $main::dev{$dv}{ip}){
-					$ippri = 3;
-				}else{
-					$ippri = 4;
+		if(exists $main::int{$dv}{$aifx{$k}}){							# Avoid non existant IFs (e.g. idx=0 on  cisco2970 and 3750 with IOS 12.1)
+			my @i		= split(/\./,$k);
+			my $iaddr	= "$i[10].$i[11].$i[12].$i[13]";
+			$main::net{$dv}{$iaddr}{ifn} = $main::int{$dv}{$aifx{$k}}{ina};
+			$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
+			print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
+			if($iaddr !~ /^127.0.0|^0/){					
+				if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
+					$ippri = 1;
+					$newip = $iaddr;
+				}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri != 1){		# 2nd priority, use virtual IF
+					$ippri = 2;
+					$newip = $iaddr;
+				}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 3){	# 3rd  priority, use ethernet IF (precedence of existing IP)
+					if($iaddr eq $main::dev{$dv}{ip}){
+						$ippri = 3;
+					}else{
+						$ippri = 4;
+					}
+					$newip = $iaddr;
 				}
-				$newip = $iaddr;
 			}
+			$nia++;
 		}
-		$nia++;
 	}
 	if ($ippri < 5 and !$main::opt{I}){
 		$main::dev{$dv}{oi} = $main::dev{$dv}{ip};

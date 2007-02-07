@@ -367,7 +367,7 @@ sub Discover {
 			}
 
 			my $clibad = 1;
-			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address tables, if  bridging is set in .def
+			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address table, if  bridging is set in .def
 				if(!$main::opt{s}){
 					$clibad = &cli::PrepDev($name,"mac");					# PrepDev returns 2 upon failure
 					if(!$clibad){
@@ -837,32 +837,34 @@ sub ManageRRD {
 		}else{print "Rs"}
 		$ok = 0;
 		foreach my $i ( keys(%{$main::int{$_[0]}}) ){
-			$irf =  $main::int{$_[0]}{$i}{ina};
-			$irf =~ s/([^a-zA-Z0-9_-])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
-			if (-e "$rrdpath/$dv/$irf.rrd"){
-				$ok = 1;
-			}else{
-				my $ds = 2 * $rrdstep;
-				$ok = 1 + system ($rrdcmd,
-						"create","$rrdpath/$dv/$irf.rrd",
-						"-s","$rrdstep",
-						"DS:inoct:COUNTER:$ds:0:10000000000",
-						"DS:outoct:COUNTER:$ds:0:10000000000",
-						"DS:inerr:COUNTER:$ds:0:10000000000",
-						"DS:outerr:COUNTER:$ds:0:10000000000",
-						"RRA:AVERAGE:0.5:1:720",
-						"RRA:AVERAGE:0.5:24:720");
-			}
-			if($ok){
-				if ($main::opt{t}){
-					printf ("%-18s %12d %12d %8d %8d\n", $irf,$main::int{$_[0]}{$i}{ioc},$main::int{$_[0]}{$i}{ooc},$main::int{$_[0]}{$i}{ier},$main::int{$_[0]}{$i}{oer}  ) if $main::opt{d};
+			if(exists $main::int{$_[0]}{$i}{ina}){							# Avoid errors due empty ifnames
+				$irf =  $main::int{$_[0]}{$i}{ina};
+				$irf =~ s/([^a-zA-Z0-9_-])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
+				if (-e "$rrdpath/$dv/$irf.rrd"){
+					$ok = 1;
 				}else{
+					my $ds = 2 * $rrdstep;
 					$ok = 1 + system ($rrdcmd,
-							"update",
-							"$rrdpath/$dv/$irf.rrd","N:$main::int{$_[0]}{$i}{ioc}:$main::int{$_[0]}{$i}{ooc}:$main::int{$_[0]}{$i}{ier}:$main::int{$_[0]}{$i}{oer}");
-							print "Ru($irf)" if !$ok;
+							"create","$rrdpath/$dv/$irf.rrd",
+							"-s","$rrdstep",
+							"DS:inoct:COUNTER:$ds:0:10000000000",
+							"DS:outoct:COUNTER:$ds:0:10000000000",
+							"DS:inerr:COUNTER:$ds:0:10000000000",
+							"DS:outerr:COUNTER:$ds:0:10000000000",
+							"RRA:AVERAGE:0.5:1:720",
+							"RRA:AVERAGE:0.5:24:720");
 				}
-			}else{print "Ri($irf)"}
+				if($ok){
+					if ($main::opt{t}){
+						printf ("%-18s %12d %12d %8d %8d\n", $irf,$main::int{$_[0]}{$i}{ioc},$main::int{$_[0]}{$i}{ooc},$main::int{$_[0]}{$i}{ier},$main::int{$_[0]}{$i}{oer}  ) if $main::opt{d};
+					}else{
+						$ok = 1 + system ($rrdcmd,
+								"update",
+								"$rrdpath/$dv/$irf.rrd","N:$main::int{$_[0]}{$i}{ioc}:$main::int{$_[0]}{$i}{ooc}:$main::int{$_[0]}{$i}{ier}:$main::int{$_[0]}{$i}{oer}");
+								print "Ru($irf)" if !$ok;
+					}
+				}else{print "Ri($irf)"}
+			}else{print "Rn($i)"}
 		}
 	}else{
 		print "Rd";

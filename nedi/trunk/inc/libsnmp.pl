@@ -546,7 +546,7 @@ sub Interfaces {
 		}else{
 			$r = $session->get_table($ifdupO);
 			$err = $session->error;
-			if ($err){print "Id";print "$err\n" if $main::opt{d};$warn++}else{ %ifdp  = %{$r}}
+			if ($err){print "Ix";print "$err\n" if $main::opt{d};$warn++}else{ %ifdp  = %{$r}}
 		}
 	}
 	if($ifduxO){											# If duplex uses a different index
@@ -556,7 +556,7 @@ sub Interfaces {
 			$r = $session->get_table($ifduxO);
 			$err = $session->error;
 			if ($err){
-				print "Il";
+				print "Ix";
 				print "$err\n" if $main::opt{d};
 			}else{
 				%ifdx  = %{$r};
@@ -943,7 +943,7 @@ sub ArpTable {
 			$misc::rarp{"$i[11].$i[12].$i[13].$i[14]"} = $mc;				# will be needed to identify OUI uplinks;
 
 			my $po = "";
-			if(defined $main::int{$_[0]}{$i[10]} ){
+			if(exists $main::int{$_[0]}{$i[10]} ){
 				$po = $main::int{$_[0]}{$i[10]}{ina};
 				$misc::portprop{$_[0]}{$po}{rtr} = 1;
 				$misc::portprop{$_[0]}{$po}{pop}++;

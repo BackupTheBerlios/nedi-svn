@@ -600,7 +600,7 @@ sub WriteNod {
 							ipupdate,ipchanges,iplost) VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
 
 	foreach my $mc ( sort keys(%main::nod) ){
-		if (exists $stomac{$mc} and $misc::notify =~ /n/){
+		if (exists $stomac{$mc} and $main::nod{$mc}{ls} == $main::now and $misc::notify =~ /n/){
 			if( ! &db::Insert('messages','level,time,source,info',"\"150\",\"$main::now\",\"$mc\",\"Node has reappeared!\"") ){
 				die "DB error messages!\n";
 			}

@@ -110,7 +110,7 @@ $ddest	= ip2long($dst);														// fixes potential signing problem
 <th><img src=img/32/net.png><br>Local Network</th>
 <th><img src=img/32/nglb.png><br>Destination</th>
 <th><img src=img/32/neti.png ><br>Next Hop</th>
-<th><img src=img/32/calc.png><br>Metric 1</th>
+<th><img src=img/32/casp.png><br>Metric 1</th>
 <th><img src=img/32/edit.png><br>Protocol</th>
 
 <?
@@ -186,7 +186,7 @@ $ddest	= ip2long($dst);														// fixes potential signing problem
 <th><img src=img/32/neti.png ><br>Next Hop</th>
 <th><img src=img/32/dumy.png><br>Interface</th>
 <th><img src=img/32/tap.png ><br>Bandwidth</th>
-<th><img src=img/32/calc.png><br>Metric 1</th>
+<th><img src=img/32/casp.png><br>Metric 1</th>
 <th><img src=img/32/edit.png><br>Protocol</th>
 <th><img src=img/32/clock.png><br>Age [s]</th>
 <?

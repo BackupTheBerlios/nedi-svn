@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-#!/usr/bin/perl
 #============================================================================
 # Program: moni.pl
 # Programmer: Remo Rickli

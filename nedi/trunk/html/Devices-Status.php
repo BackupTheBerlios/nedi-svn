@@ -426,14 +426,14 @@ if($rrdstep and $shg){
 
 		echo "<tr bgcolor=#$bg>";
 		echo "<th bgcolor=#$rs$gs$bg3><img src=img/$ifimg title=\"$i - $iftit\" vspace=8></th>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui>$in</td>\n";
+		echo "<td>$in</td>\n";
 		echo "<td align=center>$ifv[$i]</td><td>$ifi[$i]</td>\n";
 		echo "<td align=right>$ifs[$i]</td><td align=center>$ifd[$i]</td>\n";
 		echo "<td align=right bgcolor=#$bl$bg3$bg3>$iflch</td>\n";
 
 		if($shp){
 			if($ncount[$in]){
-				echo "<td>" . Bar($ncount[$in],8) . " $ncount[$in]</td>\n";
+				echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui>" . Bar($ncount[$in],8) . " $ncount[$in]</a></td>\n";
 			}else{
 				echo "<td>-</td>\n";}
 			}

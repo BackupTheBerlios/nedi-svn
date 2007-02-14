@@ -219,7 +219,7 @@ sub Help {
 	print "-N 	don't exclude devices from nodes\n";
 	print "Other Options -------------------------------------------------------------\n";
 	print "-i	initialize database and start all over\n";
-	print "-w<path>	add Kismet csv files in path to WLAN database\n";
+	print "-w<dir>	add Kismet csv files in directory to WLAN database\n";
 	print "-t<ip>	test IP only, but don't write anything\n";
 	print "-d/D	store internal variables and print debug info/debug mode (check lines 66-86)\n";
 	print "-v	verbose output\n";
@@ -250,5 +250,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 9.Feb 2007\n";
+	die "NeDi 1.0.w 14.Feb 2007\n";
 }

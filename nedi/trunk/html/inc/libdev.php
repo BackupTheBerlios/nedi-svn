@@ -48,14 +48,14 @@ function VTPmod($vn) {
 
 //===================================================================
 // Return city image
-function CtyImg($nb) {
+function CtyImg($nd) {
 
-	if($nb == 1){
-		return "citys";
-	}elseif($nb < 5){
-		return "citym";
-	}elseif($nb < 10){
+	if($nd > 99){
 		return "cityl";
+	}elseif($nd > 9){
+		return "citym";
+	}elseif($nd){
+		return "citys";
 	}else{
 		return "cityx";
 	}
@@ -73,11 +73,11 @@ function BldImg($nd,$na) {
 		$bc = "";
 	}
 
-	if($nd > 10){
+	if($nd > 19){
 		return "bldh$bc";
-	}elseif($nd > 5){
+	}elseif($nd > 9){
 		return "bldb$bc";
-	}elseif($nd > 1){
+	}elseif($nd > 2){
 		return "bldm$bc";
 	}else{
 		return "blds$bc";

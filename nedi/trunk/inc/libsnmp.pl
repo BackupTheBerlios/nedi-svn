@@ -206,7 +206,7 @@ sub Enterprise {
 			$main::dev{$_[0]}{sn} = &misc::Strip($r->{$misc::sysobj{$so}{sn}});
 		}
 	}else{
-		$main::dev{$_[0]}{sn} = "n/a";
+		$main::dev{$_[0]}{sn} = "-";
 	}
 	if($misc::sysobj{$so}{bi}){
 		$r  = $session->get_request($misc::sysobj{$so}{bi});
@@ -222,7 +222,7 @@ sub Enterprise {
 			print "BI=$main::dev{$_[0]}{bi} " if $main::opt{d};
 		}
 	}else{
-		$main::dev{$_[0]}{bi} = "n/a";
+		$main::dev{$_[0]}{bi} = "-";
 	}
 	if($misc::sysobj{$so}{rc}){
 		$r  = $session->get_request($misc::sysobj{$so}{rc});
@@ -1080,7 +1080,7 @@ sub MacTable {
 sub Modules {
 
 	my $warn = 0;
-	my $nmod   = 0;
+	my $nmod = 0;
 
 	my %mde = ();
 	my %mcl = ();
@@ -1160,7 +1160,7 @@ sub Modules {
 			$main::mod{$_[0]}{$i}{sw} = (defined $msw{"$misc::sysobj{$so}{ms}.$i"}?$msw{"$misc::sysobj{$so}{ms}.$i"}:"-");
 			$main::mod{$_[0]}{$i}{sn} = (defined $msn{"$misc::sysobj{$so}{mn}.$i"}?$msn{"$misc::sysobj{$so}{mn}.$i"}:"-");
 			$main::mod{$_[0]}{$i}{st} = 0;
-			print "\n MOD:$s\t$main::mod{$_[0]}{$i}{de}"  if $main::opt{v};
+			print "\n MOD:$s\t$main::mod{$_[0]}{$i}{mo}\t$main::mod{$_[0]}{$i}{de}"  if $main::opt{v};
 			$nmod++;
 		}
 	}

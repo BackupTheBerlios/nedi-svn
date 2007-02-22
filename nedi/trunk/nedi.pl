@@ -29,7 +29,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #============================================================================
-# Visit http://nedi.sourceforge.net for more information.
+# Visit http://www.nedi.ch for more information.
 #============================================================================
 
 use strict;
@@ -39,7 +39,6 @@ use vars qw($p $now $nediconf $cdp $lldp $oui);
 use vars qw(%nod %dev %int %mod %link %vlan %opt %net %usr); 
 
 getopts('AbcdDiIlLnNost:u:vw:y',\%opt) or &Help();
-#if (! keys %opt ){&Help()}
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;
@@ -80,7 +79,7 @@ if ($opt{D}){
 #	&db::WriteVlan();
 #	&db::WriteInt();
 #	&db::WriteNet();
-#	&db::WriteLink();
+	&db::WriteLink();
 #	&db::WriteNod();
 
 	die "\n=== Debugging ended! ===\n";
@@ -250,5 +249,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 14.Feb 2007\n";
+	die "NeDi 1.0.w 22.Feb 2007\n";
 }

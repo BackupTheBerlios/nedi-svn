@@ -9,7 +9,7 @@
 package misc;
 
 use vars qw($seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
-use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath);
+use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath $rrdcmd);
 use vars qw($arpwatch $ignoredvlans $retire $timeout $rrdstep $redbuild);
 use vars qw($notify $thres $pause $smtpserver $mailfrom);
 use vars qw(%login %map %doip %dcomm %ouineb %cdplink %sysobj %ifmac); 
@@ -250,7 +250,6 @@ sub GetChanges {
 	return $chg;
 }
 
-
 #===================================================================
 # Get the default gateway of your system.
 #===================================================================
@@ -298,7 +297,7 @@ sub InitSeeds {
 					$ip = $f[0];
 				}
 				if($ip){
-					if ($f[1]){$dcomm{$ip} = $f[1]}
+					if($f[1]){$dcomm{$ip} = $f[1]}
 					push (@todo,"seed$s");
 					$doip{"seed$s"} = $ip;
 					print "$ip seed$s added\n" if $main::opt{v};
@@ -629,31 +628,6 @@ sub NodeIf {
 }
 
 #===================================================================
-# Build arp table from Arpwatch
-#===================================================================
-sub BuildArp {
-
-	my $nad = 0;
-	open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";					# read arp.dat
-	
-	my @adat = <ARPDAT>;
-	close("ARPDAT");
-	chomp @adat;
-	foreach my $l (@adat){
-		my @ad = split(/\s/,$l);
-		if($ad[2] > $retire){									# Only add current entries
-			my $m = sprintf "%02s%02s%02s%02s%02s%02s",split(/:/,$ad[0]);
-			$arp{$m}  = $ad[1];
-			$rarp{$ad[1]}  = $m;
-			print " AWA:$m $arp{$m}\n" if $main::opt{v};
-			if($ad[3]){$arpn{$m} = $ad[3]}
-			$nad++;
-		}
-	}
-	print "$nad	arpwatch entries used.\n"  if $main::opt{d};
-}
-
-#===================================================================
 # IP update of a node
 #===================================================================
 sub UpIpNod {
@@ -876,13 +850,13 @@ sub ManageRRD {
 #===================================================================
 sub Daemonize {
 
-	use POSIX 'setsid';
+	use POSIX qw(setsid);
 
 	#    open STDOUT, ">>$config::nedilog" or die "Can't write to $config::nedilog: $!";
 
 	defined(my $pid = fork)   or die "Can't fork: $!";
 	exit if $pid;
-	SETSID                    or die "Can't start a new session: $!";
+	setsid                    or die "Can't start a new session: $!";
 	umask 0;
 }
 

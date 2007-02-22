@@ -10,7 +10,7 @@
 # 6/05/05	initial version.
 # 10/03/06	new SQL query support
 # 17/07/06	enhanced info and new network filter
-# 17/01/07	refined link weight computation, more hints
+# 21/02/07	refined layout and link weight computation, more hints and image map!
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -18,7 +18,6 @@ error_reporting(E_ALL ^ E_NOTICE);
 $bg1	= "5599BB";
 $bg2	= "66AACC";
 $btag	= "";
-$maxcol	= 6;
 $nocache= 1;
 $calendar= 0;
 $refresh = 0;
@@ -33,12 +32,15 @@ $bldlink   = array();
 $ctylink   = array();
 $devlink   = array();
 
+$imgmap    = "";
+
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
 
 $_GET = sanitize($_GET);
 $lev = isset($_GET['lev']) ? $_GET['lev'] : "";
 $dep = isset($_GET['dep']) ? $_GET['dep'] : 8;
+$loi = isset($_GET['loi']) ? "checked" : "";
 $bwi = isset($_GET['bwi']) ? "checked" : "";
 $ifi = isset($_GET['ifi']) ? "checked" : "";
 $ipi = isset($_GET['ipi']) ? "checked" : "";
@@ -65,6 +67,8 @@ $bwt = isset($_GET['bwt']) ? $_GET['bwt'] : 5;
 $cro = isset($_GET['cro']) ? $_GET['cro'] : 0;
 $bro = isset($_GET['bro']) ? $_GET['bro'] : 0;
 $lwt = isset($_GET['lwt']) ? $_GET['lwt'] : 5;
+
+$maxcol = intval($fsi/10);
 
 $cpos = strpos($locformat, "c");
 $bpos = strpos($locformat, "b");
@@ -115,7 +119,7 @@ if($res){
 <option value="svga">800x600
 <option value="xga">1024x768
 <option value="sxga">1280x1024
-<option value="rga">1600x1200
+<option value="uxga">1600x1200
 </select>
 </td></tr>
 <tr><td>or XY</td><td><input type="text" name="x" value="<?=$xm?>" size=4> <input type="text" name="y" value="<?=$ym?>" size=4>
@@ -136,6 +140,7 @@ if($res){
 W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 </td></tr>
 <tr><td>Show</td><td>
+<INPUT type="checkbox" name="loi" <?=$loi?>> L
 <INPUT type="checkbox" name="bwi" <?=$bwi?>> BW
 <INPUT type="checkbox" name="ifi" <?=$ifi?>> IF
 <INPUT type="checkbox" name="ipi" <?=$ipi?>> IP
@@ -156,7 +161,7 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 <input type="text" name="bro" value="<?=$bro?>" size=3 title="Rotation of building circle">@
 </td></tr>
 <tr><td>Floor</td><td>
-<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor spacing">S
+<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor size">S
 <input type="text" name="xo" value="<?=$xo?>" size=2 title="Map X offset"> X
 <input type="text" name="yo" value="<?=$yo?>" size=2 title="Map Y offset"> Y
 </td></tr>
@@ -203,9 +208,16 @@ if( isset($_GET['draw']) ){
 	Read($ina,$flt,$ipi,$ifi);
 	Map($lev);
 	Writemap($_SESSION['user'],count($dev) );
+}else{
+	echo "<h2>Previous Map (not clickable)</h2>";
 }
 if (file_exists("log/map_$_SESSION[user].php")) {
-	echo "<center><img SRC=\"log/map_$_SESSION[user].php\" BORDER=2></center>\n";
+?>
+	<center><img usemap=#net src="log/map_<?=$_SESSION[user]?>.php"></center>
+	<map name=net>
+	<?=$imgmap?>
+	</map>
+<?
 }
 
 include_once ("inc/footer.php");
@@ -223,14 +235,14 @@ function Writemap($usr,$nd) {
 
 
 	if ($dep == "24"){
-		$imgcreate = "\$image = imagecreatetruecolor($xm, $ym);";
-		$imgcreate .= "Imagealphablending(\$image,true);";
-		$imgcreate .= "\$gy1 = Imagecolorallocatealpha(\$image, 230, 230, 230, 40);";
-		$imgcreate .= "\$gy2 = Imagecolorallocatealpha(\$image, 250, 250, 250, 40);";
+		$imgcreate = "\$image = imagecreatetruecolor($xm, $ym);\n";
+		$imgcreate .= "Imagealphablending(\$image,true);\n";
+		$imgcreate .= "\$gy1 = Imagecolorallocatealpha(\$image, 230, 230, 230, 40);\n";
+		$imgcreate .= "\$gy2 = Imagecolorallocatealpha(\$image, 250, 250, 250, 40);\n";
 	}else{
-		$imgcreate = "\$image = imagecreate($xm, $ym);";
-		$imgcreate .= "\$gy1 = ImageColorAllocate(\$image, 230, 230, 230);";
-		$imgcreate .= "\$gy2 = ImageColorAllocate(\$image, 250, 250, 250);";
+		$imgcreate = "\$image = imagecreate($xm, $ym);\n";
+		$imgcreate .= "\$gy1 = ImageColorAllocate(\$image, 230, 230, 230);\n";
+		$imgcreate .= "\$gy2 = ImageColorAllocate(\$image, 250, 250, 250);\n";
 	}
 
        	$maphdr = array("<?PHP",
@@ -245,6 +257,7 @@ function Writemap($usr,$nd) {
 			"\$bl3 = ImageColorAllocate(\$image, 100, 150, 220);",
 			"\$org = ImageColorAllocate(\$image, 220, 220, 0);",
 			"\$wte = ImageColorAllocate(\$image, 255, 255, 255);",
+			"\$gry = ImageColorAllocate(\$image, 100, 100, 100);",
 			"\$blk = ImageColorAllocate(\$image, 0, 0, 0);",
 			"ImageFilledRectangle(\$image, 0, 0, $xm, $ym, \$wte);",
 			"ImageString(\$image, 5, 8, 8, \"$tit\", \$blk);",
@@ -273,7 +286,17 @@ function Writemap($usr,$nd) {
 
 function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 
-	global $maplinks,$bwi,$lwt;
+        global $maplinks,$bwi,$lwt,$lix,$liy;
+        if($x1 == $x2){
+                $lix[$x1]+= 2;
+                $x1 += $lix[$x1];
+                $x2 = $x1;
+        }
+        if($y1 == $y2){
+                $liy[$y1]+= 2;
+                $y1 += $liy[$y1];
+                $y2 = $y1;
+        }
 
 	if($bw == 11000000 or $bw == 54000000){
 		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$org);";
@@ -328,10 +351,10 @@ $mapframes[] = "ImageString(\$image, 3, $xt,$yt,\"$label\", \$bl2);";
 
 function Drawitem($x,$y,$opt,$label,$lev) {
 
-	global $redbuild, $mapnods;
+	global $dev,$loi,$ipi,$redbuild,$mapnods;
 
 	if($lev == "f"){
-		$img = "dev/$opt";
+		$img = "dev/" . $dev[$label]['ic'];
 		$lcol = "bl1";
 		$font = "1";
 	}elseif($lev == "b"){
@@ -346,43 +369,40 @@ function Drawitem($x,$y,$opt,$label,$lev) {
 		$img = "stair";
 		$lcol = "blk";
 		$font = "3";
+	}elseif($lev == "ci"){
+		$img  = "cityg";
+		$lcol = "bl3";
+		$font = "2";
 	}
-	$label = preg_replace('/\\$/','\\\$', $label);
 	$mapnods[] = "\$icon = Imagecreatefrompng(\"../img/$img.png\");";
 	$mapnods[] = "\$w = Imagesx(\$icon);";
 	$mapnods[] = "\$h = Imagesy(\$icon);";
+	if ($lev == "f"){
+		if ($loi){$mapnods[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y - \$h/1.5 - 8), \"".$dev[$label]['rom']."\", \$bl3);";}
+		if ($ipi){$mapnods[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5 + 8), \"".$dev[$label]['ip']."\", \$gry);";}
+	}
+	$label = preg_replace('/\\$/','\\\$', $label);
 	$mapnods[] = "Imagecopy(\$image, \$icon,intval($x - \$w/2),intval($y - \$h/2),0,0,\$w,\$h);";
 	$mapnods[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5), \"$label\", \$$lcol);";
 	$mapnods[] = "Imagedestroy(\$icon);";
 }
 
 #===================================================================
-# Draws informal items.
+# Sort by room (on floors)
+function roomsort($a, $b){
 
-function Drawinfo($x,$y,$opt,$label) {
+	global $dev;
 
-	global $mapinfo;
-
-	if($opt == "cl"){
-		$img  = "cityg";
-		$lcol = "bl3";
-		$font = "2";
-	}
-	$mapinfo[] = "\$icon = Imagecreatefrompng(\"../img/$img.png\");";
-	$mapinfo[] = "\$w = Imagesx(\$icon);";
-	$mapinfo[] = "\$h = Imagesy(\$icon);";
-	$mapinfo[] = "Imagecopy(\$image, \$icon,$x - \$w/2,$y - \$h/2,0,0,\$w,\$h);";
-	$mapinfo[] = "ImageString(\$image, $font, $x  - \$w/2, $y + \$h/2, \"$label\", \$$lcol);";
-	$mapinfo[] = "Imagedestroy(\$icon);";
+        if ($dev[$a]['rom'] == $dev[$b]['rom']){return 0;}
+        return ($dev[$a]['rom'] < $dev[$b]['rom']) ? -1 : 1;
 }
 
 #===================================================================
 # Generate the map.
-
 function Map($lev) {
 
-	global $maxcol,$xm,$ym,$xo,$yo,$csi,$bsi,$fsi,$cro,$bro,$cwt,$bwt,$dev,$ndev,$bdev,$fdev;
-	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink,$nctylink,$nbldlink;
+	global $maxcol,$xm,$ym,$xo,$yo,$csi,$bsi,$fsi,$cro,$bro,$cwt,$loi,$bwt,$dev,$ndev,$bdev,$fdev;
+	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink,$nctylink,$nbldlink,$imgmap;
 
 	$ncty = count($ndev);
 
@@ -406,12 +426,14 @@ function Map($lev) {
 
 		if($lev == "c"){
 			Drawitem($xct[$cty],$yct[$cty],$nbld,$cty,$lev);
+			$area = ($xct[$cty]-20) .",". ($yct[$cty]-20) .",". ($xct[$cty]+20) .",". ($yct[$cty]+20);
+			$imgmap .= "<area href=?flt=". urlencode($cty) ."&lev=b&draw=1 coords=\"$area\" shape=rect>\n";
 		}else{
 			if($nbld != 1){
 				$bldscalx = 1.3;
 				$bldscaly = 1;
-				if ($cty != "nureini"){
-					Drawinfo($xct[$cty],$yct[$cty],'cl',$cty);
+				if ($loi and $cty != "nureini"){
+					Drawitem($xct[$cty],$yct[$cty],'0',$cty,'ci');
 				}
 			}
 			foreach(Arrange($ndev[$cty],"b") as $bld){
@@ -424,6 +446,8 @@ function Map($lev) {
 
 				if($lev == "b"){
 					Drawitem($xbl[$bld],$ybl[$bld],$bdev[$cty][$bld],$bld,$lev);
+					$area = ($xbl[$bld]-20) .",". ($ybl[$bld]-20) .",". ($xbl[$bld]+20) .",". ($ybl[$bld]+20);
+					$imgmap .= "<area href=?flt=". urlencode($bld) ."&lev=f&draw=1 coords=\"$area\" shape=rect>\n";
 				}else{
 					$cury = $nflr = $mdfl = 0;
 					$nflr = count($ndev[$cty][$bld]);
@@ -441,7 +465,7 @@ function Map($lev) {
 						}
 					}
 					$xb1 = intval($xbl{$bld} - $fsi/2 * $mdfl - 50);
-					$yb1 = intval($ybl[$bld] - $fsi/2 * $nflr + $fsi - 40);
+					$yb1 = intval($ybl[$bld] - $fsi/2 * $nflr + $fsi - 50);
 					$xb2 = intval($xbl{$bld} + $fsi/2 * $mdfl - $fsi + 50);
 					$yb2 = intval($ybl[$bld] + $fsi/2 * $nflr + 40);
 					Drawbox($xb1,$yb1,$xb2,$yb2,$bld);
@@ -449,7 +473,7 @@ function Map($lev) {
 					foreach(array_keys($ndev[$cty][$bld]) as $flr){
 						$cury++;
 						$curx = 0;
-						sort( $ndev[$cty][$bld][$flr] );
+						usort( $ndev[$cty][$bld][$flr],"roomsort" );
 						$xf = $xbl{$bld} -  intval($fsi * $mdfl/2 + 40);
 						$yf = $ybl{$bld} +  intval($fsi * ($cury - $nflr/2));
 						Drawitem($xf,$yf,0,$flr,"fl");
@@ -460,9 +484,10 @@ function Map($lev) {
 							} 
 							$xd[$dv] = $xbl{$bld} +  intval($fsi * ($curx - $mdfl/2));
 							$yd[$dv] = $ybl{$bld} +  intval($fsi * ($cury - $nflr/2));
-							$di = $dev[$dv]['ic'];
-							Drawitem($xd[$dv],$yd[$dv],$di,$dv,$lev);
-							$curx++;
+							Drawitem($xd[$dv],$yd[$dv],'0',$dv,$lev);
+							$area = ($xd[$dv]-20) .",". ($yd[$dv]-20) .",". ($xd[$dv]+20) .",". ($yd[$dv]+20);
+							$imgmap .= "<area href=Devices-Status.php?dev=". urlencode($dv) ." coords=\"$area\" shape=rect>\n";
+$curx++;
 						}
 					}	
 				}
@@ -485,7 +510,7 @@ function Map($lev) {
 	}elseif($lev == "f"){
 		foreach(array_keys($devlink) as $devl){
 			foreach(array_keys($devlink[$devl]) as $devn){
-				Drawlink($xd[$devl],$yd[$devl],$xd[$devn],$yd[$devn],$devlink[$devl][$devn]['bw'],$rdevlink[$devl][$devn]['bw'],$devlink[$devl][$devn]['if'],$rdevlink[$devl][$devn]['if']);
+				Drawlink($xd[$devl]-8,$yd[$devl]-4,$xd[$devn]-8,$yd[$devn]-4,$devlink[$devl][$devn]['bw'],$rdevlink[$devl][$devn]['bw'],$devlink[$devl][$devn]['if'],$rdevlink[$devl][$devn]['if']);
 			}
 		}
 	}
@@ -541,7 +566,7 @@ function Arrange($array,$lev){
 # Read devices and their neighbours and create the links.
 function Read($ina,$filter,$ipi,$ifi){
 
-	global $link,$locsep,$fpos,$bpos,$cpos,$resmsg;
+	global $link,$locsep,$fpos,$bpos,$cpos,$rpos,$resmsg;
 	global $dev,$ndev,$bdev,$fdev;
 	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink;
 	global $nctylink,$nbldlink,$actylink,$abldlink;
@@ -577,7 +602,6 @@ function Read($ina,$filter,$ipi,$ifi){
 	}else{
 		$query	= GenQuery('devices','s','*','','',array('location'),array('regexp'),array($filter));
 	}
-	#echo "$query";
 	$res	= @DbQuery($query,$link);
 	if($res){
 		while( ($unit = @DbFetchRow($res)) ){
@@ -597,12 +621,17 @@ function Read($ina,$filter,$ipi,$ifi){
 			}else{
 				$flr = $locitems[$fpos];
 			}
-			$dev[$unit[0]]['ip'] = $unit[1]; 
+			if($rpos === false){
+				$rom = "nureine";
+			}else{
+				$rom = $locitems[$rpos];
+			}
+			$dev[$unit[0]]['ip'] = long2ip($unit[1]); 
 			$dev[$unit[0]]['ic'] = $unit[18]; 
 			$dev[$unit[0]]['cty'] = $cty; 
 			$dev[$unit[0]]['bld'] = $bld; 
 			$dev[$unit[0]]['flr'] = $flr; 
-	
+                        $dev[$unit[0]]['rom'] = $rom;
 			$ndev[$cty][$bld][$flr][] = $unit[0];
 			$bdev[$cty][$bld]++;
 			$fdev[$cty][$bld][$flr]++;

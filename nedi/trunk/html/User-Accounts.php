@@ -107,7 +107,7 @@ if($res){
 		echo "<td>$u[8]</td><td align=center>$u[9]</td><td>$u[12]</td><td align=center>$u[13]</td>\n";
 		echo "<td bgcolor=#$cc>".date("j. M Y",$u[10])."</td>\n";
 		echo "<td bgcolor=#$lc>".date("j. M (G:i)",$u[11])."</td><th>\n";
-		if($u[2]){echo "<a href=$_SERVER[PHP_SELF]?grp=$grp&ord=$ord&grm=$u[0]&mgp=adm><img hspace=$hs src=img/16/cfg2.png border=0 title=-admin></a>";}
+		if($u[2]){echo "<a href=$_SERVER[PHP_SELF]?grp=$grp&ord=$ord&grm=$u[0]&mgp=adm><img hspace=$hs src=img/16/cfg.png border=0 title=-admin></a>";}
 		else{echo "<a href=$_SERVER[PHP_SELF]?grp=$grp&ord=$ord&gad=$u[0]&mgp=adm><img hspace=$hs src=img/16/bcls.png border=0  title=+admin></a>";}
 		if($u[3]){echo "<a href=$_SERVER[PHP_SELF]?grp=$grp&ord=$ord&grm=$u[0]&mgp=net><img hspace=$hs src=img/16/net.png border=0 title=-net></a>";}
 		else{echo "<a href=$_SERVER[PHP_SELF]?grp=$grp&ord=$ord&gad=$u[0]&mgp=net><img hspace=$hs src=img/16/bcls.png border=0 title=+net></a>";}

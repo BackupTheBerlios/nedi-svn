@@ -96,7 +96,7 @@ Comment <input type="text" name="comment" size="50" value="<?=$u[12]?>" >
 <th>Admin</th><th>Network</th><th>Helpdesk</th><th>Monitoring</th><th>Manager</th><th>Other</th>
 <th>Created on</th>
 <tr bgcolor=#<?=$bgb?> >
-<th><?=($u[2])?"<img src=img/32/cfg2.png>":"<img src=img/16/bcls.png>"?></th>
+<th><?=($u[2])?"<img src=img/32/cfg.png>":"<img src=img/16/bcls.png>"?></th>
 <th><?=($u[3])?"<img src=img/32/net.png>":"<img src=img/16/bcls.png>"?></th>
 <th><?=($u[4])?"<img src=img/32/ring.png>":"<img src=img/16/bcls.png>"?></th>
 <th><?=($u[5])?"<img src=img/32/sys.png>":"<img src=img/16/bcls.png>"?></th>

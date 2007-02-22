@@ -418,6 +418,7 @@ sub GetCfg{
 sub GetIosCfg{
 
 	my $cmd = "sh run";
+	my $pag = "terminal length 0";
 	my $go  = 0;
 	my $cl	= 0;
 	my @run = ();
@@ -440,7 +441,7 @@ sub GetIosCfg{
 							Prompt  => $prompt,
 							#Input_log  => "input.log",
 							#output_log  => "output.log",
-							Timeout => ($misc::timeout + 10),				# Add 10 seconds to build config.
+							Timeout => ($misc::timeout + 30),				# Add 30 seconds to build config.
 							Errmode	=> 'return'
 						  	);
 		if( defined($session) ){										# To be sure it doesn't bail out...
@@ -467,7 +468,7 @@ sub GetIosCfg{
 		}
 	}
 	foreach my $line (@run){
-		if ($line =~ /^Current /){$go = 1}
+		if ($line =~ /^(Current|PIX|FWSM|ASA)\s/){$go = 1}
 		if ($go){
 			$line =~ s/[\n\r]//g;
 			print "\n CFG:$line" if $main::opt{v};

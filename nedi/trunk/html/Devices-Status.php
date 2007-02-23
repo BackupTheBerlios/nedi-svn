@@ -360,9 +360,7 @@ if ($shd){
 <th valign=bottom><img src=img/cal.png title="Realtime, last status change"><br>Last Chg</th>
 <? 
 if($shp){
-?>
-<th valign=bottom><img src=img/16/cubs.png title="Population"><br>Pop</th>
-<?
+	echo '<th valign=bottom><img src=img/16/cubs.png><br>Pop</th>';
 }
 if($rrdstep and $shg){
 	echo '<th valign=bottom><img src=img/16/3d.png><br>Traffic/Errors</th>';
@@ -426,21 +424,22 @@ if($rrdstep and $shg){
 
 		echo "<tr bgcolor=#$bg>";
 		echo "<th bgcolor=#$rs$gs$bg3><img src=img/$ifimg title=\"$i - $iftit\" vspace=8></th>\n";
-		echo "<td>$in</td>\n";
+		echo "<td><b>$in</b></td>\n";
 		echo "<td align=center>$ifv[$i]</td><td>$ifi[$i]</td>\n";
 		echo "<td align=right>$ifs[$i]</td><td align=center>$ifd[$i]</td>\n";
 		echo "<td align=right bgcolor=#$bl$bg3$bg3>$iflch</td>\n";
 
 		if($shp){
 			if($ncount[$in]){
-				echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui>" . Bar($ncount[$in],8) . " $ncount[$in]</a></td>\n";
+				echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui title=\"$in Nodes-List\">" . Bar($ncount[$in],8) . " $ncount[$in]</a></td>\n";
 			}else{
 				echo "<td>-</td>\n";}
 			}
 		if($rrdstep and $shg){
 			if($ud and $ui ){
 				echo "<td nowrap align=center>\n";
-				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$ui><img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=trf border=0>\n";
+				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$ui title=\"$in Devices-Graph\">\n";
+				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=trf border=0>\n";
 				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=err border=0></a>\n";
 			}else{
 				echo "<td></td>";
@@ -455,7 +454,8 @@ if($rrdstep and $shg){
 		if($ifm[$i]){echo "<a href=Nodes-Status.php?mac=$ifm[$i]>$ifm[$i]</a><br>";}
 		foreach ($net[$in] as $ip => $dmsk){
 			list($pfix,$msk,$bmsk)	= Masker($dmsk);
-			echo long2ip($ip)."/$pfix ";
+			$dnet = long2ip($ip);
+			echo "<a href=Nodes-List.php?ina=ip&opa==&sta=$dnet/$pfix&ord=ip title=\"$dnet/$pfix Nodes-List\">$dnet</a>/$pfix ";
 		}
 		echo "</td></tr>\n";
 	}

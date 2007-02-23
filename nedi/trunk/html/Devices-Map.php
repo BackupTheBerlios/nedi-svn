@@ -25,14 +25,12 @@ $refresh = 0;
 $mapinfo   = array();
 $mapframes = array();
 $maplinks  = array();
-$mapnods   = array();
+$mapitems   = array();
 
 $ndev      = array();
 $bldlink   = array();
 $ctylink   = array();
 $devlink   = array();
-
-$imgmap    = "";
 
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
@@ -61,7 +59,7 @@ elseif($res == "uxga") {$xm = "1600";$ym = "1200";}
 
 $csi = isset($_GET['csi']) ? $_GET['csi'] : intval($xm /3);
 $bsi = isset($_GET['bsi']) ? $_GET['bsi'] : intval($xm /4);
-$fsi = isset($_GET['fsi']) ? $_GET['fsi'] : 80;
+$fsi = isset($_GET['fsi']) ? $_GET['fsi'] : 70;
 $cwt = isset($_GET['cwt']) ? $_GET['cwt'] : 5;
 $bwt = isset($_GET['bwt']) ? $_GET['bwt'] : 5;
 $cro = isset($_GET['cro']) ? $_GET['cro'] : 0;
@@ -89,6 +87,8 @@ if(!($fpos === false) ){
 	$s = ($lev == "f")?"selected":"";
         $levopt .= "<OPTION VALUE=f $s>Device\n";
 }
+
+$imgmap    = "";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 $query	= GenQuery('devices');
@@ -161,7 +161,7 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 <input type="text" name="bro" value="<?=$bro?>" size=3 title="Rotation of building circle">@
 </td></tr>
 <tr><td>Floor</td><td>
-<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor size">S
+<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor size and columns(divided by 10)">S
 <input type="text" name="xo" value="<?=$xo?>" size=2 title="Map X offset"> X
 <input type="text" name="yo" value="<?=$yo?>" size=2 title="Map Y offset"> Y
 </td></tr>
@@ -227,7 +227,7 @@ include_once ("inc/footer.php");
 
 function Writemap($usr,$nd) {
 
-	global $xm,$ym,$dep,$tit,$ina,$flt,$mapnods,$mapinfo,$mapframes,$maplinks;
+	global $xm,$ym,$dep,$tit,$ina,$flt,$mapitems,$mapinfo,$mapframes,$maplinks;
 
 	$xf = $xm - 130;
 	$yf = $ym - 10;
@@ -272,7 +272,7 @@ function Writemap($usr,$nd) {
 			);
 	
 
-	$map = array_merge($maphdr,$mapinfo,$mapframes,$maplinks,$mapnods,$mapftr);
+	$map = array_merge($maphdr,$mapinfo,$mapframes,$maplinks,$mapitems,$mapftr);
 
 	$fd =  @fopen("log/map_$usr.php","w") or die ("can't create log/map_$usr.php");
 	fwrite($fd,implode("\n",$map));
@@ -332,18 +332,17 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 
 function Drawbox($x1,$y1,$x2,$y2,$label) {
 
-	global $mapframes;
+	global $mapframes,$imgmap;
 
 	$xt = $x1 + 4;
 	$yt = $y1 + 4;
 	$xs = $x1 + 20;
 	$ys = $y1 + 20;
 
-$mapframes[] = "Imagefilledrectangle(\$image, $x1,$y1,$x2,$y2, \$gy2);";
-$mapframes[] = "Imagefilledrectangle(\$image, $x1,$ys,$xs,$y2, \$gy1);";
-$mapframes[] = "Imagerectangle(\$image, $x1,$y1,$x2,$y2, \$blk);";
-$mapframes[] = "ImageString(\$image, 3, $xt,$yt,\"$label\", \$bl2);";
-
+	$mapframes[] = "Imagefilledrectangle(\$image, $x1,$y1,$x2,$y2, \$gy2);";
+	$mapframes[] = "Imagefilledrectangle(\$image, $x1,$ys,$xs,$y2, \$gy1);";
+	$mapframes[] = "Imagerectangle(\$image, $x1,$y1,$x2,$y2, \$blk);";
+	$mapframes[] = "ImageString(\$image, 3, $xt,$yt,\"$label\", \$bl2);";
 }
 
 #===================================================================
@@ -351,7 +350,7 @@ $mapframes[] = "ImageString(\$image, 3, $xt,$yt,\"$label\", \$bl2);";
 
 function Drawitem($x,$y,$opt,$label,$lev) {
 
-	global $dev,$loi,$ipi,$redbuild,$mapnods;
+	global $dev,$loi,$ipi,$redbuild,$mapinfo,$mapitems;
 
 	if($lev == "f"){
 		$img = "dev/" . $dev[$label]['ic'];
@@ -370,21 +369,25 @@ function Drawitem($x,$y,$opt,$label,$lev) {
 		$lcol = "blk";
 		$font = "3";
 	}elseif($lev == "ci"){
-		$img  = "cityg";
-		$lcol = "bl3";
-		$font = "2";
+		$mapinfo[] = "\$icon = Imagecreatefrompng(\"../img/cityg.png\");";
+		$mapinfo[] = "\$w = Imagesx(\$icon);";
+		$mapinfo[] = "\$h = Imagesy(\$icon);";
+		$mapinfo[] = "Imagecopy(\$image, \$icon,intval($x - \$w/2),intval($y - \$h/2),0,0,\$w,\$h);";
+		$mapinfo[] = "ImageString(\$image,2, intval($x  - \$w/1.5), intval($y + \$h/1.5), \"$label\", \$bl3);";
+		$mapinfo[] = "Imagedestroy(\$icon);";
+		return;
 	}
-	$mapnods[] = "\$icon = Imagecreatefrompng(\"../img/$img.png\");";
-	$mapnods[] = "\$w = Imagesx(\$icon);";
-	$mapnods[] = "\$h = Imagesy(\$icon);";
+	$mapitems[] = "\$icon = Imagecreatefrompng(\"../img/$img.png\");";
+	$mapitems[] = "\$w = Imagesx(\$icon);";
+	$mapitems[] = "\$h = Imagesy(\$icon);";
 	if ($lev == "f"){
-		if ($loi){$mapnods[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y - \$h/1.5 - 8), \"".$dev[$label]['rom']."\", \$bl3);";}
-		if ($ipi){$mapnods[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5 + 8), \"".$dev[$label]['ip']."\", \$gry);";}
+		if ($loi){$mapitems[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y - \$h/1.5 - 8), \"".$dev[$label]['rom']."\", \$bl3);";}
+		if ($ipi){$mapitems[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5 + 8), \"".$dev[$label]['ip']."\", \$gry);";}
 	}
 	$label = preg_replace('/\\$/','\\\$', $label);
-	$mapnods[] = "Imagecopy(\$image, \$icon,intval($x - \$w/2),intval($y - \$h/2),0,0,\$w,\$h);";
-	$mapnods[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5), \"$label\", \$$lcol);";
-	$mapnods[] = "Imagedestroy(\$icon);";
+	$mapitems[] = "Imagecopy(\$image, \$icon,intval($x - \$w/2),intval($y - \$h/2),0,0,\$w,\$h);";
+	$mapitems[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5), \"$label\", \$$lcol);";
+	$mapitems[] = "Imagedestroy(\$icon);";
 }
 
 #===================================================================
@@ -427,7 +430,7 @@ function Map($lev) {
 		if($lev == "c"){
 			Drawitem($xct[$cty],$yct[$cty],$nbld,$cty,$lev);
 			$area = ($xct[$cty]-20) .",". ($yct[$cty]-20) .",". ($xct[$cty]+20) .",". ($yct[$cty]+20);
-			$imgmap .= "<area href=?flt=". urlencode($cty) ."&lev=b&draw=1 coords=\"$area\" shape=rect>\n";
+			$imgmap .= "<area href=?flt=". urlencode($cty) ."&lev=b&loi=1&draw=1 coords=\"$area\" shape=rect title=\"Show $nbld buildings\">\n";
 		}else{
 			if($nbld != 1){
 				$bldscalx = 1.3;
@@ -447,7 +450,7 @@ function Map($lev) {
 				if($lev == "b"){
 					Drawitem($xbl[$bld],$ybl[$bld],$bdev[$cty][$bld],$bld,$lev);
 					$area = ($xbl[$bld]-20) .",". ($ybl[$bld]-20) .",". ($xbl[$bld]+20) .",". ($ybl[$bld]+20);
-					$imgmap .= "<area href=?flt=". urlencode($bld) ."&lev=f&draw=1 coords=\"$area\" shape=rect>\n";
+					$imgmap .= "<area href=?flt=". urlencode($bld) ."&lev=f&loi=1&ipi=1&draw=1 coords=\"$area\" shape=rect title=\"Show". $bdev[$cty][$bld] ." devices\">\n";
 				}else{
 					$cury = $nflr = $mdfl = 0;
 					$nflr = count($ndev[$cty][$bld]);
@@ -486,7 +489,7 @@ function Map($lev) {
 							$yd[$dv] = $ybl{$bld} +  intval($fsi * ($cury - $nflr/2));
 							Drawitem($xd[$dv],$yd[$dv],'0',$dv,$lev);
 							$area = ($xd[$dv]-20) .",". ($yd[$dv]-20) .",". ($xd[$dv]+20) .",". ($yd[$dv]+20);
-							$imgmap .= "<area href=Devices-Status.php?dev=". urlencode($dv) ." coords=\"$area\" shape=rect>\n";
+							$imgmap .= "<area href=Devices-Status.php?dev=". urlencode($dv) ." coords=\"$area\" shape=rect title=\"Show $dv Status\">\n";
 $curx++;
 						}
 					}	

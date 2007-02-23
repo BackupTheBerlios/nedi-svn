@@ -43,7 +43,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 <OPTION VALUE="sum" <? if(in_array("sum",$rep)){echo "selected";} ?> >Summary
 <OPTION VALUE="ips" <? if(in_array("ips",$rep)){echo "selected";} ?> >IP Addresses
 <OPTION VALUE="ifs" <? if(in_array("ifs",$rep)){echo "selected";} ?> >Interfaces
-<OPTION VALUE="vln" <? if(in_array("vln",$rep)){echo "selected";} ?> >Vlans
+<OPTION VALUE="vln" <? if(in_array("vln",$rep)){echo "selected";} ?> >Unpopulated Vlans
 <OPTION VALUE="nom" <? if(in_array("nom",$rep)){echo "selected";} ?> >Nomads
 <OPTION VALUE="ust" <? if(in_array("ust",$rep)){echo "selected";} ?> >Update Stats 
 </select>

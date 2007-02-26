@@ -204,7 +204,7 @@ ColHead('time');
 		elseif( preg_match("/^router|^ network|vlan/",$l) )
 			$l = "<font style='color: green'>$l</font>";
 		elseif($smo)
-			$l = preg_replace("/ (\^)([\w])$/"," $1",$l);
+			$l = preg_replace("/(\^)([\w])$/","$1",$l);
 		if($sln)
 			$config .= sprintf("<i>%3d</i> $l\n",$lnr);
 		else

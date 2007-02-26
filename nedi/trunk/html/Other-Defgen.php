@@ -37,6 +37,8 @@ $snt = "";
 $thc = "";					# I decided to use $thc for the two-hc variable due to extensive listening to older Pink Floyd songs...
 
 $ios = "";
+$iof = "";
+$iow = "";
 $cos = "";
 $c19 = "";
 $cvp = "";
@@ -95,6 +97,8 @@ if ($so){
 				elseif($d[0] == 'SNMPv' AND $d[1] == '2HC'){$thc = 'selected';}
 				elseif($d[0] == 'Type'){$typ = $d[1];}
 				elseif($d[0] == 'OS' AND $d[1] == 'IOS'){$ios = 'selected';}
+				elseif($d[0] == 'OS' AND $d[1] == 'IOS-fw'){$iof = 'selected';}
+				elseif($d[0] == 'OS' AND $d[1] == 'IOS-wl'){$iow = 'selected';}
 				elseif($d[0] == 'OS' AND $d[1] == 'CatOS'){$cos = 'selected';}
 				elseif($d[0] == 'OS' AND $d[1] == 'C19'){$c19 = 'selected';}
 				elseif($d[0] == 'OS' AND $d[1] == 'Cvpn'){$cvp = 'selected';}
@@ -462,6 +466,8 @@ Type</th><td>
 OS</th><td>
  <select size=1 name="os" title="Choose operating system for your new device" onchange="update();"><option value="other">other
 <option value="IOS" <?=$ios?>>IOS
+<option value="IOS-fw" <?=$iof?>>IOS-FW
+<option value="IOS-wl" <?=$iow?>>IOS-Wlan
 <option value="CatOS" <?=$cos?>>CatOS
 <option value="Cat1900" <?=$c19?>>Cat1900
 <option value="Cvpn" <?=$cvp?>>Cvpn

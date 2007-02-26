@@ -63,7 +63,7 @@ sub PrepDev{
 	my $op = $_[1];
 	my @users = @misc::users;
 
-	if($op eq "mac" and $main::dev{$na}{os} ne "IOS"){							# Only IOS has support for mac-address stuff
+	if($op eq "mac" and $main::dev{$na}{os} !~ /^IOS/){							# Only IOS has support for mac-address stuff
 		return 2;
 	}	
 	if(defined $main::dev{$na}{cp} and $main::dev{$na}{cp} != 0){						# If port not defined, it's new or set to be prepd
@@ -102,7 +102,7 @@ sub PrepDev{
 				return 2;
 			}
 		} while ($#users ne "-1" and $nok);								# And stop on ok or we ran out of logins
-	}elsif( $main::dev{$na}{os} =~ /IOS|CatOS|Ironware/){
+	}elsif( $main::dev{$na}{os} =~ /^(IOS|CatOS|Ironware)/){
 		do {
 			$us = shift (@users);
 			print " P:$us" if $main::opt{d};
@@ -232,7 +232,7 @@ sub GetMacTab{
 	my @cam  = ();
 	my $cmd = "sh mac-address-table dyn";
 
-	if($misc::sysobj{$main::dev{$_[0]}{so}}{bf} eq "CAP"){
+	if($main::dev{$_[0]}{os} eq "IOS-wl"){									# Cisco WLan specific...
 		$cmd = 'sh bridge | exclude \*\*\*';								# Work around aged (***) forwarding entries
 	}
 	if( $main::dev{$_[0]}{cp} == 22 ){
@@ -313,86 +313,6 @@ sub GetMacTab{
 }
 
 #============================================================================
-# Get CatOS mac address table. DECOMMISSIONED in .w due to inconsisting channel names (plus SNMP is faster!)
-#============================================================================
-sub GetCatMacTab{
-
-	my $line = "";
-	my $nspo = 0;
-	my @cam  = ();
-	my $cmd = "sh cam dyn";
-
-	if( $main::dev{$_[0]}{cp} == 22 ){
-		eval {
-			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
-			$ssh->login($main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw});
-			my ($stdout, $stderr, $exit) = $ssh->cmd("$cmd");
-			@cam = split("\n", $stdout);	
-		};
-		if ($@){
-			print "Ho";
-			return 1;
-		}
-	}else{
-		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
-							Port	=> $main::dev{$_[0]}{cp},
-							Prompt  => $prompt,
-							Timeout	=> $misc::timeout,
-							Errmode	=> 'return'
-						  	);
-		
-		if( defined($session) ){										# To be sure it doesn't bail out...
-			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
-				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
-					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
-						$session->close;
-						print "Te";
-						return 1;
-					}
-				}
-				$session->cmd("set length 0");
-				@cam = $session->cmd("sh cam dyn");
-				$session->close;
-			}else{
-				$session->close;
-				print "Tl";
-				return 1;
-			}
-			$session->close;
-		}else{
-			print "Tc";
-			return 1;
-		}
-	}
-	foreach my $l (@cam){
-		if ($l =~ /^[0-9]{1,4}\s/){
-			my @mactab = split (/\s+/,$l);
-			my $mc = 0;
-			my $po = 0;
-			my $vl = "";
-			foreach my $col (@mactab){
-				if ($col =~ /^[0-9]{1,4}$/){$vl = $col}
-				elsif ($col =~ /^[0-9|a-f]{2}-/){$mc = $col}			
-				elsif ($col =~ /[0-9]{1,2}\/[0-9]{1,2}/){$po = $col}			
-			}
-			$mc =~ s/-//g;
-			if ($po =~ /,|-/){
-				$misc::portprop{$_[0]}{$po}{chn} = 1;
-			}
-			if ($vl !~ /$misc::ignoredvlans/){
-				$misc::portprop{$_[0]}{$po}{pop}++;
-				$misc::portnew{$mc}{$_[0]}{po} = $po;
-				$misc::portnew{$mc}{$_[0]}{vl} = $vl;
-				print "\n FWC:$mc on $po vl$vl" if $main::opt{v};
-				$nspo++;
-			}
-		}
-	}
-	print " f$nspo";
-	return 0;
-}
-
-#============================================================================
 # Wrapper to get the proper config
 #============================================================================
 sub GetCfg{
@@ -424,6 +344,9 @@ sub GetIosCfg{
 	my @run = ();
 	my @cfg = ();
 
+	if($main::dev{$_[0]}{os} eq "IOS-fw"){									# Cisco firewall specific...
+		$pag = "terminal pager 0";
+	}
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
 			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
@@ -441,10 +364,10 @@ sub GetIosCfg{
 							Prompt  => $prompt,
 							#Input_log  => "input.log",
 							#output_log  => "output.log",
-							Timeout => ($misc::timeout + 30),				# Add 30 seconds to build config.
+							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
 							Errmode	=> 'return'
 						  	);
-		if( defined($session) ){										# To be sure it doesn't bail out...
+		if( defined($session) ){									# To be sure it doesn't bail out...
 			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
 				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
 					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
@@ -453,7 +376,7 @@ sub GetIosCfg{
 						return "Enable failed!\n";
 					}
 				}
-				$session->cmd("terminal length 0");
+				$session->cmd($pag);
 				@run = $session->cmd($cmd);
 				$session->close;
 			}else{
@@ -476,7 +399,7 @@ sub GetIosCfg{
 			$cl++;
 		}
 	}
-	if( $cfg[$#cfg] eq "" ){pop @cfg}										# Remove empty line at the end.
+	if( $cfg[$#cfg] eq "" ){pop @cfg}									# Remove empty line at the end.
 	print "Bi";
 	print "-$cl" if $main::opt{d};
 	return @cfg;
@@ -508,11 +431,11 @@ sub GetCatCfg{
 		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 							Port	=> $main::dev{$_[0]}{cp},
 							Prompt  => $prompt,
-							Timeout => ($misc::timeout + 30),				# Add 30 seconds to build config.
+							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
 							Errmode	=> 'return'
 						  	);
 		
-		if( defined($session) ){										# To be sure it doesn't bail out...
+		if( defined($session) ){									# To be sure it doesn't bail out...
 			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
 				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
 					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
@@ -622,10 +545,10 @@ sub GetIronCfg{
 		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 							Port	=> $main::dev{$_[0]}{cp},
 							Prompt  => $prompt,
-							Timeout => ($misc::timeout + 10),				# Add 10 seconds to build config.
+							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
 							Errmode	=> 'return'
 						  	);
-		if( defined($session) ){										# To be sure it doesn't bail out...
+		if( defined($session) ){									# To be sure it doesn't bail out...
 			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
 				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
 					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
@@ -657,7 +580,7 @@ sub GetIronCfg{
 			$cl++;
 		}
 	}
-	if( $cfg[$#cfg] eq "" ){pop @cfg}										# Remove empty line at the end.
+	if( $cfg[$#cfg] eq "" ){pop @cfg}									# Remove empty line at the end.
 	print "Bf";
 	print "-$cl" if $main::opt{d};
 	return @cfg;
@@ -690,10 +613,10 @@ sub GetProCfg{
 							Port	=> $main::dev{$_[0]}{cp},
 							Prompt  => $prompt,
 							#input_record_separator => "\r",
-							Timeout => ($misc::timeout + 10),				# Add 10 seconds to build config.
+							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
 							Errmode	=> 'return'
 						  	);
-		if( defined($session) ){										# To be sure it doesn't bail out...
+		if( defined($session) ){									# To be sure it doesn't bail out...
 print "A" if $main::opt{d};
 			$session->waitfor('/Password:/');
 print "B" if $main::opt{d};

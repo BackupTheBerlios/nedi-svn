@@ -30,7 +30,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/ddum.png border=0 title="Device interface based statistics">
+<img src=img/32/ddum.png border=0 title="select order to limit to ethernet on active IFs or show incomplete link mismatches.">
 </a></th>
 <th>Select Report(s)</th>
 <th>
@@ -64,15 +64,17 @@ if($res){
 	$ndif = 0;
 	$nummo	= array();
 	while( ($i = @DbFetchRow($res)) ){
-		$numif[$i[0]]++;
-		$topino["$i[0];;$i[1]"] = $i[12];						# Using a flat array for sorting on counter values
+		if($i[4] == 6 or !$ord){						# alternatively only show ethernet IFs
+			$numif[$i[0]]++;
+			if($i[12] > 70){$nactif[$i[0]]++;}
+		}
+		$topino["$i[0];;$i[1]"] = $i[12];					# Using a flat array for  value based sorting
 		$topier["$i[0];;$i[1]"] = $i[13];
 		$topoto["$i[0];;$i[1]"] = $i[14];
 		$topoer["$i[0];;$i[1]"] = $i[15];
 		$ifsp["$i[0];;$i[1]"]   = $i[9];
 		$ifdu["$i[0];;$i[1]"] = $i[10];
 		$ifvl["$i[0];;$i[1]"]   = $i[11];
-		if($i[12] > 70){$nactif[$i[0]]++;}
 		if($i[8] == 2){$ndif++;$disif[$i[0]] .= "$i[1] ";}
 		$nif++;
 	}
@@ -109,6 +111,7 @@ if ( in_array("aif",$rep) ){
 		echo "<td align=center>".$numif[$dv]."</td><td>$ubar $up % (".$nactif[$dv].")</td></tr>\n";
 		if($row == $_GET['lim']){break;}
 	}
+	if($ord){$nif .= " <b>ethernet</b>";}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$nif interfaces on $row devices in total</td></tr></table>\n";
 ?>
@@ -334,9 +337,9 @@ if ( in_array("lmi",$rep) ){
 	if($res){
 		$row = 0;
 		while( ($l = @DbFetchRow($res)) ){
-			$libw[$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];		# Bandwidth is the only value, which is constructed from local IF in SNMP::CDP/LLDP
+			$libw[$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];			# Bandwidth is the only value, which is constructed from local IF in SNMP::CDP/LLDP
 			$lity[$l[1]][$l[2]][$l[3]][$l[4]] = $l[6];
-			$lidu[$l[1]][$l[2]][$l[3]][$l[4]] = $l[8];		# Duplex and Vlan are read via CDP from remote side
+			$lidu[$l[1]][$l[2]][$l[3]][$l[4]] = $l[8];			# Duplex and Vlan are read via CDP from remote side
 			$livl[$l[1]][$l[2]][$l[3]][$l[4]] = $l[9];
 		}
 		@DbFreeResult($res);
@@ -398,6 +401,7 @@ if ( in_array("lmi",$rep) ){
 		}
 		if($row == $lim){break;}
 	}
+	if($ord){$nli .= " <b>incomplete</b>";}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$row canditates of $nli links in total</td></tr></table>\n";
 }

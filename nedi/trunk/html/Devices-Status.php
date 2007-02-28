@@ -312,17 +312,6 @@ if ($shd){
 </table>
 <h2>Interfaces</h2><p>
 <?
-
-	if ($shp ){
-		$query	= GenQuery('nodes','g','ifname','','',array('device'),array('='),array($shd) );
-		$res	= @DbQuery($query,$link);
-		if($res){
-			while( ($nc = @DbFetchRow($res)) ){
-				$ncount[$nc[0]] = $nc[1];
-			}
-		}
-	}
-
 	$query	= GenQuery('interfaces','s','*','ifidx','',array('device'),array('='),array($shd) );
 	$res	= @DbQuery($query,$link);
 	$nif = 0;
@@ -359,19 +348,34 @@ if ($shd){
 <th valign=bottom><img src=img/dpx.png title="DB value"><br>Duplex</th>
 <th valign=bottom><img src=img/cal.png title="Realtime, last status change"><br>Last Chg</th>
 <? 
-if($shp){
-	echo '<th valign=bottom><img src=img/16/cubs.png><br>Pop</th>';
-}
-if($rrdstep and $shg){
-	echo '<th valign=bottom><img src=img/16/3d.png><br>Traffic/Errors</th>';
-}else{
+	if($shp){
+		echo '<th valign=bottom><img src=img/16/cubs.png><br>Pop</th>';
+
+		$query	= GenQuery('nodes','g','ifname','','',array('device'),array('='),array($shd) );
+		$res	= @DbQuery($query,$link);
+		if($res){
+			while( ($nc = @DbFetchRow($res)) ){
+				$ncount[$nc[0]] = $nc[1];
+			}
+		}
+		$query	= GenQuery('nodiflog','g','ifname','','',array('device'),array('='),array($shd) );
+		$res	= @DbQuery($query,$link);
+		if($res){
+			while( ($nl = @DbFetchRow($res)) ){
+				$niflog[$nl[0]] = $nl[1];
+			}
+		}
+	}
+	if($shg){
+		echo '<th valign=bottom><img src=img/16/3d.png><br>Traffic/Errors</th>';
+	}else{
  ?>
 <th valign=bottom><img src=img/dl.png title="DB value"><br>In Octets</th>
 <th valign=bottom><img src=img/ul.png title="DB value"><br>Out Octets</th>
 <th valign=bottom><img src=img/xr.png title="DB value"><br>In Err</th>
 <th valign=bottom><img src=img/xg.png title="DB value"><br>Out Err</th>
 <?
-}
+	}
 ?>
 <th valign=bottom><img src=img/netg.png title="DB value"><br>Address</th>
 <?
@@ -393,14 +397,14 @@ if($rrdstep and $shg){
 		$ui = rawurlencode($in);
 		if ($ifa[$i] == "1"){$gs = sprintf("%02x",60 + $off);}
 		if ($ifost[$i] == "2" or $ifost[$i] == "down"){$rs = sprintf("%02x",60 + $off);}
-		if ($ino[$i] > 70){											// Ignore the first 70  packets.
+		if ($ino[$i] > 70){											// Ignore the first 70  packets...
 			$bio = sprintf("%02x","40" + $off);
 			$ier = $ine[$i] * $ine[$i]/ $ino[$i];
 		            if ($ier > 55){$ier = 55;}
 		            $bie = sprintf("%02x", $ier + $off);
 		}
 		$boo = $boe = $bg;
-		if ($oto[$i] > 70){											// Ignore the first 70  packets.
+		if ($oto[$i] > 70){											// ...since some always see that.
 			$boo = sprintf("%02x","40" + $off);
 			$oer = $ote[$i] * $ote[$i]/ $oto[$i];
 		            if ($oer > 55){$oer = 55;}
@@ -410,7 +414,7 @@ if($rrdstep and $shg){
 		$il		= $upmin - ($lcm + 60 * $lch + 1440 * $lcd);
 		if($il <= 0){
 			$iflch	= "-";
-			$bl	= $bg3;
+			$blc	= $bg3;
 		}else{
 			$ild	= intval($il / 1440);
 			$ilh	= intval(($il - $ild * 1440)/60);
@@ -418,7 +422,7 @@ if($rrdstep and $shg){
 			$iflch	= sprintf("%d D %d:%02d",$ild,$ilh,$ilm);
 			$rblcm	= $off + 1000/($il + 1);
 			if($rblcm > 255){$rblcm = 255;}
-			$bl		= sprintf("%02x",$rblcm );
+			$blc	= sprintf("%02x",$rblcm );
 		}
 		list($ifimg,$iftit)	= Iftype($ift[$i]);
 
@@ -427,22 +431,29 @@ if($rrdstep and $shg){
 		echo "<td><b>$in</b></td>\n";
 		echo "<td align=center>$ifv[$i]</td><td>$ifi[$i]</td>\n";
 		echo "<td align=right>$ifs[$i]</td><td align=center>$ifd[$i]</td>\n";
-		echo "<td align=right bgcolor=#$bl$bg3$bg3>$iflch</td>\n";
+		echo "<td align=right bgcolor=#$blc$bg3$bg3>$iflch</td>\n";
 
 		if($shp){
-			if($ncount[$in]){
-				echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui title=\"$in Nodes-List\">" . Bar($ncount[$in],8) . " $ncount[$in]</a></td>\n";
+			if($niflog[$in]){
+				$bnl = sprintf("%02x","40" + $off);
+				echo "<td bgcolor=#$bg3$bg3$boo title=\"$niflog[$in] nodes tracked\">";
 			}else{
-				echo "<td>-</td>\n";}
+				echo "<td>";
 			}
-		if($rrdstep and $shg){
-			if($ud and $ui ){
+
+			if($ncount[$in]){
+				echo Bar($ncount[$in],8) . " <a href=Nodes-List.php?ina=device&opa==&sta=$ud&cop=AND&inb=ifname&opb==&stb=$ui title=\"$ud-$in Nodes-List\">$ncount[$in]</a>\n";
+			}
+			echo "</td>\n";
+		}
+		if($shg){
+			if($ud and $ui ){				// Still needed?
 				echo "<td nowrap align=center>\n";
 				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$ui title=\"$in Devices-Graph\">\n";
 				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=trf border=0>\n";
 				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=err border=0></a>\n";
 			}else{
-				echo "<td></td>";
+				echo "<td>Tell Remo, if you see this!!!</td>";
 			}
 		}else{
 			echo "<td bgcolor=#$bg3$bg3$bio align=right>".$ino[$i]."</td>\n";

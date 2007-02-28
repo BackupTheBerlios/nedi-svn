@@ -436,7 +436,7 @@ sub LinkIf {
 	my $newdv = "";
 	my $newif = "";
 	my $pop   = 65535;
-	my $metric = 250;											# This should never be seen in DB!
+	my $newmet = 250;											# This should never be seen in DB!
 	my $mc    = $_[0];
 
 	print "$mc [" if $main::opt{v};
@@ -446,23 +446,22 @@ sub LinkIf {
 		if(!defined $portprop{$dv}{$if}{rtr}){$portprop{$dv}{$if}{rtr} = 0}
 		if(!defined $portprop{$dv}{$if}{upl}){$portprop{$dv}{$if}{upl} = 0}
 		if(!defined $portprop{$dv}{$if}{chn}){$portprop{$dv}{$if}{chn} = 0}
-		#if(!defined $portprop{$dv}{$if}{pho}){$portprop{$dv}{$if}{pho} = 0}
 
-		my $newmet =	$portprop{$dv}{$if}{rtr} * 50 + 
+		my $metric =	$portprop{$dv}{$if}{rtr} * 50 + 
 				$portprop{$dv}{$if}{upl} * 30 + 
 				$portprop{$dv}{$if}{chn} * 100;
 
-		if( $portprop{$dv}{$if}{pop} <= $pop and $newmet <= $metric ){
+		if( $portprop{$dv}{$if}{pop} <= $pop and $metric <= $newmet ){
 			$newdv = $dv;										# ...and use the one with least# of other MACs for links, if interface value is equal or better than the existing entry.
 			$newif = $if;
-			$metric = $newmet;
+			$newmet = $metric;
 			$pop = $portprop{$dv}{$if}{pop};
 			print "$pop/$metric($dv-$if) " if $main::opt{v};
 		}
 	}
 	print "] $newdv $newif\n" if $main::opt{v};
 
-	return ($newdv, $newif, $metric);
+	return ($newdv, $newif, $newmet);
 }
 
 #===================================================================
@@ -593,17 +592,17 @@ sub NodeIf {
 	my $newdv = "";
 	my $newif = "";
 	my $vlan = "";
-	my $metric = 250;											# This should never be seen in DB!
+	my $newmet = 250;											# This should never be seen in DB!
 	my $mc    = $_[0];
 
-	if($_[1]){												#  Check whether node exists already.
+	if($_[1]){												#  Node exists already...
 		if($main::nod{$mc}{iu} < $retire){
-			$metric = 200;										# forces update if interface hasn't been updated in the retirement period.
+			$newmet = 200;										# forces update if interface hasn't been updated in the retirement period.
 		}else{
-			$metric = $main::nod{$mc}{im};								# Use old if value if available.
+			$newmet = $main::nod{$mc}{im};								# Use old if value if available.
 		}
 	}
-	print " $metric-> " if $main::opt{v};
+	print " $newmet-> " if $main::opt{v};
 	foreach my $dv (keys(%{$portnew{$mc}}) ){								# Cycle thru ports...
 		my $if = $portnew{$mc}{$dv}{po};
 
@@ -612,19 +611,34 @@ sub NodeIf {
 		if(!defined $portprop{$dv}{$if}{chn}){$portprop{$dv}{$if}{chn} = 0}
 		if(!defined $portprop{$dv}{$if}{pho}){$portprop{$dv}{$if}{pho} = 0}
 
-		my $newmet =	$portprop{$dv}{$if}{pho} * 10 + 
+		my $metric =	$portprop{$dv}{$if}{pho} * 10 + 
 				$portprop{$dv}{$if}{rtr} * 30 + 
 				$portprop{$dv}{$if}{upl} * 50 + 
 				$portprop{$dv}{$if}{chn} * 100;
-		if ($newmet <= $metric ){
+		if ($metric <= $newmet ){
 			$newdv  = $dv;										# ...and use the new one, if interface value is equal or better than the existing entry or update is forced due to age.
 			$newif  = $if;
-			$metric = $newmet;
+			$newmet = $metric;
 			$vlan   = $portnew{$mc}{$newdv}{vl};
 			print "$dv-$if:$metric Vl$vlan " if $main::opt{v};
 		}
 	}
-	return ($newdv, $newif, $metric, $vlan);
+	if($newdv){
+		if($_[1] and ($main::nod{$mc}{dv} ne $newdv or $main::nod{$mc}{if} ne $newif) ){
+			$main::nod{$mc}{ic}++;
+			if( ! &db::Insert('nodiflog','mac,ifupdate,device,ifname,vlanid,ifmetric',"\"$mc\",\"$main::nod{$mc}{iu}\",\"$main::nod{$mc}{dv}\",\"$main::nod{$mc}{if}\",\"$main::nod{$mc}{vl}\",\"$main::nod{$mc}{im}\"") ){
+				die "DB error nodiflog!\n";
+			}
+		}
+		$main::nod{$mc}{im} = $newmet;
+		$main::nod{$mc}{dv} = $newdv;
+		$main::nod{$mc}{if} = $newif;
+		$main::nod{$mc}{vl} = $vlan;
+		$main::nod{$mc}{iu} = $main::now;
+		print "] $dv-$if\n" if $main::opt{v};
+	}else{
+		print "old IF kept $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
+	}
 }
 
 #===================================================================
@@ -633,12 +647,33 @@ sub NodeIf {
 sub UpIpNod {
 
 	use Socket;
-	my $mc = $_[0];
+
+	my $mc    = $_[0];
+	my $getna = 0;
 	
+	if($_[1]){
+		if($main::nod{$mc}{ip} ne $arp{$mc} ){
+			$getna = 1;
+			my $dip = &misc::Ip2Dec($main::nod{$mc}{ip});
+			if( ! &db::Insert('nodiplog','mac,ipupdate,name,ip',"\"$mc\",\"$main::nod{$mc}{au}\",\"$main::nod{$mc}{na}\",\"$dip\"") ){
+				die "DB error nodiplog!\n";
+			}
+			$main::nod{$mc}{ac}++;
+		}elsif($main::nod{$mc}{au} < $retire){								# Same IP forever, update name
+			$getna = 1;
+		}
+	}else{
+			$getna = 1;
+	}
 	$main::nod{$mc}{ip} = $arp{$mc};
-	$main::nod{$mc}{na} = gethostbyaddr(inet_aton($arp{$mc}), AF_INET) or $main::nod{$mc}{na} = "";
-	$main::nod{$mc}{au} = $main::now;
-	
+	if($getna){
+		$main::nod{$mc}{au} = $main::now;
+		if(exists $arpn{$mc}){										# ARPwatch got a name, ...
+			$main::nod{$mc}{na} = $arpn{$mc};
+		}else{
+			$main::nod{$mc}{na} = gethostbyaddr(inet_aton($arp{$mc}), AF_INET) or $main::nod{$mc}{na} = "";
+		}	
+	}
 	print " IP:$arp{$mc} $main::nod{$mc}{na} "  if $main::opt{v};
 }
 
@@ -650,7 +685,7 @@ sub BuildNod {
 	my $nnip = 0;
 	my $nip  = 0;
 
-	print "Building Nodes (i:IP n:non-IP x:ignored p:no port):\n"  if $main::opt{d};
+	print "Building Nodes (i:IP n:non-IP x:ignored f:no IF):\n"  if $main::opt{d};
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
 	foreach my $mc (keys(%arp)){
 		if (!grep /^$arp{$mc}$/,@doneip or $main::opt{N}){						# Don't use devices as nodes.
@@ -659,18 +694,7 @@ sub BuildNod {
 				my $nodex = 0;
 				if(exists $main::nod{$mc}){
 					$nodex = 1;
-					if(exists $arpn{$mc}){							# Simple update, if ARPwatch got a name, ...
-						$main::nod{$mc}{ip} = $arp{$mc};
-						$main::nod{$mc}{na} = $arpn{$mc};
-						$main::nod{$mc}{au} = $main::now;
-					}elsif($main::nod{$mc}{ip} ne $arp{$mc}){				# ...IP changed...
-						&UpIpNod($mc);
-						$main::nod{$mc}{ac}++;
-					}elsif($main::nod{$mc}{au} < $retire){					# ...or it's been a while.
-						&UpIpNod($mc);
-					}
 				}else{
-					&UpIpNod($mc);
 					$main::nod{$mc}{fs} = $main::now;
 					$main::nod{$mc}{ic} = 0;
 					$main::nod{$mc}{ac} = 0;
@@ -678,22 +702,12 @@ sub BuildNod {
 				}
 				$main::nod{$mc}{nv} = &GetOui($mc);
 				$main::nod{$mc}{ls} = $main::now;
-				(my $dv, my $if, my $imet, my $vl) = &NodeIf($mc,$nodex);
-				if($dv){
-					$main::nod{$mc}{ic}++ if ($main::nod{$mc}{dv} and ($main::nod{$mc}{dv} ne $dv or $main::nod{$mc}{if} ne $if) );
-					$main::nod{$mc}{im} = $imet;
-					$main::nod{$mc}{dv} = $dv;
-					$main::nod{$mc}{if} = $if;
-					$main::nod{$mc}{vl} = $vl;
-					$main::nod{$mc}{iu} = $main::now;
-					print "] $dv-$if\n" if $main::opt{v};
-				}else{
-					print "old IF kept $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
-				}
+				&UpIpNod($mc,$nodex);
+				&NodeIf($mc,$nodex);
 				print "i"  if $main::opt{d};
 			}else{
 				print " no new IF ]\n" if $main::opt{v};					# Should only happen when Arpwatch is used
-				print "p"  if $main::opt{d};
+				print "f"  if $main::opt{d};
 			}
 			$nip++;
 		}else{
@@ -727,19 +741,7 @@ sub BuildNod {
 				}
 				$main::nod{$mc}{nv} = &GetOui($mc);
 				$main::nod{$mc}{ls} = $main::now;
-				(my $dv, my $if, my $imet, my $vl) = &NodeIf($mc,$nodex);
-				if($dv){									# was a (better) IF found?
-					$main::nod{$mc}{nv} = &GetOui($mc);
-					$main::nod{$mc}{ic}++ if ($main::nod{$mc}{dv} and ($main::nod{$mc}{dv} ne $dv or $main::nod{$mc}{if} ne $if) );
-					$main::nod{$mc}{im} = $imet;
-					$main::nod{$mc}{dv} = $dv;
-					$main::nod{$mc}{if} = $if;
-					$main::nod{$mc}{vl} = $vl;
-					$main::nod{$mc}{iu} = $main::now;
-					print "] $dv-$if\n" if $main::opt{v};
-				}else{
-					print "old IF $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
-				}
+				&NodeIf($mc,$nodex);
 				print "n"  if $main::opt{d};
 				$nnip++;
 			}
@@ -750,7 +752,7 @@ sub BuildNod {
 }
 
 #===================================================================
-# Retire nodes which have been inactive longer than $misc::retire days
+# Remove nodes their logs which have been inactive longer than $misc::retire days
 #===================================================================
 sub RetireNod {
 
@@ -760,6 +762,12 @@ sub RetireNod {
 		if ($main::nod{$mc}{ls} < $retire){
 			print "$mc $main::nod{$mc}{na} $main::nod{$mc}{ip} $main::nod{$mc}{dv}-$main::nod{$mc}{if}\n"  if $main::opt{v};
 			delete $main::nod{$mc};
+			if( ! &Delete('nodiflog','mac',$mc) ){
+				die "DB error nodiflog!\n";
+			}
+			if( ! &Delete('nodiplog','mac',$mc) ){
+				die "DB error nodiplog!\n";
+			}
 			$nret++;
 		}
 	}

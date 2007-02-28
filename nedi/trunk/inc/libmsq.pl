@@ -59,13 +59,13 @@ sub InitDB{
 	print "Creating Tables:";
 
 	print "devices, ";
-	$dbh->do("CREATE TABLE devices	(	name VARCHAR(64) UNIQUE,ip INT unsigned,serial VARCHAR(32),type VARCHAR(32),
+	$dbh->do("CREATE TABLE devices	(	name VARCHAR(64) NOT NULL UNIQUE,ip INT unsigned,serial VARCHAR(32),type VARCHAR(32),
 						firstseen INT unsigned,lastseen INT unsigned,services TINYINT unsigned,
 						description VARCHAR(255),os VARCHAR(8),bootimage VARCHAR(64),
 						location VARCHAR(255),contact VARCHAR(255),
 						vtpdomain VARCHAR(32),vtpmode TINYINT unsigned,snmpversion TINYINT unsigned,
 						community VARCHAR(32),cliport SMALLINT unsigned,login VARCHAR(32),
-						icon VARCHAR(16),origip INT unsigned,index (name(8)) )");
+						icon VARCHAR(16),origip INT unsigned,index (name(8)), PRIMARY KEY  (name) )");
  	$dbh->commit;
 						
 	print "devdel, ";
@@ -104,12 +104,21 @@ sub InitDB{
  	$dbh->commit;
 
 	print "nodes, ";
-	$dbh->do("CREATE TABLE nodes 	(	name VARCHAR(64),ip INT unsigned,mac CHAR(12) UNIQUE,oui VARCHAR(32),
+	$dbh->do("CREATE TABLE nodes 	(	name VARCHAR(64),ip INT unsigned,mac CHAR(12) NOT NULL UNIQUE,oui VARCHAR(32),
 						firstseen INT unsigned,lastseen INT unsigned, 
 						device VARCHAR(64),ifname VARCHAR(32),vlanid SMALLINT unsigned,
 						ifmetric TINYINT unsigned,ifupdate INT unsigned,ifchanges INT unsigned,
 						ipupdate INT unsigned,ipchanges INT unsigned,iplost INT unsigned,
-						index (name(8)),index(ip),index(mac),index(vlanid) )");
+						index (name(8)),index(ip),index(mac),index(vlanid), PRIMARY KEY  (mac) )");
+ 	$dbh->commit;
+	print "nodiflog, ";
+	$dbh->do("CREATE TABLE nodiflog	(	mac CHAR(12),ifupdate INT unsigned,
+						device VARCHAR(64),ifname VARCHAR(32),vlanid SMALLINT unsigned,
+						ifmetric TINYINT unsigned,index(mac),index(ifupdate) )");
+ 	$dbh->commit;
+	print "nodiplog, ";
+	$dbh->do("CREATE TABLE nodiplog (	mac CHAR(12),ipupdate INT unsigned,
+						name VARCHAR(64),ip INT unsigned,index(mac),index(ipupdate) )");
  	$dbh->commit;
 
 	print "stock, ";
@@ -322,7 +331,7 @@ sub WriteDev {
 	foreach my $na ( sort keys(%main::dev) ){
 		if (exists $devdel{$na}){
 			if( ! &Delete('configs','device',$na) ){
-				die "DB error messages!\n";
+				die "DB error configs!\n";
 			}
 			if (-e "$misc::rrdpath/$na"){
 				unlink(glob ("$misc::rrdpath/$na/*"));

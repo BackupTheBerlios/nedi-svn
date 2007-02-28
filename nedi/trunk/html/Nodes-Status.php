@@ -10,6 +10,7 @@
 #  9/05/05	improved probing & cosmetic changes.
 # 17/03/06	new SQL query support
 # 09/01/07	Minor improvements.
+# 02/28/07	Added IP & IF tracking tables.
 */
 
 $bg1	= "BBDDCC";
@@ -92,7 +93,7 @@ if ($mac){
 ?>
 <table cellspacing=10 width=100%>
 <tr><td width=50% valign=top>
-<h3>Database Info</h3><p>
+<h2>Database Info</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr><th bgcolor=#<?=$bia?> width=120><a href=Nodes-Status.php?mac=<?=$n[2]?> ><img src=img/oui/<?=$img?> title="<?=$n[3]?>" vspace=8 border=0></a><br><?=$name?></th>
 <td bgcolor=#<?=$bg2?>>
@@ -101,7 +102,7 @@ if ($mac){
 <?
 if(preg_match("/dsk/",$_SESSION['group']) ){
 	echo "<img src=img/sep.png hspace=12><a href=Nodes-Stolen.php?na=$n[0]&ip=$n[1]&stl=$n[2]&dev=$n[6]&ifn=$n[7]><img src=img/16/fiqu.png hspace=8 border=0  title=\"Mark as stolen!\"></a>";
-	echo "<a href=$_SERVER[PHP_SELF]?wol=$n[2]><img src=img/16/idea.png hspace=8 border=0 title=\"Wake this node\"></a>";
+	echo "<a href=$_SERVER[PHP_SELF]?wol=$n[2]><img src=img/16/powr.png hspace=8 border=0 title=\"Wake this node\"></a>";
 }
 if(preg_match("/adm/",$_SESSION['group']) ){
 	echo "<img src=img/sep.png hspace=12><a href=$_SERVER[PHP_SELF]?del=$n[2]><img src=img/16/bcnl.png hspace=8 border=0 onclick=\"return confirm('Delete node $n[2]?')\" title=\"Delete this node!\"></a>";
@@ -126,7 +127,7 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 flush();
 if($n[1]){
 ?>
-<h3>Realtime Info</h3><p>
+<h2>Realtime Info</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr><th bgcolor=#<?=$bg1?> width=120><img src=img/32/nwin.png><br>Netbios</th><td bgcolor=#<?=$bgb?>><?=NbtStat($ip)?></td></tr>
 <tr><th bgcolor=#<?=$bg1?> width=120><a href=http://<?=$ip?> target=window><img src=img/32/glob.png border=0></a><br>HTTP</th><td bgcolor=#<?=$bga?>><?=CheckTCP($ip,'80'," \r\n\r\n")?></td></tr>
@@ -144,16 +145,67 @@ if($rrdstep){
 	if($d = urlencode($n[6]) and $if = urlencode($n[7]) ){
 ?>
 <tr><td align=center>
-<h2>Interface Traffic (<?=$rsh?>h average)</h2>
+<h2>Current Interface Traffic (<?=$rsh?>h average)</h2>
 <a href=Devices-Graph.php?dv=<?=$d?>&if%5B%5D=<?=$if?>><img src=inc/drawrrd.php?dv=<?=$d?>&if%5B%5D=<?=$if?>&s=m&t=trf border=0></a>
 </td><td align=center>
-<h2>Interface Errors (<?=$rsh?>h average)</h2>
+<h2>Current Interface Errors (<?=$rsh?>h average)</h2>
 <img src=inc/drawrrd.php?dv=<?=$d?>&if%5B%5D=<?=$if?>&s=m&t=err border=0>
 </td></tr>
 <?
 	}
 }
-echo '</table>';
+?>
+<tr><td align=center valign=top>
+<h2>IP Tracking</h2>
+
+<table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
+<th colspan=2><img src=img/32/clock.png><br>Updated</th>
+<th><img src=img/32/say.png><br>Name</th>
+<th><img src=img/32/form.png><br>IP Address</th>
+<?
+
+$query	= GenQuery('nodiplog','s','*','ipupdate','',array('mac'),array('='),array($n[2]) );
+$res	= @DbQuery($query,$link);
+
+$row = 0;
+while( $l = @DbFetchRow($res) ){
+	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+	$row++;
+	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th>\n";
+	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td>$l[3]</td></tr>\n";
+}
+@DbFreeResult($res);
+
+echo "</table><table bgcolor=#666666 $tabtag >\n";
+echo "<tr bgcolor=#$bg2><td>$row IP changes in total</td></tr></table>\n";
+
+?>
+</td><td align=center valign=top>
+<h2>Interface Tracking</h2>
+
+<table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
+<th colspan=2><img src=img/32/clock.png><br>Updated</th>
+<th><img src=img/32/dev.png><br>Device</th>
+<th><img src=img/32/dumy.png><br>IF</th>
+<th><img src=img/32/stat.png><br>Vlan</th>
+<?
+
+$query	= GenQuery('nodiflog','s','*','ifupdate','',array('mac'),array('='),array($n[2]) );
+$res	= @DbQuery($query,$link);
+
+$row = 0;
+while( $l = @DbFetchRow($res) ){
+	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+	$row++;
+	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th>\n";
+	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td>$l[3]</td><td>$l[4]</td></tr>\n";
+}
+@DbFreeResult($res);
+
+echo "</table><table bgcolor=#666666 $tabtag >\n";
+echo "<tr bgcolor=#$bg2><td>$row IF changes in total</td></tr></table>\n";
+
+echo '</td></tr></table>';
 include_once ("inc/footer.php");
 
 }elseif ($wol){

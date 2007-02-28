@@ -96,7 +96,7 @@ Duration
 <th width=80><input type="submit" value="Show"></th>
 </tr></table></form><p><center>
 <?
-$udev = rawurlencode($dv);
+$udev = urlencode($dv);
 if($cpu ){
 	echo "<img src=inc/drawrrd.php?dv=$udev&s=$sze&t=cpu&dur=$dur>\n";
 }

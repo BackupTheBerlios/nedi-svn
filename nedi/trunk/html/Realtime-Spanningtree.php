@@ -189,7 +189,7 @@ if('0.0.0.0' == $ip){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
 		$rpimg = "";
-		if($rport == $po){$rpimg = "<img src=img/16/idea.png hspace=8 title=Rootport>";}
+		if($rport == $po){$rpimg = "<img src=img/16/form.png hspace=8 title=Rootport>";}
 
 		if($pstate[$po] == 1){$pst = "<img src=img/16/bcnl.png hspace=8>disabled";}
 		elseif($pstate[$po] == 2){$pst = "<img src=img/16/bstp.png hspace=8>blocking";}

@@ -147,7 +147,7 @@ if ( in_array("sum",$rep) ){
 		$row++;
 		$obar = Bar($nn);
 		$img  = Nimg($o);
-		$uo = str_replace(" ","%20",$o);
+		$uo = urlencode($o);
 
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><th bgcolor=#$bi><img src=img/oui/$img></th>\n";
@@ -433,7 +433,7 @@ if ( in_array("ust",$rep) ){
 		$fbar = Bar($nodup[$d]['fs'],100000);
 		$lbar = Bar($nodup[$d]['ls'],1);
 		$ibar = Bar($nodup[$d]['iu'],0);
-		$fd   = rawurlencode(date("m/d/Y H:i:s",$d));
+		$fd   = urlencode(date("m/d/Y H:i:s",$d));
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bg1>".date("r",$d)."\n";
 		echo "<td>$fbar <a href=Nodes-List.php?ina=firstseen&opa==&sta=".$fd.">".$nodup[$d]['fs']."</a> first seen<br>\n";

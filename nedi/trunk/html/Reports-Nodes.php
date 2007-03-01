@@ -87,6 +87,7 @@ $res	= @DbQuery($query,$link);
 			$nodup[$n[10]]['iu']++;
 			$ival[$n[9]]++;
 			$ifchg[$n[11]]++;
+			$nodup[$n[12]]['au']++;
 			$ipchg[$n[13]]++;
 			$iplost[$n[14]]++;
 			if($n[13] and $n[11]){
@@ -273,8 +274,9 @@ if ( in_array("ifs",$rep) ){
 			$row++;
 			$d = explode(';;', $di);
 			$mbar = Bar($nm,8);
+			$ud = urlencode($d[0]);
 			echo "<tr bgcolor=#$bg>\n";
-			echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
+			echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$ud>$d[0]</a></td>\n";
 			echo "<td><a href=Nodes-List.php?ina=device&&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a></td>\n";
 			echo "<td align=center>$ifvl[$di]</td><td>$mbar $nm</td></tr>\n";
 			if($row == $lim){break;}
@@ -430,14 +432,17 @@ if ( in_array("ust",$rep) ){
 		$nodup[$d]['fs'] = isset($nodup[$d]['fs']) ? $nodup[$d]['fs'] : 0;
 		$nodup[$d]['ls'] = isset($nodup[$d]['ls']) ? $nodup[$d]['ls'] : 0;
 		$nodup[$d]['iu'] = isset($nodup[$d]['iu']) ? $nodup[$d]['iu'] : 0;
+		$nodup[$d]['au'] = isset($nodup[$d]['au']) ? $nodup[$d]['au'] : 0;
 		$fbar = Bar($nodup[$d]['fs'],100000);
 		$lbar = Bar($nodup[$d]['ls'],1);
 		$ibar = Bar($nodup[$d]['iu'],0);
+		$abar = Bar($nodup[$d]['au'],0);
 		$fd   = urlencode(date("m/d/Y H:i:s",$d));
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bg1>".date("r",$d)."\n";
 		echo "<td>$fbar <a href=Nodes-List.php?ina=firstseen&opa==&sta=".$fd.">".$nodup[$d]['fs']."</a> first seen<br>\n";
 		echo "$lbar <a href=Nodes-List.php?ina=lastseen&opa==&sta=".$fd.">".$nodup[$d]['ls']."</a> last seen <br>\n";
+		echo "$abar <a href=Nodes-List.php?ina=ipupdate&opa==&sta=".$fd.">".$nodup[$d]['au']."</a> IP Updates<br>\n";
 		echo "$ibar <a href=Nodes-List.php?ina=ifupdate&opa==&sta=".$fd.">".$nodup[$d]['iu']."</a> IF Updates</td></tr>\n";
 		if($row == $lim){break;}
 	}

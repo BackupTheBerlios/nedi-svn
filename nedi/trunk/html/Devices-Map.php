@@ -44,7 +44,7 @@ $ifi = isset($_GET['ifi']) ? "checked" : "";
 $ipi = isset($_GET['ipi']) ? "checked" : "";
 $tit = isset($_GET['tit']) ? $_GET['tit'] : "NeDi Network Map";
 $flt = isset($_GET['flt']) ? $_GET['flt'] : ".";
-$ina = isset($_GET['ina']) ? $_GET['ina'] : ".";
+$ina = isset($_GET['ina']) ? $_GET['ina'] : "loc";
 $xm  = isset($_GET['x']) ? $_GET['x'] : 800;
 $ym  = isset($_GET['y']) ? $_GET['y'] : 600;
 $xo  = isset($_GET['xo']) ? $_GET['xo'] : 0;
@@ -172,7 +172,7 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
 <table >
 <tr><td>
 <select size=1 name="ina">
-<option value="location" <?=($ina == "location")?"selected":""?>>Location
+<option value="loc" <?=($ina == "loc")?"selected":""?>>Location
 <option value="vlan" <?=($ina == "vlan")?"selected":""?>>Vlan
 <option value="network" <?=($ina == "network")?"selected":""?>>Network
 </select>
@@ -261,7 +261,7 @@ function Writemap($usr,$nd) {
 			"\$blk = ImageColorAllocate(\$image, 0, 0, 0);",
 			"ImageFilledRectangle(\$image, 0, 0, $xm, $ym, \$wte);",
 			"ImageString(\$image, 5, 8, 8, \"$tit\", \$blk);",
-			"ImageString(\$image, 1, 8, 24, \"Filter: $ina $flt\", \$blk);",
+			"ImageString(\$image, 1, 8, 24, \"Filter: ($ina) $flt\", \$blk);",
 			"ImageString(\$image, 1, 8, 33, \"Match: $nd Devices\", \$blk);",
 			);
 

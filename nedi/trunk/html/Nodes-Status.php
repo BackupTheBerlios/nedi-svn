@@ -58,7 +58,8 @@ if ($mac){
 		$img		= Nimg("$n[2];$n[3]");
 		$fs		= date("r",$n[4]);
 		$ls		= date("r",$n[5]);
-		list($fc,$lc) = Agecol($n[4],$n[5],0);
+		$ud 		= urlencode($n[6]);
+		list($fc,$lc)	= Agecol($n[4],$n[5],0);
 
 		if($n[7]){
 			$query	= GenQuery('interfaces','s','*','','',array('device','name'),array('=','='),array($n[6],$n[7]),array('AND') );
@@ -97,7 +98,7 @@ if ($mac){
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr><th bgcolor=#<?=$bia?> width=120><a href=Nodes-Status.php?mac=<?=$n[2]?> ><img src=img/oui/<?=$img?> title="<?=$n[3]?>" vspace=8 border=0></a><br><?=$name?></th>
 <td bgcolor=#<?=$bg2?>>
-<a href=Devices-Status.php?dev=<?=$n[6]?> ><img src=img/16/hwif.png hspace=8 border=0 title="Status of related device"></a>
+<a href=Devices-Status.php?dev=<?=$ud?> ><img src=img/16/hwif.png hspace=8 border=0 title="Status of related device"></a>
 
 <?
 if(preg_match("/dsk/",$_SESSION['group']) ){
@@ -172,7 +173,7 @@ while( $l = @DbFetchRow($res) ){
 	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 	$row++;
 	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th>\n";
-	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td>$l[3]</td></tr>\n";
+	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td>". long2ip($l[3]) ."</td></tr>\n";
 }
 @DbFreeResult($res);
 
@@ -181,7 +182,7 @@ echo "<tr bgcolor=#$bg2><td>$row IP changes in total</td></tr></table>\n";
 
 ?>
 </td><td align=center valign=top>
-<h2>Interface Tracking</h2>
+<h2>IF Tracking</h2>
 
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2><img src=img/32/clock.png><br>Updated</th>
@@ -197,8 +198,9 @@ $row = 0;
 while( $l = @DbFetchRow($res) ){
 	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 	$row++;
-	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th>\n";
-	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td>$l[3]</td><td>$l[4]</td></tr>\n";
+	$uld = urlencode($l[2]);
+	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th><td>". date("r",$l[1]) ."</td>\n";
+	echo "<td><a href=Devices-Status.php?dev=$uld>$l[2]</a></td><td>$l[3]</td><td>$l[4]</td></tr>\n";
 }
 @DbFreeResult($res);
 
@@ -239,6 +241,10 @@ setTimeout("history.go(-1)",10000);
 		$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 		$query	= GenQuery('nodes','d','','','',array('mac'),array('='),array($del) );
 		if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Node $del $delokmsg</h3>";}
+		$query	= GenQuery('nodiplog','d','','','',array('mac'),array('='),array($del) );
+		if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Node IP log $del $delokmsg</h3>";}
+		$query	= GenQuery('nodiflog','d','','','',array('mac'),array('='),array($del) );
+		if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Node IF log $del $delokmsg</h3>";}
 ?>
 <script language="JavaScript"><!--
 setTimeout("history.go(-2)",2000);

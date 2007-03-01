@@ -626,8 +626,10 @@ sub NodeIf {
 	if($newdv){
 		if($_[1] and ($main::nod{$mc}{dv} ne $newdv or $main::nod{$mc}{if} ne $newif) ){
 			$main::nod{$mc}{ic}++;
-			if( ! &db::Insert('nodiflog','mac,ifupdate,device,ifname,vlanid,ifmetric',"\"$mc\",\"$main::nod{$mc}{iu}\",\"$main::nod{$mc}{dv}\",\"$main::nod{$mc}{if}\",\"$main::nod{$mc}{vl}\",\"$main::nod{$mc}{im}\"") ){
-				die "DB error nodiflog!\n";
+			if(!$main::opt{t}){
+				if( ! &db::Insert('nodiflog','mac,ifupdate,device,ifname,vlanid,ifmetric',"\"$mc\",\"$main::nod{$mc}{iu}\",\"$main::nod{$mc}{dv}\",\"$main::nod{$mc}{if}\",\"$main::nod{$mc}{vl}\",\"$main::nod{$mc}{im}\"") ){
+					die "DB error nodiflog!\n";
+				}
 			}
 		}
 		$main::nod{$mc}{im} = $newmet;
@@ -635,7 +637,7 @@ sub NodeIf {
 		$main::nod{$mc}{if} = $newif;
 		$main::nod{$mc}{vl} = $vlan;
 		$main::nod{$mc}{iu} = $main::now;
-		print "] $dv-$if\n" if $main::opt{v};
+		print "] $newdv-$newif\n" if $main::opt{v};
 	}else{
 		print "old IF kept $main::nod{$mc}{dv}-$main::nod{$mc}{if}:$main::nod{$mc}{im}]\n" if $main::opt{v};
 	}
@@ -655,10 +657,12 @@ sub UpIpNod {
 		if($main::nod{$mc}{ip} ne $arp{$mc} ){
 			$getna = 1;
 			my $dip = &misc::Ip2Dec($main::nod{$mc}{ip});
-			if( ! &db::Insert('nodiplog','mac,ipupdate,name,ip',"\"$mc\",\"$main::nod{$mc}{au}\",\"$main::nod{$mc}{na}\",\"$dip\"") ){
-				die "DB error nodiplog!\n";
-			}
 			$main::nod{$mc}{ac}++;
+			if(!$main::opt{t}){
+				if( ! &db::Insert('nodiplog','mac,ipupdate,name,ip',"\"$mc\",\"$main::nod{$mc}{au}\",\"$main::nod{$mc}{na}\",\"$dip\"") ){
+					die "DB error nodiplog!\n";
+				}
+			}
 		}elsif($main::nod{$mc}{au} < $retire){								# Same IP forever, update name
 			$getna = 1;
 		}
@@ -762,10 +766,10 @@ sub RetireNod {
 		if ($main::nod{$mc}{ls} < $retire){
 			print "$mc $main::nod{$mc}{na} $main::nod{$mc}{ip} $main::nod{$mc}{dv}-$main::nod{$mc}{if}\n"  if $main::opt{v};
 			delete $main::nod{$mc};
-			if( ! &Delete('nodiflog','mac',$mc) ){
+			if( ! &db::Delete('nodiflog','mac',$mc) ){
 				die "DB error nodiflog!\n";
 			}
-			if( ! &Delete('nodiplog','mac',$mc) ){
+			if( ! &db::Delete('nodiplog','mac',$mc) ){
 				die "DB error nodiplog!\n";
 			}
 			$nret++;

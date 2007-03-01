@@ -60,7 +60,7 @@ function sanitize( $arr ){
     if ( is_array( $arr ) ) {
         return array_map( 'sanitize', $arr );
     }
-    return trim( preg_replace( "/\.\.|\"/","", $arr ) );
+    return preg_replace( "/\.\.|\"/","", $arr );
 }
 
 //===================================================================

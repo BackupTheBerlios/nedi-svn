@@ -436,9 +436,9 @@ if ($shd){
 		if($shp){
 			if($niflog[$in]){
 				$bnl = sprintf("%02x","40" + $off);
-				echo "<td bgcolor=#$bg3$bg3$boo title=\"$niflog[$in] nodes tracked\">";
+				echo "<td bgcolor=#$bg3$bg3$boo title=\"$niflog[$in] nodes tracked\" nowrap>";
 			}else{
-				echo "<td>";
+				echo "<td nowrap>";
 			}
 
 			if($ncount[$in]){

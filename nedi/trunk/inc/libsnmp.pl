@@ -53,7 +53,7 @@ sub Identify {
 	}else{
 		print "+ " if $main::opt{d};
 		$name = &misc::Strip($r->{$namO});
-		if ($name eq ""){
+		if ($name =~ /^\s*$/){
 			$name = "($peer)";
 		}else{
 			$name =~  s/^(.*?)\.(.*)/$1/;							# Domain confuses CDP links!		

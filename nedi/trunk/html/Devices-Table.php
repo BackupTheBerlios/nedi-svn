@@ -27,7 +27,6 @@ include_once ('inc/libdev.php');
 $_GET = sanitize($_GET);
 $cty = isset($_GET['cty']) ? $_GET['cty'] : "";
 $bld = isset($_GET['bld']) ? $_GET['bld'] : "";
-
 $cpos = strpos($locformat, "c");
 $bpos = strpos($locformat, "b");
 $fpos = strpos($locformat, "f");

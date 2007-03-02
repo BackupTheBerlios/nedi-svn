@@ -60,7 +60,7 @@ if($shl == 'Inverted'){
 <option value="">----------
 <?
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
-$query	= GenQuery('configs');
+$query	= GenQuery('configs','s','device');
 $res	= @DbQuery($query,$link);
 if($res){
 	while( ($d = @DbFetchRow($res)) ){

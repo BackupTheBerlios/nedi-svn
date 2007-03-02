@@ -217,7 +217,7 @@ sub Enterprise {
 			$main::dev{$_[0]}{bi} = "err";
 		}else{
 			$main::dev{$_[0]}{bi} = &misc::Strip($r->{$misc::sysobj{$so}{bi}});
-			$main::dev{$_[0]}{bi} =~ s/^flash:|^bootflash:|^slot[0-9]:|^sup-bootflash:|^disk0://;
+			$main::dev{$_[0]}{bi} =~ s/^flash:|^bootflash:|^slot[0-9]:|^sup-boot(flash|disk):|^disk0://;
 			$main::dev{$_[0]}{bi} =~ s/.*\/(.*)/$1/;
 			print "BI=$main::dev{$_[0]}{bi} " if $main::opt{d};
 		}

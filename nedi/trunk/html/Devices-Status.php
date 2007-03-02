@@ -358,11 +358,11 @@ if ($shd){
 				$ncount[$nc[0]] = $nc[1];
 			}
 		}
-		$query	= GenQuery('nodiflog','g','ifname','','',array('device'),array('='),array($shd) );
+		$query	= GenQuery('nodiflog','s','*','','',array('device'),array('='),array($shd) );
 		$res	= @DbQuery($query,$link);
 		if($res){
 			while( ($nl = @DbFetchRow($res)) ){
-				$niflog[$nl[0]] = $nl[1];
+				$niflog[$nl[3]] = $nl[1];
 			}
 		}
 	}
@@ -436,7 +436,7 @@ if ($shd){
 		if($shp){
 			if($niflog[$in]){
 				$bnl = sprintf("%02x","40" + $off);
-				echo "<td bgcolor=#$bg3$bg3$boo title=\"$niflog[$in] nodes tracked\" nowrap>";
+				echo "<td bgcolor=#$bg3$bg3$boo title=\"Last node tracked ". date("r",$niflog[$in]) ."\" nowrap>";
 			}else{
 				echo "<td nowrap>";
 			}

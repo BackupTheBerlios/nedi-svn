@@ -172,8 +172,9 @@ $row = 0;
 while( $l = @DbFetchRow($res) ){
 	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 	$row++;
+	$lip = long2ip($l[3]);
 	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th>\n";
-	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td>". long2ip($l[3]) ."</td></tr>\n";
+	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td><a href=Nodes-List.php?ina=ip&opa==&sta=$lip>$lip</a></td></tr>\n";
 }
 @DbFreeResult($res);
 
@@ -189,6 +190,7 @@ echo "<tr bgcolor=#$bg2><td>$row IP changes in total</td></tr></table>\n";
 <th><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>IF</th>
 <th><img src=img/32/stat.png><br>Vlan</th>
+<th><img src=img/32/casp.png><br>Metric</th>
 <?
 
 $query	= GenQuery('nodiflog','s','*','ifupdate','',array('mac'),array('='),array($n[2]) );
@@ -200,7 +202,7 @@ while( $l = @DbFetchRow($res) ){
 	$row++;
 	$uld = urlencode($l[2]);
 	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th><td>". date("r",$l[1]) ."</td>\n";
-	echo "<td><a href=Devices-Status.php?dev=$uld>$l[2]</a></td><td>$l[3]</td><td>$l[4]</td></tr>\n";
+	echo "<td><a href=Devices-Status.php?dev=$uld&shp=on>$l[2]</a></td><td>$l[3]</td><td>$l[4]</td><td>$l[5]</td></tr>\n";
 }
 @DbFreeResult($res);
 

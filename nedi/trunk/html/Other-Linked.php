@@ -68,7 +68,7 @@ if($res){
 </select>
 <?
 if ($dv) {
-	$query	= GenQuery('interfaces','s','*','name','',array('device'),array('='),array($dv) );
+	$query	= GenQuery('interfaces','s','*','ifname','',array('device'),array('='),array($dv) );
 	$res	= @DbQuery($query,$link);
 	if($res){
 ?>
@@ -132,7 +132,7 @@ if($res){
 </select>
 <?
 if ($nb) {
-	$query	= GenQuery('interfaces','s','*','name','',array('device'),array('='),array($nb) );
+	$query	= GenQuery('interfaces','s','*','ifname','',array('device'),array('='),array($nb) );
 	$res	= @DbQuery($query,$link);
 	if($res){
 ?>
@@ -204,9 +204,9 @@ if ($dv or $typ){
 </tr>
 <?
 	if ($typ){
-		$query	= GenQuery('links','s','*','ifname','',array('type'),array('='),array($typ));
+		$query	= GenQuery('links','s','*','device','',array('type'),array('='),array($typ));
 	}else{
-		$query	= GenQuery('links','s','*','ifname','',array('device'),array('='),array($dv));
+		$query	= GenQuery('links','s','*','device','',array('device'),array('='),array($dv));
 	}
 	$res	= @DbQuery($query,$link);
 	if($res){

@@ -587,7 +587,7 @@ sub Link {
 #===================================================================
 # Find most appropriate interface for a MAC address based on metric (rtr=30,upl=50)
 #===================================================================
-sub NodeIf {
+sub UpNodif {
 	
 	my $newdv = "";
 	my $newif = "";
@@ -646,7 +646,7 @@ sub NodeIf {
 #===================================================================
 # IP update of a node
 #===================================================================
-sub UpIpNod {
+sub UpNodip {
 
 	use Socket;
 
@@ -706,8 +706,8 @@ sub BuildNod {
 				}
 				$main::nod{$mc}{nv} = &GetOui($mc);
 				$main::nod{$mc}{ls} = $main::now;
-				&UpIpNod($mc,$nodex);
-				&NodeIf($mc,$nodex);
+				&UpNodip($mc,$nodex);
+				&UpNodif($mc,$nodex);
 				print "i"  if $main::opt{d};
 			}else{
 				print " no new IF ]\n" if $main::opt{v};					# Should only happen when Arpwatch is used
@@ -745,7 +745,7 @@ sub BuildNod {
 				}
 				$main::nod{$mc}{nv} = &GetOui($mc);
 				$main::nod{$mc}{ls} = $main::now;
-				&NodeIf($mc,$nodex);
+				&UpNodif($mc,$nodex);
 				print "n"  if $main::opt{d};
 				$nnip++;
 			}

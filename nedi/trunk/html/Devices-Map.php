@@ -391,12 +391,17 @@ function Drawitem($x,$y,$opt,$label,$lev) {
 }
 
 #===================================================================
-# Sort by room (on floors)
-function roomsort($a, $b){
+# Sort by room and device name(on floors)
+function Roomsort($a, $b){
 
 	global $dev;
 
-        if ($dev[$a]['rom'] == $dev[$b]['rom']){return 0;}
+        if ($dev[$a]['rom'] == $dev[$b]['rom']){
+		if ($a == $b){
+			return 0;
+		}
+		return ($a < $b) ? -1 : 1;
+	}
         return ($dev[$a]['rom'] < $dev[$b]['rom']) ? -1 : 1;
 }
 
@@ -476,7 +481,7 @@ function Map($lev) {
 					foreach(array_keys($ndev[$cty][$bld]) as $flr){
 						$cury++;
 						$curx = 0;
-						usort( $ndev[$cty][$bld][$flr],"roomsort" );
+						usort( $ndev[$cty][$bld][$flr],"Roomsort" );
 						$xf = $xbl{$bld} -  intval($fsi * $mdfl/2 + 40);
 						$yf = $ybl{$bld} +  intval($fsi * ($cury - $nflr/2));
 						Drawitem($xf,$yf,0,$flr,"fl");

@@ -58,7 +58,7 @@ if($res){
 </select>
 <?
 if ($dv) {
-	$query	= GenQuery('interfaces','s','*','name','',array('device'),array('='),array($dv) );
+	$query	= GenQuery('interfaces','s','*','ifname','',array('device'),array('='),array($dv) );
 	$res	= @DbQuery($query,$link);
 	if($res){
 ?>

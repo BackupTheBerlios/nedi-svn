@@ -55,7 +55,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 </SELECT>
 </th>
 <th>
-<INPUT type="checkbox" name="ord" <?=$ord?> > reverse order
+<INPUT type="checkbox" name="ord" <?=$ord?> > alternative order
 </th>
 </SELECT></th>
 <th width=80><input type="submit" name="gen" value="Show"></th>
@@ -385,7 +385,7 @@ if ( in_array("nom",$rep) ){
 <th colspan=2><img src=img/32/dev.png><br>Device - IF</th>
 <th><img src=img/32/clock.png><br>First Seen</th>
 <th><img src=img/32/clock.png><br>Last Seen</th>
-<th><img src=img/32/form.png><br>Nomad Factor</th>
+<th><img src=img/32/fitr.png><br>Nomad Factor</th>
 <?
 	if($ord){
 		asort($nonf);

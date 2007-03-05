@@ -48,7 +48,7 @@ function DbError($l){
 // $do 	's'= select (is default), 'i'=insert (using $in for columns and $st for values), 't'=show tables, 'c'=show columns,
 //	'g'=group ( $col is counted/grouped), 'u'=update (using $in,$st to set and $col,$ord to match), 'd'=delete
 // $col	= column(s) to display (* is default), or to group by
-// $ord	= order by (where ifname takes into account the device column and an if like 0/4)
+// $ord	= order by (where device also takes numerical interface sorting (with /) into account)
 // $lim	= limiting results
 // $in,op,st	= array of columns,operators and strings to be used for WHERE in UPDATE, INSERT, SELECT and DELETE queries
 // $co	= combines current values with the next series of $in,op,st
@@ -77,10 +77,10 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 		return "SHOW COLUMNS FROM $tab";
 	}else{
 		$l = ($lim) ? "LIMIT $lim" : "";
-		if('ifname' == $ord){
-			$o = "ORDER BY device,SUBSTRING_INDEX(ifname, '/', 1), SUBSTRING_INDEX(ifname, '/', -1)*1";
-		}elseif('ifname desc' == $ord){
-			$o = "ORDER BY device desc,SUBSTRING_INDEX(ifname, '/', 1), SUBSTRING_INDEX(ifname, '/', -1)*1";
+		if('device' == $ord){
+			$o = "ORDER BY device,SUBSTRING_INDEX(ifname, '/', 1)+0, SUBSTRING_INDEX(ifname, '/', -1)*1+0";
+		}elseif('device desc' == $ord){
+			$o = "ORDER BY device desc,SUBSTRING_INDEX(ifname, '/', 1)+0, SUBSTRING_INDEX(ifname, '/', -1)*1+0";
 		}elseif($ord){
 			$o = "ORDER BY $ord";
 		}else{

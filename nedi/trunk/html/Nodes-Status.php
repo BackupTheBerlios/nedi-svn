@@ -62,7 +62,7 @@ if ($mac){
 		list($fc,$lc)	= Agecol($n[4],$n[5],0);
 
 		if($n[7]){
-			$query	= GenQuery('interfaces','s','*','','',array('device','name'),array('=','='),array($n[6],$n[7]),array('AND') );
+			$query	= GenQuery('interfaces','s','*','','',array('device','ifname'),array('=','='),array($n[6],$n[7]),array('AND') );
 			$res	= @DbQuery($query,$link);
 			$nif	= @DbNumRows($res);
 			if ($nif != 1) {
@@ -103,7 +103,7 @@ if ($mac){
 <?
 if(preg_match("/dsk/",$_SESSION['group']) ){
 	echo "<img src=img/sep.png hspace=12><a href=Nodes-Stolen.php?na=$n[0]&ip=$n[1]&stl=$n[2]&dev=$n[6]&ifn=$n[7]><img src=img/16/fiqu.png hspace=8 border=0  title=\"Mark as stolen!\"></a>";
-	echo "<a href=$_SERVER[PHP_SELF]?wol=$n[2]><img src=img/16/powr.png hspace=8 border=0 title=\"Wake this node\"></a>";
+	echo "<a href=$_SERVER[PHP_SELF]?wol=$n[2]><img src=img/16/powr.png hspace=8 border=0 title=\"Power on\"></a>";
 }
 if(preg_match("/adm/",$_SESSION['group']) ){
 	echo "<img src=img/sep.png hspace=12><a href=$_SERVER[PHP_SELF]?del=$n[2]><img src=img/16/bcnl.png hspace=8 border=0 onclick=\"return confirm('Delete node $n[2]?')\" title=\"Delete this node!\"></a>";
@@ -162,7 +162,7 @@ if($rrdstep){
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2><img src=img/32/clock.png><br>Updated</th>
 <th><img src=img/32/say.png><br>Name</th>
-<th><img src=img/32/form.png><br>IP Address</th>
+<th><img src=img/32/net.png><br>IP Address</th>
 <?
 
 $query	= GenQuery('nodiplog','s','*','ipupdate','',array('mac'),array('='),array($n[2]) );

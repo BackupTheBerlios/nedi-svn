@@ -8,10 +8,11 @@
 # DATE		COMMENT
 # -------- ------------------------------------------------------------------
 # 22/02/05	initial version.
-# 04/03/05	Revised backend
-# 10/03/05	Revised authentication
+# 04/03/05	revised backend
+# 10/03/05	revised authentication
 # 07/03/06	renamed time field, added icons
 # 17/03/06	new SQL query support
+# 05/03/07	location field
 */
 
 $bg1	= "88BBCC";
@@ -31,8 +32,13 @@ $_GET = sanitize($_GET);
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
 <img src=img/32/pkg.png border=0 title="Devices will be removed as found in discovery via SN#">
 </a></th>
-<th>Serial#: <input type="text" name="ser" size="30" OnFocus=select();>
-<th>Type: <input type="text" name="typ" size="30" OnFocus=select();>
+
+<th>Serial# <input type="text" name="ser" size="24" OnFocus=select();>
+
+<th>Type <input type="text" name="typ" size="24" OnFocus=select();>
+
+<th>Location <input type="text" name="loc" size="24" OnFocus=select();>
+
 <th width=80><input type="submit" value="Add" name="add"></th></tr>
 </table></form><p>
 <?
@@ -45,7 +51,7 @@ if( isset($_GET['add']) or isset($_GET['del']) ){
 			if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Device $_GET[del] $delokmsg</h3>";}
 		}elseif ($_GET['add'] and $_GET['ser'] and $_GET['typ'] ){
 			$now = time();
-			$query	= GenQuery('stock','i','','','',array('serial','type','user','time'),'',array($_GET['ser'],$_GET['typ'],$_SESSION['user'],$now) );
+			$query	= GenQuery('stock','i','','','',array('serial','type','user','time','location'),'',array($_GET['ser'],$_GET['typ'],$_SESSION['user'],$now,$_GET['loc']) );
 			if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Device $_GET[ser] $upokmsg</h3>";}
 		}
 	}else{
@@ -56,7 +62,7 @@ if( isset($_GET['add']) or isset($_GET['del']) ){
 <h2>Type Inventory</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th><img src=img/32/fiap.png><br>Type</th>
-<th><img src=img/32/form.png><br>Quantity</th>
+<th><img src=img/32/dev.png><br>Quantity</th>
 
 <?
 $query	= GenQuery('stock','g','type');
@@ -72,15 +78,44 @@ if($res){
 		echo "$stbar $dev[1]</td></tr>\n";
 	}
 }
-echo "</table><table bgcolor=#666666 $tabtag >\n";
-echo "<tr bgcolor=#$bg2><td>$row results using $query</td></tr></table>\n";
+?>
+</table><table bgcolor=#666666 <?=$tabtag?> >
+<tr bgcolor=#<?=$bg2?>><td><?=$row?> results using <?=$query?></td></tr></table>
 
-echo "<h2>Devices</h2>\n";
-echo "<table bgcolor=#666666 $tabtag >\n";
-echo "<tr bgcolor=#$bg2>\n";
-echo "<th><img src=img/32/form.png><br>Serial #</th><th><img src=img/32/fiap.png><br>Type</th>\n";
-echo "<th><img src=img/32/smil.png><br>Added by</th><th><img src=img/32/clock.png><br>Added on</th><th><img src=img/32/idea.png><br>Action</th></tr>\n";
+<h2>Location Inventory</h2>
+<table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
+<th><img src=img/32/glob.png><br>Location</th>
+<th><img src=img/32/dev.png><br>Quantity</th>
 
+<?
+$query	= GenQuery('stock','g','location');
+$res	= @DbQuery($query,$link);
+if($res){
+	$row = 0;
+	while( ($dev = @DbFetchRow($res)) ){
+		if ($row % 2){$bg = $bgb; $bi = $bib;}else{$bg = $bga; $bi = $bia;}
+		$row++;
+		$stbar = Bar($dev[1],0);
+		echo "<tr bgcolor=#$bg>\n";
+		echo "<td>$dev[0]</td><td>\n";
+		echo "$stbar $dev[1]</td></tr>\n";
+	}
+}
+?>
+</table><table bgcolor=#666666 <?=$tabtag?> >
+<tr bgcolor=#<?=$bg2?>><td><?=$row?> results using <?=$query?></td></tr></table>
+
+<h2>Device Inventory</h2>
+<table bgcolor=#666666 <?=$tabtag?> >
+<tr bgcolor=#<?=$bg2?>>
+<th><img src=img/32/key.png><br>Serial #</th>
+<th><img src=img/32/fiap.png><br>Type</th>
+<th><img src=img/32/smil.png><br>Added by</th>
+<th><img src=img/32/clock.png><br>Added on</th>
+<th><img src=img/32/glob.png><br>Location</th>
+<th><img src=img/32/idea.png><br>Action</th></tr>
+
+<?
 $query	= GenQuery('stock','s','*','type');
 $res	= @DbQuery($query,$link);
 if($res){
@@ -93,7 +128,7 @@ if($res){
 		$da  = date("j.M (G:i)",$dev[3]);
 		list($a1c,$a2c) = Agecol($dev[3],$dev[3],$row % 2);
 		echo "\t<tr bgcolor=#$bg>\n";
-		echo "\t\t<td>$dev[0]</td><td>$dev[1]</td><td>$dev[2]</td><td bgcolor=#$a1c>$da</td>\n";
+		echo "\t\t<td>$dev[0]</td><td>$dev[1]</td><td>$dev[2]</td><td bgcolor=#$a1c>$da</td><td>$dev[4]</td>\n";
 		echo "\t\t<td align=center><a href=$_SERVER[PHP_SELF]?del=$ud><img src=img/16/bcnl.png border=0 onclick=\"return confirm('Delete $dev[0] from stock?')\" title=\"Delete this device!\"></a></td>\n";
 		echo "\t</tr>\n";
 	}

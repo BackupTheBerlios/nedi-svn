@@ -32,7 +32,7 @@ $opa = isset($_GET['opa']) ? $_GET['opa'] : "";
 $opb = isset($_GET['opb']) ? $_GET['opb'] : "";
 $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
-$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','ifname','vlanid','firstseen','lastseen');
+$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','device','ifname','vlanid','firstseen','lastseen');
 
 $cols = array(	"name"=>"Name",
 		"ip"=>"IP Address",
@@ -40,7 +40,8 @@ $cols = array(	"name"=>"Name",
 		"oui"=>"OUI Vendor",
 		"firstseen"=>"Firstseen",
 		"lastseen"=>"Lastseen",
-		"ifname"=>"Device",
+		"device"=>"Device",
+		"ifname"=>"Ifname",
 		"vlanid"=>"Vlan",
 		"ifmetric"=>"IF Metric",
 		"ifupdate"=>"IF Update",
@@ -127,7 +128,7 @@ if ($ina){
 	if( in_array("iplost",$col) )	{ColHead('iplost');}
 	if( in_array("mac",$col) )	{ColHead('mac');}
 	if( in_array("oui",$col) )	{ColHead('oui');}
-	if( in_array("ifname",$col) )	{ColHead('ifname');}
+	if( in_array("device",$col) )	{ColHead('device');}
 	if( in_array("vlanid",$col) )	{ColHead('vlanid');}
 	if( in_array("ifmetric",$col) )	{ColHead('ifmetric');}
 	if( in_array("ifupdate",$col) )	{ColHead('ifupdate');}
@@ -158,9 +159,9 @@ if ($ina){
 
 			echo "<tr bgcolor=#$bg>\n";
 			echo "<th bgcolor=#$bi><a href=Nodes-Status.php?mac=$n[2]><img src=img/oui/$img title=\"$n[3] ($n[2])\" border=0></a></th>\n";
-			if(in_array("name",$col)){ echo "<td>$n[0]</td>";}
+			if(in_array("name",$col)){ echo "<td><b>$n[0]</b></td>";}
 			if(in_array("ip",$col)){
-				echo "<td>$ip</td>";
+				echo "<td><a href=telnet://$ip>$ip</a></td>";
 			}
 			if(in_array("ipupdate",$col)){
 				$au      	= date("j.M G:i:s",$n[12]);
@@ -171,7 +172,13 @@ if ($ina){
 			if(in_array("iplost",$col))	{echo "<td align=right>$n[14]</td>";}
 			if(in_array("mac",$col))	{echo "<td>$n[2]</td>";}
 			if(in_array("oui",$col))	{echo "<td>$n[3]</td>";}
-			if(in_array("ifname",$col))	{echo "<td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a> <a href=$_SERVER[PHP_SELF]?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a></td>";}
+			if(in_array("device",$col))	{
+				echo "<td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a>";
+				if(in_array("ifname",$col)){
+					echo " - <a href=$_SERVER[PHP_SELF]?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a>";
+				}
+				echo "</td>\n";
+			}
 			if(in_array("vlanid",$col))	{echo "<td>$n[8]</td>";}
 			if(in_array("ifupdate",$col)){
 				$iu       = date("j.M G:i:s",$n[10]);
@@ -212,13 +219,15 @@ if ($ina){
 				echo "<td bgcolor=#$lc>$ls</td>";
 			}
 			if(in_array("ssh",$col)){
+				echo "<td><a href=ssh://$ip><img src=img/16/lokc.png border=0></a>\n";
 				echo "<td>". CheckTCP($ip,'22','') ."</td>";
 			}
 			if(in_array("tel",$col)){
-				echo "<td>". CheckTCP($ip,'23','') ."</td>";
+				echo CheckTCP($ip,'23','') ."</td>";
 			}
 			if(in_array("www",$col)){
-				echo "<td>". CheckTCP($ip,'80'," \r\n\r\n") ."</td>";
+				echo "<td><a href=http://$ip target=window><img src=img/16/glob.png border=0></a>\n";
+				echo CheckTCP($ip,'80'," \r\n\r\n") ."</td>";
 			}
 			echo "</tr>\n";
 		}

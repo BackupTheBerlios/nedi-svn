@@ -15,7 +15,7 @@ $mico['250'] = "ford";
 // Assign an icon to a node.
 function Cimg($cat) {
 
-	if($cat == 1)		{return "star";}
+	if($cat == 0)		{return "star";}
 	elseif($cat == 2)	{return "find";}
 	elseif($cat < 10)	{return "fiqu";}
 	elseif($cat == 11)	{return "glof";}

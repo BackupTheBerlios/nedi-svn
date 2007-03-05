@@ -28,7 +28,7 @@ $mlvl['200']	= "Alarm";
 $mlvl['250']	= "Notfall";
 
 // Ueberwachungsbegriffe
-$icat['1']	= "Neu";
+$icat['0']	= "Neu";
 $icat['2']	= "Andere";
 $icat['3']	= "Unbekannt";
 $icat['10']	= "---Infrastruktur---";

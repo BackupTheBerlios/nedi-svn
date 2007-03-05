@@ -145,7 +145,7 @@ if ( in_array("cat",$rep) ){
 <h3>Categories</h3><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2><img src=img/32/find.png><br>Category</th>
-<th><img src=img/32/form.png><br>Occurrence</th>
+<th><img src=img/32/eyes.png><br>Seen</th>
 </tr>
 <?
 	if($ord){

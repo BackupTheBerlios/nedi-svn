@@ -28,7 +28,7 @@ $mlvl['200']	= "Alert";
 $mlvl['250']	= "Emergency";
 
 // Monitoring Terms
-$icat['1']	= "New";
+$icat['0']	= "New";
 $icat['2']	= "Other";
 $icat['3']	= "Unkown";
 $icat['10']	= "---Facility---";

@@ -59,62 +59,64 @@ sub InitDB{
 	print "Creating Tables:";
 
 	print "devices, ";
-	$dbh->do("CREATE TABLE devices	(	name VARCHAR(64) NOT NULL UNIQUE,ip INT unsigned,serial VARCHAR(32),type VARCHAR(32),
-						firstseen INT unsigned,lastseen INT unsigned,services TINYINT unsigned,
-						description VARCHAR(255),os VARCHAR(8),bootimage VARCHAR(64),
-						location VARCHAR(255),contact VARCHAR(255),
-						vtpdomain VARCHAR(32),vtpmode TINYINT unsigned,snmpversion TINYINT unsigned,
-						community VARCHAR(32),cliport SMALLINT unsigned,login VARCHAR(32),
-						icon VARCHAR(16),origip INT unsigned,index (name(8)), PRIMARY KEY  (name) )");
+	$dbh->do("CREATE TABLE devices	(	name VARCHAR(64) NOT NULL UNIQUE, ip INT unsigned, serial VARCHAR(32), type VARCHAR(32),
+						firstseen INT unsigned, lastseen INT unsigned, services TINYINT unsigned,
+						description VARCHAR(255), os VARCHAR(8), bootimage VARCHAR(64),
+						location VARCHAR(255), contact VARCHAR(255),
+						vtpdomain VARCHAR(32), vtpmode TINYINT unsigned, snmpversion TINYINT unsigned,
+						community VARCHAR(32), cliport SMALLINT unsigned, login VARCHAR(32),
+						icon VARCHAR(16), origip INT unsigned, index (name(8)), PRIMARY KEY  (name) )");
  	$dbh->commit;
 						
 	print "devdel, ";
-	$dbh->do("CREATE TABLE devdel	(	device VARCHAR(64) UNIQUE,user VARCHAR(32),time INT unsigned,index (device(8)) )");
+	$dbh->do("CREATE TABLE devdel	(	device VARCHAR(64) NOT NULL UNIQUE, user VARCHAR(32), time INT unsigned,
+						index (device(8)), PRIMARY KEY  (device) )");
  	$dbh->commit;
 
 	print "modules, ";
 	$dbh->do("CREATE TABLE modules	(	device VARCHAR(64), slot VARCHAR(32), model VARCHAR(32), description VARCHAR(64), 
 						serial VARCHAR(32), hw VARCHAR(16), fw VARCHAR(16), sw VARCHAR(16),
-						status TINYINT unsigned, index (device(8)) ) ");
+						status TINYINT unsigned, index (device(8)), index (slot(8)) ) ");
  	$dbh->commit;
 
 	print "interfaces, ";
-	$dbh->do("CREATE TABLE interfaces(	device VARCHAR(64), name VARCHAR(32), ifidx SMALLINT unsigned,
+	$dbh->do("CREATE TABLE interfaces(	device VARCHAR(64), ifname VARCHAR(32), ifidx SMALLINT unsigned,
 						fwdidx SMALLINT unsigned, type INT unsigned, mac CHAR(12),
 						description VARCHAR(64), alias VARCHAR(64), status TINYINT unsigned,
 						speed BIGINT unsigned, duplex CHAR(2), vlid SMALLINT unsigned, inoct BIGINT unsigned,
 						inerr INT unsigned, outoct BIGINT unsigned, outerr INT unsigned,
-						comment VARCHAR(255), index (device(8)),index (name(8)),index (ifidx) )");
+						comment VARCHAR(255), index (device(8)), index (ifname(8)),index (ifidx) )");
  	$dbh->commit;
 
 	print "networks, ";
-	$dbh->do("CREATE TABLE networks (	device VARCHAR(64),ifname VARCHAR(32),ip INT unsigned,
-						mask INT unsigned,index (device(8)),index (ifname),index (ip) )");
+	$dbh->do("CREATE TABLE networks (	device VARCHAR(64), ifname VARCHAR(32), ip INT unsigned,
+						mask INT unsigned, index (device(8)), index (ifname), index (ip) )");
  	$dbh->commit;
 
 	print "links, ";
 	$dbh->do("CREATE TABLE links	(	id INT unsigned NOT NULL AUTO_INCREMENT, device VARCHAR(64), ifname VARCHAR(32),
 						neighbour VARCHAR(32), nbrifname VARCHAR(32), bandwidth BIGINT unsigned, type CHAR(1),
-						power INT unsigned, nbrduplex CHAR(2), nbrvlanid SMALLINT unsigned,  index (id), index (device(8)) )");
+						power INT unsigned, nbrduplex CHAR(2), nbrvlanid SMALLINT unsigned,
+						index (id), index (device(8)), index (ifname(8)), index (neighbour(8)), index (nbrifname(8)),
+						PRIMARY KEY  (id) )");
  	$dbh->commit;
 
 	print "configs, ";
-	$dbh->do("CREATE TABLE configs	(	device VARCHAR(64) UNIQUE,config MEDIUMTEXT,changes MEDIUMTEXT ,time INT unsigned,
-						index (device(8)) )");
+	$dbh->do("CREATE TABLE configs	(	device VARCHAR(64) UNIQUE, config MEDIUMTEXT, changes MEDIUMTEXT , time INT unsigned,
+						index (device(8)), PRIMARY KEY  (device)  )");
  	$dbh->commit;
 
 	print "nodes, ";
-	$dbh->do("CREATE TABLE nodes 	(	name VARCHAR(64),ip INT unsigned,mac CHAR(12) NOT NULL UNIQUE,oui VARCHAR(32),
-						firstseen INT unsigned,lastseen INT unsigned, 
-						device VARCHAR(64),ifname VARCHAR(32),vlanid SMALLINT unsigned,
-						ifmetric TINYINT unsigned,ifupdate INT unsigned,ifchanges INT unsigned,
-						ipupdate INT unsigned,ipchanges INT unsigned,iplost INT unsigned,
-						index (name(8)),index(ip),index(mac),index(vlanid), PRIMARY KEY  (mac) )");
+	$dbh->do("CREATE TABLE nodes 	(	name VARCHAR(64), ip INT unsigned, mac CHAR(12) NOT NULL UNIQUE, oui VARCHAR(32),
+						firstseen INT unsigned, lastseen INT unsigned, device VARCHAR(64), ifname VARCHAR(32),
+						vlanid SMALLINT unsigned, ifmetric TINYINT unsigned, ifupdate INT unsigned,
+						ifchanges INT unsigned,	ipupdate INT unsigned, ipchanges INT unsigned,
+						iplost INT unsigned, index (name(8)),index(ip),index(mac),index(vlanid), PRIMARY KEY  (mac) )");
  	$dbh->commit;
 	print "nodiflog, ";
 	$dbh->do("CREATE TABLE nodiflog	(	mac CHAR(12),ifupdate INT unsigned,
-						device VARCHAR(64),ifname VARCHAR(32),vlanid SMALLINT unsigned,
-						ifmetric TINYINT unsigned,index(mac),index(ifupdate) )");
+						device VARCHAR(64), ifname VARCHAR(32), vlanid SMALLINT unsigned,
+						ifmetric TINYINT unsigned, index(mac), index(ifupdate) )");
  	$dbh->commit;
 	print "nodiplog, ";
 	$dbh->do("CREATE TABLE nodiplog (	mac CHAR(12),ipupdate INT unsigned,
@@ -122,19 +124,19 @@ sub InitDB{
  	$dbh->commit;
 
 	print "stock, ";
-	$dbh->do("CREATE TABLE stock	(	serial VARCHAR(32) UNIQUE, type VARCHAR(32),
-						user VARCHAR(32),time INT unsigned,index(serial) )");
+	$dbh->do("CREATE TABLE stock	(	serial VARCHAR(32) UNIQUE, type VARCHAR(32),user VARCHAR(32),
+						time INT unsigned, location VARCHAR(255), index(serial) )");
  	$dbh->commit;
 	
 	print "stolen, ";
 	$dbh->do("CREATE TABLE stolen 	(	name VARCHAR(64), ip INT unsigned, mac CHAR(12) UNIQUE,
-						device VARCHAR(64),ifname VARCHAR(32),
-						who VARCHAR(32),time INT unsigned,index(mac) )");
+						device VARCHAR(64), ifname VARCHAR(32),
+						who VARCHAR(32), time INT unsigned, index(mac), PRIMARY KEY  (mac) )");
  	$dbh->commit;
 
 	print "vlans, ";
-	$dbh->do("CREATE TABLE vlans	(	device VARCHAR(64),vlanid SMALLINT unsigned,
-						vlanname VARCHAR(32),index(vlanid) )");
+	$dbh->do("CREATE TABLE vlans	(	device VARCHAR(64), vlanid SMALLINT unsigned,
+						vlanname VARCHAR(32), index(vlanid) )");
  	$dbh->commit;
 
 	print "user, ";
@@ -150,20 +152,21 @@ sub InitDB{
  	$dbh->commit;
 
 	print "monitoring, ";
-	$dbh->do("CREATE TABLE monitoring(	device VARCHAR(64) UNIQUE,status INT unsigned,depend VARCHAR(64),
-						sms INT unsigned,mail INT unsigned,lastchk INT unsigned,
-						uptime INT unsigned,lost INT unsigned,ok INT unsigned, index (device(8)) )");
+	$dbh->do("CREATE TABLE monitoring(	device VARCHAR(64) UNIQUE, status INT unsigned, depend VARCHAR(64),
+						sms INT unsigned, mail INT unsigned, lastchk INT unsigned,
+						uptime INT unsigned, lost INT unsigned, ok INT unsigned, index (device(8)) )");
  	$dbh->commit;
 
 	print "messages, ";
 	$dbh->do("CREATE TABLE messages(	id INT unsigned NOT NULL AUTO_INCREMENT, level TINYINT unsigned, time INT unsigned,
-						source VARCHAR(64),info VARCHAR(255), index (id) )");
+						source VARCHAR(64), info VARCHAR(255), index (id), index (source(8)), PRIMARY KEY  (id) )");
  	$dbh->commit;
 
 	print "incidents, ";
 	$dbh->do("CREATE TABLE incidents(	id INT unsigned NOT NULL AUTO_INCREMENT, level TINYINT unsigned, device VARCHAR(64),
 						deps INT unsigned, firstseen INT unsigned, lastseen INT unsigned, who VARCHAR(32), 
-						time INT unsigned, category TINYINT unsigned, comment VARCHAR(255), index (id) )");
+						time INT unsigned, category TINYINT unsigned, comment VARCHAR(255),
+						index (id), PRIMARY KEY  (id) )");
  	$dbh->commit;
 
 	print "wlan";
@@ -403,7 +406,7 @@ sub WriteInt {
 
 	my $dbh = DBI->connect("DBI:mysql:$misc::dbname:$misc::dbhost", "$misc::dbuser", "$misc::dbpass", { RaiseError => 1, AutoCommit => 0});
 	$dbh->do("TRUNCATE interfaces") if (!$_[0]);
-	my $sth = $dbh->prepare("INSERT INTO interfaces(	device,name,ifidx,fwdidx,type,mac,description,alias,status,speed,duplex,vlid,
+	my $sth = $dbh->prepare("INSERT INTO interfaces(device,ifname,ifidx,fwdidx,type,mac,description,alias,status,speed,duplex,vlid,
 							inoct,inerr,outoct,outerr,comment) VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
 
 	foreach my $dv ( sort keys(%main::int) ){

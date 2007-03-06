@@ -94,7 +94,7 @@ if($res){
 			$n	= @DbFetchRow($nres);
 			@DbFreeResult($nres);
 		}else{
-			$n = array('Not in nodes',0,$s[2],$s[3],0,0,'-','-');
+			$n = array($s[0],$s[1],$s[2],'-',0,0,'Not in nodes','-');
 		}
 		$dbna	= preg_replace("/^(.*?)\.(.*)/","$1", $n[0]);
 		$dbip	= long2ip($n[1]);

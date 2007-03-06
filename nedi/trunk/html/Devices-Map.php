@@ -131,19 +131,19 @@ if($res){
 </table>
 </th>
 
-<th valign=top title="Select detail levels">Layers
+<th valign=top>Layers
 <table>
 <tr><td>Title</td><td><input type="text" name="tit" value="<?=$tit?>" size=18></td></tr>
-<tr><td>Level</td><td><select size=1 name="lev">
+<tr><td>Level</td><td><select size=1 name="lev" title="Select detail level">
 <?=$levopt ?>
 </select>
-W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Label weight">
+W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label weight">
 </td></tr>
 <tr><td>Show</td><td>
-<INPUT type="checkbox" name="loi" <?=$loi?>> L
-<INPUT type="checkbox" name="bwi" <?=$bwi?>> BW
-<INPUT type="checkbox" name="ifi" <?=$ifi?>> IF
-<INPUT type="checkbox" name="ipi" <?=$ipi?>> IP
+<INPUT type="checkbox" name="loi" <?=$loi?> title="Location info"> L
+<INPUT type="checkbox" name="bwi" <?=$bwi?> title="Bandwidth"> B
+<INPUT type="checkbox" name="ifi" <?=$ifi?> title="Interface"> I
+<INPUT type="checkbox" name="ipi" <?=$ipi?> title="IP addresses"> A
 </td></tr>
 </table>
 </th>

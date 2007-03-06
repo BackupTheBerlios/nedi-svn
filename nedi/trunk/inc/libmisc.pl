@@ -10,8 +10,8 @@ package misc;
 
 use vars qw($seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
 use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath $rrdcmd);
-use vars qw($arpwatch $ignoredvlans $retire $timeout $rrdstep $redbuild);
-use vars qw($notify $thres $pause $smtpserver $mailfrom);
+use vars qw($arpwatch $ignoredvlans $retire $timeout $rrdstep $redbuild $ipchg $ifchg);
+use vars qw($notify $thres $pause $smtpserver $mailfrom );
 use vars qw(%login %map %doip %dcomm %ouineb %cdplink %sysobj %ifmac); 
 use vars qw(%oui %arp %rarp %arpn %portprop %portnew);
 use vars qw(@todo @oudo @doneoth @donecdp @donenam @donemac @doneip @comms @seeds @users @devdel); 
@@ -631,6 +631,7 @@ sub UpNodif {
 					die "DB error nodiflog!\n";
 				}
 			}
+			$ifchg++;
 		}
 		$main::nod{$mc}{im} = $newmet;
 		$main::nod{$mc}{dv} = $newdv;
@@ -663,6 +664,7 @@ sub UpNodip {
 					die "DB error nodiplog!\n";
 				}
 			}
+			$ipchg++;
 		}elsif($main::nod{$mc}{au} < $retire){								# Same IP forever, update name
 			$getna = 1;
 		}
@@ -688,6 +690,9 @@ sub BuildNod {
 
 	my $nnip = 0;
 	my $nip  = 0;
+
+	$ipchg   = 0;
+	$ifchg   = 0;
 
 	print "Building Nodes (i:IP n:non-IP x:ignored f:no IF):\n"  if $main::opt{d};
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
@@ -752,7 +757,8 @@ sub BuildNod {
 		}
 	}
 	print "\n"  if $main::opt{d};
-	print "$nip/$nnip	IP/non-IP nodes processed.\n";
+	print "$nip	IP and $nnip non-IP nodes processed\n";
+	print "$ipchg	IP and $ifchg IF changes detected\n";
 }
 
 #===================================================================

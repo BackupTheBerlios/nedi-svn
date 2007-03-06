@@ -8,8 +8,9 @@
 # -----------------------------------------------------------
 # 27/03/06	initial version.
 # 15/05/06	new concept towards CPU and Mem graphing
-# 2/11/06		cosmetic changes
-# 8/11/06		medium graph option
+# 02/11/06	cosmetic changes
+# 08/11/06	medium graph option
+# 05/03/07	support for 8  stacks
 */
 
 $bg1	= "BBDDDD";
@@ -33,7 +34,7 @@ $sze = isset($_GET['sze']) ? "m" : "l";
 <h1>Device Graphs</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="traf">
 <table bgcolor=#000000 <?=$tabtag?> >
-<tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/chart.png border=0 title="Hold down Ctrl to select up to 6 interfaces, for stacked graphs (e.g. for channels)"></a></th>
+<tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/tap.png border=0 title="Hold down Ctrl to select up to 6 interfaces, for stacked graphs (e.g. for channels)"></a></th>
 <th>
 Device
 </th><th>

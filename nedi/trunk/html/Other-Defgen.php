@@ -401,7 +401,7 @@ function setrrd(typ) {
 		document.bld.mio.value = "1.3.6.1.4.1.9.9.48.1.1.1.6.2";
 	}else if ('3' == typ){
 		document.bld.cpu.value = "1.3.6.1.4.1.9.9.109.1.1.1.1.8.1";
-		document.bld.tmp.value = "1.3.6.1.4.1.9.9.13.1.3.1.3.1";
+		document.bld.tmp.value = "1.3.6.1.4.1.9.9.13.1.3.1.3.1005";
 		document.bld.mcp.value = "1.3.6.1.4.1.9.9.48.1.1.1.6.1";
 		document.bld.mio.value = "1.3.6.1.4.1.9.9.48.1.1.1.6.2";
 	}else if ('4' == typ){
@@ -445,6 +445,7 @@ function walk(oid) {
 <img src="img/gsw.png" align=left onClick="setgen('1');" title="Possible Cisco OIDs">
 <img src="img/ksw.png" align=left onClick="setgen('2');" title="Possible Foundry OIDs">
 <img src="img/bsw.png" align=left onClick="setgen('3');" title="Possible Nortel OIDs">
+<img src="img/16/dev.png" hspace=10 align=right>
 General</th></tr>
 <tr><th align=right>
 SysObjId</th><td>
@@ -527,6 +528,7 @@ VTP Mode</th><td>
 <img src="img/gsw.png" align=left onClick="setint('3');" title="Cisco Stack">
 <img src="img/bsw.png" align=left onClick="setint('4');" title="Nortel">
 <img src="img/ksw.png" align=left onClick="setint('5');" title="Foundry">
+<img src="img/16/dumy.png" hspace=10 align=right>
 Interfaces</th></tr>
 <tr><th align=right>
 IF Alias</th><td>
@@ -569,6 +571,7 @@ Vlan Index</th><td>
 <img src="img/gsw.png" align=left onClick="setmod('2');" title="Cisco Stack MIB">
 <img src="img/gsw.png" align=left onClick="setmod('3');" title="Older Cisco HW">
 <img src="img/bsw.png" align=left onClick="setmod('4');" title="Nortel Baystack MIB">
+<img src="img/16/dmsc.png" hspace=10 align=right>
 Modules</th></tr>
 <tr><th align=right>
 Slot</th><td>
@@ -619,6 +622,7 @@ Model</th><td>
 <img src="img/gsw.png" align=left onClick="setrrd('2');" title="Possible OIDs for newer Cisco HW">
 <img src="img/gsw.png" align=left onClick="setrrd('3');" title="Possible OIDs for new Cisco HW">
 <img src="img/gsw.png" align=left onClick="setrrd('4');" title="Possible OIDs for CatOS Cisco HW">
+<img src="img/16/tap.png" hspace=10 align=right>
 RRD Graphing</th></tr>
 <tr><th align=right>
 CPU Util</th><td>

@@ -119,14 +119,12 @@ if ($shd){
 <th bgcolor=#<?=$bia?> width=140><a href=?dev=<?=$ud?> ><img src=img/dev/<?=$img?>.png title="<?=$dev[3]?>" vspace=4 border=0></a><br><?=$dev[0]?></th>
 <td bgcolor=#<?=$bg2?>>
 <table width=100%><tr><td valign=top>
-<?
-	if ($ip){
-?>
 <a href=Monitoring-Messages.php?ina=source&opa==&sta=<?=$ud?>><img src=img/16/info.png hspace=<?=$hs?> border=0 title="Messages"></a>
 <a href=Devices-Config.php?shc=<?=$ud?> ><img src=img/16/cfg2.png hspace=<?=$hs?> border=0 title="Config of device"></a>
 <a href=Devices-Graph.php?dv=<?=$ud?> ><img src=img/16/chart.png hspace=<?=$hs?> border=0 title="Graphs of device"></a>
 <a href=Nodes-List.php?ina=device&opa==&sta=<?=$ud?>&ord=device><img src=img/16/cubs.png hspace=<?=$hs?> border=0 title="Nodes on device"></a>
 <?
+	if ($ip){							# Makes sense here, to use above links in case of lost device IP...
 		if($dev[6] & 2){
 ?>
 <a href=Realtime-Spanningtree.php?dev=<?=$ud?> ><img src=img/16/tabt.png hspace=<?=$hs?> border=0 title="Spanningtree info on switch"></a>
@@ -253,7 +251,7 @@ if ($shd){
 <h2>Modules</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th valign=bottom colspan=3><img src=img/32/nic.png title="Slot, Model and Description"><br>Module</th>
-<th valign=bottom><img src=img/32/form.png><br>Serial</th>
+<th valign=bottom><img src=img/32/key.png><br>Serial</th>
 <th valign=bottom colspan=3 title="HW / FW / SW"><img src=img/32/cog.png><br>Version</th>
 </tr>
 <?

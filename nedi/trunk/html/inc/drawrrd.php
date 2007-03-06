@@ -74,12 +74,12 @@ if($_GET['t'] == 'cpu'){
 	if (!file_exists("$rrd")){$debug = "RRD $rrd not found!";}
 }elseif($_GET['t'] == 'trf'){
 	$typ = 'Traffic in Byte/s';
-	$cols = array('0000aa','008800','0044bb','00bb44','0088ee','00ee88','00aaff','00ffaa','0044ff','00ff44','0088ff','00ff88');
+	$cols = array('0000aa','008800','0044bb','00bb44','0088ee','00ee88','00aaff','00ffaa','0044ff','00ff44','0088ff','00ff88','3388ff','33ff88','6688ff','66ff88');
 	$lb = "COMMENT:\"\\n\" ";
 	StackTraffic($rrddev,$_GET['if'],'inoct','outoct');
 }elseif($_GET['t'] == 'err'){
 	$typ = "Errors";
-	$cols = array('880000','888800','aa0000','aa4400','ee0000','ee8800','ff0000','ffee00','ff0044','ffee44','ff0088','ffee88');
+	$cols = array('880000','886600','aa0000','aa8800','ee0000','eeaa00','ff0000','ffcc00','ff0066','ffcc66','ff0088','ffcc88','ff00aa','ffeeaa','ff00cc','ffccdd');
 	$lb = "COMMENT:\"\\n\" ";
 	StackTraffic($rrddev,$_GET['if'],'inerr','outerr');
 }else{

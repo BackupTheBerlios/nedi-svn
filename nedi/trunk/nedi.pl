@@ -212,6 +212,7 @@ sub Help {
 	print "-l 	LLDP discovery\n";
 	print "-o	OUI discovery (based on ARP chache entries of the above)\n";
 	print "-b	backup running configs\n";
+	print "-s	force SNMP for mac-address-tables on IOS switches\n";
 	print "-A 	append to networks, links, vlans, interfaces and modules tables\n";
 	print "-I 	don't try to find best suited IP addresses for devices\n";
 	print "-L 	don't touch links, so you can maintain them manually\n";
@@ -249,5 +250,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 6.Mar 2007\n";
+	die "NeDi 1.0.w 8.Mar 2007\n";
 }

@@ -30,7 +30,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/ddum.png border=0 title="select order to limit to ethernet on active IFs or show incomplete link mismatches.">
+<img src=img/32/ddum.png border=0 title="Use alternative order for more specific details">
 </a></th>
 <th>Select Report(s)</th>
 <th>
@@ -48,7 +48,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 </SELECT>
 </th>
 <th>
-<INPUT type="checkbox" name="ord"  <?=$ord?> > alternative order
+<INPUT type="checkbox" name="ord"  <?=$ord?> title="Only ethernet on active IF, normalize ERR to OCT, OCT to BW or show incomplete links"> alternative order
 </th>
 </SELECT></th>
 <th width=80><input type="submit" name="gen" value="Show"></th>
@@ -64,14 +64,25 @@ if($res){
 	$ndif = 0;
 	$nummo	= array();
 	while( ($i = @DbFetchRow($res)) ){
-		if($i[4] == 6 or !$ord){						# alternatively only show ethernet IFs
+		if($ord){
+			if($i[4] == 6){							# alternatively only show ethernet IFs
+				$numif[$i[0]]++;
+				if($i[12] > 70){$nactif[$i[0]]++;}
+			}
+			if($i[12]){$topier["$i[0];;$i[1]"] = $i[13]/$i[12];}		# Using a flat array for  value based sorting
+			if($i[14]){$topoer["$i[0];;$i[1]"] = $i[15]/$i[14];}
+			if($i[9]){
+				$topino["$i[0];;$i[1]"] = $i[12]/$i[9];
+				$topoto["$i[0];;$i[1]"] = $i[14]/$i[9];
+			}
+		}else{
 			$numif[$i[0]]++;
 			if($i[12] > 70){$nactif[$i[0]]++;}
+			$topier["$i[0];;$i[1]"] = $i[13];
+			$topoer["$i[0];;$i[1]"] = $i[15];
+			$topino["$i[0];;$i[1]"] = $i[12];
+			$topoto["$i[0];;$i[1]"] = $i[14];
 		}
-		$topino["$i[0];;$i[1]"] = $i[12];					# Using a flat array for  value based sorting
-		$topier["$i[0];;$i[1]"] = $i[13];
-		$topoto["$i[0];;$i[1]"] = $i[14];
-		$topoer["$i[0];;$i[1]"] = $i[15];
 		$ifsp["$i[0];;$i[1]"]   = $i[9];
 		$ifdu["$i[0];;$i[1]"] = $i[10];
 		$ifvl["$i[0];;$i[1]"]   = $i[11];
@@ -177,11 +188,7 @@ if ( in_array("itr",$rep) ){
 <th><img src=img/32/dumy.png><br>Interface</th>
 <th><img src=img/32/tap.png><br>Octets</th>
 <?
-	if($ord){
-		asort($topino);
-	}else{
-		arsort($topino);
-	}
+	arsort($topino);
 	$row = 0;
 	foreach ($topino as $di => $io){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
@@ -214,11 +221,7 @@ if ( in_array("itr",$rep) ){
 <th><img src=img/32/dumy.png><br>Interface</th>
 <th><img src=img/32/err.png><br>Errors</th>
 <?
-	if($ord){
-		asort($topier);
-	}else{
-		arsort($topier);
-	}
+	arsort($topier);
 	$row = 0;
 	foreach ($topier as $di => $ie){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
@@ -249,11 +252,7 @@ if ( in_array("itr",$rep) ){
 <th><img src=img/32/dumy.png><br>Interface</th>
 <th><img src=img/32/tap.png><br>Octets</th>
 <?
-	if($ord){
-		asort($topoto);
-	}else{
-		arsort($topoto);
-	}
+	arsort($topoto);
 	$row = 0;
 	foreach ($topoto as $di => $oo){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
@@ -286,11 +285,7 @@ if ( in_array("itr",$rep) ){
 <th><img src=img/32/dumy.png><br>Interface</th>
 <th><img src=img/32/err.png><br>Errors</th>
 <?
-	if($ord){
-		asort($topoer);
-	}else{
-		arsort($topoer);
-	}
+	arsort($topoer);
 	$row = 0;
 	foreach ($topoer as $di => $oe){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}

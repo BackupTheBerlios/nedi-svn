@@ -27,6 +27,12 @@ $mlvl['150']	= "Warnung";
 $mlvl['200']	= "Alarm";
 $mlvl['250']	= "Notfall";
 
+// Lager Zustand
+$stco['10']  = "neu";
+$stco['100'] = "instand gesetzt";
+$stco['150'] = "gebraucht";
+$stco['200'] = "defekt";
+
 // Ueberwachungsbegriffe
 $icat['0']	= "Neu";
 $icat['2']	= "Andere";

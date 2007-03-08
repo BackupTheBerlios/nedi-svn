@@ -57,14 +57,14 @@ elseif($res == "xga") {$xm = "1024";$ym = "768";}
 elseif($res == "sxga"){$xm = "1280";$ym = "1024";}
 elseif($res == "uxga") {$xm = "1600";$ym = "1200";}
 
-$csi = isset($_GET['csi']) ? $_GET['csi'] : intval($xm /3);
+$csi = isset($_GET['csi']) ? $_GET['csi'] : intval($xm /5);
 $bsi = isset($_GET['bsi']) ? $_GET['bsi'] : intval($xm /4);
 $fsi = isset($_GET['fsi']) ? $_GET['fsi'] : 70;
-$cwt = isset($_GET['cwt']) ? $_GET['cwt'] : 5;
-$bwt = isset($_GET['bwt']) ? $_GET['bwt'] : 5;
+$cwt = isset($_GET['cwt']) ? $_GET['cwt'] : 3;
+$bwt = isset($_GET['bwt']) ? $_GET['bwt'] : 3;
 $cro = isset($_GET['cro']) ? $_GET['cro'] : 0;
 $bro = isset($_GET['bro']) ? $_GET['bro'] : 0;
-$lwt = isset($_GET['lwt']) ? $_GET['lwt'] : 5;
+$lwt = isset($_GET['lwt']) ? $_GET['lwt'] : 3;
 
 $maxcol = intval($fsi/10);
 
@@ -506,19 +506,19 @@ $curx++;
 	if($lev == "c"){
 		foreach(array_keys($ctylink) as $ctyl){
 			foreach(array_keys($ctylink[$ctyl]) as $ctyn){
-				Drawlink($xct[$ctyl],$yct[$ctyl],$xct[$ctyn],$yct[$ctyn],$ctylink[$ctyl][$ctyn]['bw'],$rctylink[$ctyl][$ctyn]['bw'],$ctylink[$ctyl][$ctyn]['ip'],$rctylink[$ctyl][$ctyn]['ip']);
+				Drawlink($xct[$ctyl],$yct[$ctyl],$xct[$ctyn],$yct[$ctyn],$ctylink[$ctyl][$ctyn]['bw'],$rctylink[$ctyl][$ctyn]['bw'],$ctylink[$ctyl][$ctyn]['il'],$rctylink[$ctyl][$ctyn]['il']);
 			}
 		}
 	}elseif($lev == "b"){
 		foreach(array_keys($bldlink) as $bldl){
 			foreach(array_keys($bldlink[$bldl]) as $bldn){
-				Drawlink($xbl[$bldl],$ybl[$bldl],$xbl[$bldn],$ybl[$bldn],$bldlink[$bldl][$bldn]['bw'],$rbldlink[$bldl][$bldn]['bw'],$bldlink[$bldl][$bldn]['ip'],$rbldlink[$bldl][$bldn]['ip']);
+				Drawlink($xbl[$bldl],$ybl[$bldl],$xbl[$bldn],$ybl[$bldn],$bldlink[$bldl][$bldn]['bw'],$rbldlink[$bldl][$bldn]['bw'],$bldlink[$bldl][$bldn]['il'],$rbldlink[$bldl][$bldn]['il']);
 			}
 		}
 	}elseif($lev == "f"){
 		foreach(array_keys($devlink) as $devl){
 			foreach(array_keys($devlink[$devl]) as $devn){
-				Drawlink($xd[$devl]-8,$yd[$devl]-4,$xd[$devn]-8,$yd[$devn]-4,$devlink[$devl][$devn]['bw'],$rdevlink[$devl][$devn]['bw'],$devlink[$devl][$devn]['if'],$rdevlink[$devl][$devn]['if']);
+				Drawlink($xd[$devl]-8,$yd[$devl]-4,$xd[$devn]-8,$yd[$devn]-4,$devlink[$devl][$devn]['bw'],$rdevlink[$devl][$devn]['bw'],$devlink[$devl][$devn]['il'],$rdevlink[$devl][$devn]['il']);
 			}
 		}
 	}
@@ -653,7 +653,7 @@ function Read($ina,$filter,$ipi,$ifi){
 		$res	= @DbQuery($query,$link);
 		if($res){
 			while( ($n = @DbFetchRow($res)) ){
-				$net[$n[0]][$n[1]] .= long2ip($n[2]) . " ";
+				$net[$n[0]][$n[1]] .= " ". long2ip($n[2]);
 			}
 		}else{
 			print @DbError($link);
@@ -666,37 +666,37 @@ function Read($ina,$filter,$ipi,$ifi){
 		while( ($l = @DbFetchRow($res)) ){
 			if($dev[$l[1]]['ic'] and $dev[$l[3]]['ic']){							// both ends are ok, if an icon exists
 				if($ifi){
-					$inam = "$l[2] ";
+					$inam = $l[2];
 				}else{
 					$inam = "";
 				}
-				if(!isset($devlink[$l[3]][$l[1]]) ){							// opposite link doesn't exist?
-					$devlink[$l[1]][$l[3]]['bw'] += $l[5];
-					$devlink[$l[1]][$l[3]]['if'] .= $inam . $net[$l[1]][$l[2]];
-				}else{
+				if(isset($devlink[$l[3]][$l[1]]) ){							// opposite link doesn't exist?
 					$rdevlink[$l[3]][$l[1]]['bw'] += $l[5];
-					$rdevlink[$l[3]][$l[1]]['if'] .= $inam . $net[$l[1]][$l[2]];
+					$rdevlink[$l[3]][$l[1]]['il'] .= $inam . $net[$l[1]][$l[2]];
+				}else{
+					$devlink[$l[1]][$l[3]]['bw'] += $l[5];
+					$devlink[$l[1]][$l[3]]['il'] .= $inam . $net[$l[1]][$l[2]];
 				}
 				if($dev[$l[1]]['bld'] != $dev[$l[3]]['bld'])			{			// is it same bld?
 					$nbldlink[$dev[$l[1]]['bld']] ++;
 					$abldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]++;				// needed for Arranging.
-					if(!isset($bldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]) ){			// link defined already?
-						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['bw'] += $l[5];
-						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['ip'] .= $net[$l[1]][$l[2]];
-					}else{
+					if(isset($bldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]) ){			// link defined already?
 						$rbldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]['bw'] += $l[5];
-						$rbldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]['ip'] .= $net[$l[1]][$l[2]];
+						$rbldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]['il'] = $net[$l[1]][$l[2]];
+					}else{
+						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['bw'] += $l[5];
+						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['il'] = $net[$l[1]][$l[2]];
 					}
 				}
 				if($dev[$l[1]]['cty'] != $dev[$l[3]]['cty']){						// is it same cty?
 					$nctylink[$dev[$l[1]]['cty']]++;
 					$actylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]++;     	               	// needed for Arranging.
-					if(!isset($ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]) ){			// link defined already?
-						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['bw'] += $l[5];
-						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['ip'] .= $net[$l[1]][$l[2]];
-					}else{
+					if(isset($ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]) ){			// link defined already?
 						$rctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['bw'] += $l[5];
-						$rctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['ip'] .= $net[$l[1]][$l[2]];
+						$rctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['il'] = $net[$l[1]][$l[2]];
+					}else{
+						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['bw'] += $l[5];
+						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['il'] = $net[$l[1]][$l[2]];
 					}
 				}
 			}

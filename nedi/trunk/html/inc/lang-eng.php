@@ -27,6 +27,12 @@ $mlvl['150']	= "Warning";
 $mlvl['200']	= "Alert";
 $mlvl['250']	= "Emergency";
 
+// Stock Condition Levels
+$stco['10']  = "new";
+$stco['100'] = "refurbished";
+$stco['150'] = "used";
+$stco['200'] = "broken";
+
 // Monitoring Terms
 $icat['0']	= "New";
 $icat['2']	= "Other";

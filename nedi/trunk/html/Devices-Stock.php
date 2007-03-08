@@ -22,6 +22,11 @@ $nocache= 0;
 $calendar= 0;
 $refresh = 0;
 
+$cico['10']  = "star";
+$cico['100'] = "brld";
+$cico['150'] = "impt";
+$cico['200'] = "bstp";
+
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
 $_GET = sanitize($_GET);
@@ -33,12 +38,17 @@ $_GET = sanitize($_GET);
 <img src=img/32/pkg.png border=0 title="Devices will be removed as found in discovery via SN#">
 </a></th>
 
-<th>Serial# <input type="text" name="ser" size="24" OnFocus=select();>
-
-<th>Type <input type="text" name="typ" size="24" OnFocus=select();>
-
-<th>Location <input type="text" name="loc" size="24" OnFocus=select();>
-
+<th>Serial# <input type="text" name="ser" size="20" OnFocus=select();></th>
+<th>Type <input type="text" name="typ" size="20" OnFocus=select();></th>
+<th>Location <input type="text" name="loc" size="12" OnFocus=select();></th>
+<th>Condition <select size=1 name="con">
+<?
+foreach (array_keys($stco) as $c){
+	echo "<option value=\"$c\" ";
+	echo ">$stco[$c]\n";
+}
+?>
+</select></th>
 <th width=80><input type="submit" value="Add" name="add"></th></tr>
 </table></form><p>
 <?
@@ -49,9 +59,9 @@ if( isset($_GET['add']) or isset($_GET['del']) ){
 		if( isset($_GET['del']) ){
 			$query	= GenQuery('stock','d','','','',array('serial'),array('='),array($_GET['del']) );
 			if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Device $_GET[del] $delokmsg</h3>";}
-		}elseif ($_GET['add'] and $_GET['ser'] and $_GET['typ'] ){
+		}elseif ($_GET['add'] and $_GET['ser'] and $_GET['typ'] and $_GET['loc'] and $_GET['con']){
 			$now = time();
-			$query	= GenQuery('stock','i','','','',array('serial','type','user','time','location'),'',array($_GET['ser'],$_GET['typ'],$_SESSION['user'],$now,$_GET['loc']) );
+			$query	= GenQuery('stock','i','','','',array('serial','type','user','time','location','state'),'',array($_GET['ser'],$_GET['typ'],$_SESSION['user'],$now,$_GET['loc'],$_GET['con'] ) );
 			if( !@DbQuery($query,$link) ){echo "<h4>".DbError($link)."</h4>";}else{echo "<h3>Device $_GET[ser] $upokmsg</h3>";}
 		}
 	}else{
@@ -108,7 +118,7 @@ if($res){
 <h2>Device Inventory</h2>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?>>
-<th><img src=img/32/key.png><br>Serial #</th>
+<th colspan=2><img src=img/32/key.png><br>Serial #</th>
 <th><img src=img/32/fiap.png><br>Type</th>
 <th><img src=img/32/smil.png><br>Added by</th>
 <th><img src=img/32/clock.png><br>Added on</th>
@@ -127,10 +137,10 @@ if($res){
 		$ud  = rawurlencode($dev[0]);
 		$da  = date("j.M (G:i)",$dev[3]);
 		list($a1c,$a2c) = Agecol($dev[3],$dev[3],$row % 2);
-		echo "\t<tr bgcolor=#$bg>\n";
-		echo "\t\t<td>$dev[0]</td><td>$dev[1]</td><td>$dev[2]</td><td bgcolor=#$a1c>$da</td><td>$dev[4]</td>\n";
-		echo "\t\t<td align=center><a href=$_SERVER[PHP_SELF]?del=$ud><img src=img/16/bcnl.png border=0 onclick=\"return confirm('Delete $dev[0] from stock?')\" title=\"Delete this device!\"></a></td>\n";
-		echo "\t</tr>\n";
+		echo "<tr bgcolor=#$bg><th bgcolor=#$bi><img src=img/16/" . $cico[$dev[5]] . ".png title=" . $stco[$dev[5]] . "></th><td>$dev[0]</td>\n";
+		echo "<td>$dev[1]</td><td>$dev[2]</td><td bgcolor=#$a1c>$da</td><td>$dev[4]</td>\n";
+		echo "<td align=center><a href=$_SERVER[PHP_SELF]?del=$ud><img src=img/16/bcnl.png border=0 onclick=\"return confirm('Delete $dev[0] from stock?')\" title=\"Delete this device!\"></a></td>\n";
+		echo "</tr>\n";
 	}
 	@DbFreeResult($res);
 }else{

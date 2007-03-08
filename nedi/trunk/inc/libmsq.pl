@@ -124,8 +124,8 @@ sub InitDB{
  	$dbh->commit;
 
 	print "stock, ";
-	$dbh->do("CREATE TABLE stock	(	serial VARCHAR(32) UNIQUE, type VARCHAR(32),user VARCHAR(32),
-						time INT unsigned, location VARCHAR(255), index(serial) )");
+	$dbh->do("CREATE TABLE stock	(	serial VARCHAR(32) UNIQUE, type VARCHAR(32),user VARCHAR(32), time INT unsigned,
+						location VARCHAR(255), state TINYINT unsigned, index(serial) )");
  	$dbh->commit;
 	
 	print "stolen, ";

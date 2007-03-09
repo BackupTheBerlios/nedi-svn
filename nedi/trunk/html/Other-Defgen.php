@@ -43,6 +43,7 @@ $cos = "";
 $c19 = "";
 $cvp = "";
 $bas = "";
+$tco = "";
 $iro = "";
 $pro = "";
 
@@ -105,6 +106,7 @@ if ($so){
 				elseif($d[0] == 'OS' AND $d[1] == 'Baystack'){$bas = 'selected';}
 				elseif($d[0] == 'OS' AND $d[1] == 'Ironware'){$iro = 'selected';}
 				elseif($d[0] == 'OS' AND $d[1] == 'ProCurve'){$pro = 'selected';}
+				elseif($d[0] == 'OS' AND $d[1] == '3Com-SS'){$tco = 'selected';}
 				elseif($d[0] == 'Icon'){$ico = $d[1];}
 				elseif($d[0] == 'Bridge' AND $d[1] == 'normal'){$bno = 'selected';}
 				elseif($d[0] == 'Bridge' AND $d[1] == 'VLX'){$bvl = 'selected';}
@@ -466,15 +468,16 @@ Type</th><td>
 </td><th align=right>
 OS</th><td>
  <select size=1 name="os" title="Choose operating system for your new device" onchange="update();"><option value="other">other
-<option value="IOS" <?=$ios?>>IOS
+<option value="IOS" <?=$ios?>>Cisco IOS
 <option value="IOS-fw" <?=$iof?>>IOS-FW
 <option value="IOS-wl" <?=$iow?>>IOS-Wlan
-<option value="CatOS" <?=$cos?>>CatOS
-<option value="Cat1900" <?=$c19?>>Cat1900
-<option value="Cvpn" <?=$cvp?>>Cvpn
-<option value="Baystack" <?=$bas?>>Baystack
-<option value="Ironware" <?=$iro?>>Ironware
-<option value="ProCurve" <?=$pro?>>ProCurve
+<option value="CatOS" <?=$cos?>>Cisco CatOS
+<option value="Cat1900" <?=$c19?>>Cisco Cat1900
+<option value="Cvpn" <?=$cvp?>>Cisco vpn
+<option value="Baystack" <?=$bas?>>Nortel Baystack
+<option value="3Com-SS" <?=$tco?>>3Com Superstack
+<option value="Ironware" <?=$iro?>>Foundry Ironware
+<option value="ProCurve" <?=$pro?>>HP ProCurve
 </select>
 </td></tr>
 <tr><th align=right>
@@ -622,7 +625,7 @@ Model</th><td>
 <img src="img/gsw.png" align=left onClick="setrrd('2');" title="Possible OIDs for newer Cisco HW">
 <img src="img/gsw.png" align=left onClick="setrrd('3');" title="Possible OIDs for new Cisco HW">
 <img src="img/gsw.png" align=left onClick="setrrd('4');" title="Possible OIDs for CatOS Cisco HW">
-<img src="img/16/tap.png" hspace=10 align=right>
+<img src="img/16/dlog.png" hspace=10 align=right>
 RRD Graphing</th></tr>
 <tr><th align=right>
 CPU Util</th><td>

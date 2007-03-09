@@ -80,7 +80,7 @@ $cols = array(	"id"=>"ID",
 <form method="get" name="list" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/info.png border=0 title="View and del messages.">
+<img src=img/32/say.png border=0 title="View and del messages.">
 </a></th>
 <th valign=top>Condition A<p>
 <SELECT size=1 name="ina">
@@ -150,9 +150,9 @@ foreach (array_keys($mlvl) as $ml){
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
 <th width=80><img src=img/32/eyes.png><br>Event</th>
-<th><img src=img/32/impt.png title="Unspecified<50, 100=Notice, 150=Warning, 200=Alert, 250=Emergency"><br>Level</th>
+<th><img src=img/32/info.png title="Unspecified<50, 100=Notice, 150=Warning, 200=Alert, 250=Emergency"><br>Level</th>
 <th width=100><img src=img/32/clock.png><br>Time</th>
-<th><img src=img/32/say.png title="Device (if in devices) or IP (will only produce level <50)"><br>Source</th>
+<th><img src=img/32/dev.png title="Device (if in devices) or IP (will only produce level <50)"><br>Source</th>
 <th><img src=img/32/idea.png title="Action based on message info"><br>Action</th>
 <th><img src=img/32/find.png><br>Info</th>
 </tr>

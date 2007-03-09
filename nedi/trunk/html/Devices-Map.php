@@ -286,7 +286,7 @@ function Writemap($usr,$nd) {
 
 function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 
-        global $maplinks,$bwi,$lwt,$lix,$liy;
+        global $maplinks,$bwi,$lwt,$lix,$liy,$rrdstep;
         if($x1 == $x2){
                 $lix[$x1]+= 2;
                 $x1 += $lix[$x1];
@@ -299,7 +299,9 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
         }
 
 	if($bw == 11000000 or $bw == 54000000){
-		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$org);";
+		#$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$org);";
+		$maplinks[] = "imagesetstyle(\$image,array(\$bl2,\$bl2,\$wte,\$wte) );";
+		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,IMG_COLOR_STYLED);";
 	}elseif($bw < 10000000){
 		$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$grn);";
 	}elseif($bw < 100000000){
@@ -317,8 +319,16 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 	if($bwi){
 		$xl = intval($x1  + $x2) / 2;
 		$yl = intval($y1  + $y2) / 2;
-		$label = ZFix($bw) . "/" . ZFix($rbw);
-		$maplinks[] = "ImageString(\$image, 1,$xl,$yl,\"$label\", \$grn);";
+		if($rrdstep){
+			$maplinks[] = "\$icon = Imagecreatefrompng(\"../img/cityg.png\");";
+			$maplinks[] = "\$w = Imagesx(\$icon);";
+			$maplinks[] = "\$h = Imagesy(\$icon);";
+			$maplinks[] = "Imagecopy(\$image, \$icon,$xl,$yl,0,0,\$w,\$h);";
+			$maplinks[] = "Imagedestroy(\$icon);";
+		}else{
+			$label = ZFix($bw) . "/" . ZFix($rbw);
+			$maplinks[] = "ImageString(\$image, 1,$xl,$yl,\"$label\", \$grn);";
+		}
 	}
 	$xi1 = intval($x1+($x2-$x1)/(1 + $lwt/10));
 	$xi2 = intval($x2+($x1-$x2)/(1 + $lwt/10));

@@ -119,9 +119,8 @@ if ($shd){
 <th bgcolor=#<?=$bia?> width=140><a href=?dev=<?=$ud?> ><img src=img/dev/<?=$img?>.png title="<?=$dev[3]?>" vspace=4 border=0></a><br><?=$dev[0]?></th>
 <td bgcolor=#<?=$bg2?>>
 <table width=100%><tr><td valign=top>
-<a href=Monitoring-Messages.php?ina=source&opa==&sta=<?=$ud?>><img src=img/16/info.png hspace=<?=$hs?> border=0 title="Messages"></a>
+<a href=Monitoring-Messages.php?ina=source&opa==&sta=<?=$ud?>><img src=img/16/say.png hspace=<?=$hs?> border=0 title="Messages"></a>
 <a href=Devices-Config.php?shc=<?=$ud?> ><img src=img/16/cfg2.png hspace=<?=$hs?> border=0 title="Config of device"></a>
-<a href=Devices-Graph.php?dv=<?=$ud?> ><img src=img/16/chart.png hspace=<?=$hs?> border=0 title="Graphs of device"></a>
 <a href=Nodes-List.php?ina=device&opa==&sta=<?=$ud?>&ord=device><img src=img/16/cubs.png hspace=<?=$hs?> border=0 title="Nodes on device"></a>
 <?
 	if ($ip){							# Makes sense here, to use above links in case of lost device IP...

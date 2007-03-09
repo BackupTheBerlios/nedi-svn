@@ -33,7 +33,7 @@ $det = isset($_GET['det']) ? "checked" : "";
 <form method="get" name="tline" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/dlog.png border=0 title="View timeline of events for daily intervals.">
+<img src=img/32/ele.png border=0 title="View timeline of events for daily intervals.">
 </a></th>
 <th>
 From
@@ -61,7 +61,7 @@ to
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
 <th width=80><img src=img/32/clock.png><br>Time</th>
-<th><img src=img/32/info.png><br>Messages</th>
+<th><img src=img/32/say.png><br>Messages</th>
 </tr>
 
 <?

@@ -684,27 +684,29 @@ sub IfAddresses {
 	foreach my $k (keys %aifx){
 		if(exists $main::int{$dv}{$aifx{$k}}){							# Avoid non existant IFs (e.g. idx=0 on  cisco2970 and 3750 with IOS 12.1)
 			my @i		= split(/\./,$k);
-			my $iaddr	= "$i[10].$i[11].$i[12].$i[13]";
-			$main::net{$dv}{$iaddr}{ifn} = $main::int{$dv}{$aifx{$k}}{ina};
-			$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
-			print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
-			if($iaddr !~ /^127.0.0|^0/){					
-				if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
-					$ippri = 1;
-					$newip = $iaddr;
-				}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri != 1){		# 2nd priority, use virtual IF
-					$ippri = 2;
-					$newip = $iaddr;
-				}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 3){	# 3rd  priority, use ethernet IF (precedence of existing IP)
-					if($iaddr eq $main::dev{$dv}{ip}){
-						$ippri = 3;
-					}else{
-						$ippri = 4;
+			if (defined $i[13]){								# Some devs have incomplete IPs here!	
+				my $iaddr	= "$i[10].$i[11].$i[12].$i[13]";
+				$main::net{$dv}{$iaddr}{ifn} = $main::int{$dv}{$aifx{$k}}{ina};
+				$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
+				print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
+				if($iaddr !~ /^127.0.0|^0/){					
+					if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
+						$ippri = 1;
+						$newip = $iaddr;
+					}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri != 1){		# 2nd priority, use virtual IF
+						$ippri = 2;
+						$newip = $iaddr;
+					}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 3){	# 3rd  priority, use ethernet IF (precedence of existing IP)
+						if($iaddr eq $main::dev{$dv}{ip}){
+							$ippri = 3;
+						}else{
+							$ippri = 4;
+						}
+						$newip = $iaddr;
 					}
-					$newip = $iaddr;
 				}
+				$nia++;
 			}
-			$nia++;
 		}
 	}
 	if ($ippri < 5 and !$main::opt{I}){
@@ -1045,27 +1047,29 @@ sub MacTable {
 			foreach my $fpo (keys (%fwdpo)){
 				my @dmac = split(/\./,$fpo);
 				my $mc   = sprintf "%02x%02x%02x%02x%02x%02x",$dmac[11],$dmac[12],$dmac[13],$dmac[14],$dmac[15],$dmac[16];
-				my $ifx  = $fwdix{"$fwdxO.$fwdpo{$fpo}"};
-				if (defined $ifx){
-					my $po = "fwd$ifx";						# Fallback name for weird switches...
-					if (defined $main::int{$_[0]}{$ifx}){
-						$po   = $main::int{$_[0]}{$ifx}{ina};			# ...otherwhise use real name.
+				if (defined $dmac[16]){								# Some devs have incomplete MACs here!
+					my $ifx  = $fwdix{"$fwdxO.$fwdpo{$fpo}"};
+					if (defined $ifx){
+						my $po = "fwd$ifx";						# Fallback name for weird switches...
+						if (defined $main::int{$_[0]}{$ifx}){
+							$po   = $main::int{$_[0]}{$ifx}{ina};			# ...otherwhise use real name.
 
-						if ($po =~ /[0-9]-[0-9]|[0-9],[0-9]|^Po[0-9]|channel/){
-							$misc::portprop{$_[0]}{$po}{chn} = 1;
+							if ($po =~ /[0-9]-[0-9]|[0-9],[0-9]|^Po[0-9]|channel/){
+								$misc::portprop{$_[0]}{$po}{chn} = 1;
+							}
 						}
-					}
-					$misc::portprop{$_[0]}{$po}{pop}++;
-					$misc::portnew{$mc}{$_[0]}{po} = $po;
-					if($vl){
-						$misc::portnew{$mc}{$_[0]}{vl} = $vl;
+						$misc::portprop{$_[0]}{$po}{pop}++;
+						$misc::portnew{$mc}{$_[0]}{po} = $po;
+						if($vl){
+							$misc::portnew{$mc}{$_[0]}{vl} = $vl;
+						}else{
+							$misc::portnew{$mc}{$_[0]}{vl} = $misc::portprop{$_[0]}{$po}{vln};
+						}
+						print "\n FWS:$mc on $po Vl$misc::portnew{$mc}{$_[0]}{vl}" if $main::opt{v};
+						$nspo++;
 					}else{
-						$misc::portnew{$mc}{$_[0]}{vl} = $misc::portprop{$_[0]}{$po}{vln};
+						print "No Ifix:$mc\n" if $main::opt{v};				# happens for switch's own MAC
 					}
-					print "\n FWS:$mc on $po Vl$misc::portnew{$mc}{$_[0]}{vl}" if $main::opt{v};
-					$nspo++;
-				}else{
-					print "No Ifix:$mc\n" if $main::opt{v};				# happens for switch's own MAC
 				}
 			}
 		}

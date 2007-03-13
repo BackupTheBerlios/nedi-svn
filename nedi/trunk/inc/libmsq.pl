@@ -336,6 +336,12 @@ sub WriteDev {
 			if( ! &Delete('configs','device',$na) ){
 				die "DB error configs!\n";
 			}
+			if( ! &Delete('messages','source',$na) ){
+				die "DB error messages!\n";
+			}
+			if( ! &Delete('incidents','device',$na) ){
+				die "DB error incidents!\n";
+			}
 			if (-e "$misc::rrdpath/$na"){
 				unlink(glob ("$misc::rrdpath/$na/*"));
 				rmdir("$misc::rrdpath/$na");

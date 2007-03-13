@@ -241,7 +241,7 @@ if ( in_array("mss",$rep) ){
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th width=10%><img src=img/32/say.png><br>Source</th>
 <th><img src=img/32/umgr.png><br>Contact</th>
-<th><img src=img/32/impt.png><br>Messages</th>
+<th><img src=img/32/say.png><br>Messages</th>
 </tr>
 <?
 	$rord = ($ord)? " desc" : "";

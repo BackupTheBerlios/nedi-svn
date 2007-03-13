@@ -53,9 +53,8 @@ $locstr = implode($locsep, $loc);
 <a href=inc/alarm1.mp3 controls=true><img src=img/16/spkr.png border=0 title='little alarm' hspace=20></a>
 <a href=inc/alarm2.mp3 controls=true><img src=img/16/spkr.png border=0 title='serious alarm' hspace=20></a>
 <a href=inc/alarm3.mp3 controls=true><img src=img/16/spkr.png border=0 title='panic alarm' hspace=20></a>
-
 </th>
-</tr></table></form><p>
+</tr></table></form>
 <?
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 $query	= GenQuery('monitoring');

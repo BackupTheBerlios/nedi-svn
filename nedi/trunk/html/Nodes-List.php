@@ -161,7 +161,7 @@ if ($ina){
 			echo "<th bgcolor=#$bi><a href=Nodes-Status.php?mac=$n[2]><img src=img/oui/$img title=\"$n[3] ($n[2])\" border=0></a></th>\n";
 			if(in_array("name",$col)){ echo "<td><b>$n[0]</b></td>";}
 			if(in_array("ip",$col)){
-				echo "<td><a href=telnet://$ip>$ip</a></td>";
+				echo "<td><a href=?ina=ip&opa==&sta=$ip>$ip</a></td>";
 			}
 			if(in_array("ipupdate",$col)){
 				$au      	= date("j.M G:i:s",$n[12]);
@@ -173,9 +173,9 @@ if ($ina){
 			if(in_array("mac",$col))	{echo "<td>$n[2]</td>";}
 			if(in_array("oui",$col))	{echo "<td>$n[3]</td>";}
 			if(in_array("device",$col))	{
-				echo "<td><a href=$_SERVER[PHP_SELF]?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a>";
+				echo "<td><a href=?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a>";
 				if(in_array("ifname",$col)){
-					echo " - <a href=$_SERVER[PHP_SELF]?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a>";
+					echo " - <a href=?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a>";
 				}
 				echo "</td>\n";
 			}
@@ -223,6 +223,7 @@ if ($ina){
 				echo "<td>". CheckTCP($ip,'22','') ."</td>";
 			}
 			if(in_array("tel",$col)){
+				echo "<td><a href=telnet://$ip><img src=img/16/kons.png border=0></a>\n";
 				echo CheckTCP($ip,'23','') ."</td>";
 			}
 			if(in_array("www",$col)){

@@ -629,7 +629,7 @@ sub Interfaces {
 		$misc::portprop{$dv}{$ina}{idx} = $i;
 		$misc::portprop{$dv}{$ina}{spd} = $main::int{$dv}{$i}{spd};
 		$misc::portprop{$dv}{$ina}{vln} = $main::int{$dv}{$i}{vln};
-		print "\n IF:$i\t$ina\tD:$main::int{$dv}{$i}{dpx}\tVL:$main::int{$dv}{$i}{vln}\t$ifde{$dek}\t$main::int{$dv}{$i}{ali}" if $main::opt{v};
+		print "\n IF:$i\t$ina\tT:$main::int{$dv}{$i}{typ}\tD:$main::int{$dv}{$i}{dpx}\tVL:$main::int{$dv}{$i}{vln}\t$ifde{$dek}\t$main::int{$dv}{$i}{ali}" if $main::opt{v};
 		$ni++;
 	}
 	print " i$ni" if !$main::opt{v};
@@ -653,7 +653,7 @@ sub IfAddresses {
 	my $nia		= 0;
 	
 	my $newip	= "";
-	my $ippri	= 5;
+	my $ippri	= 10;
 
 	my $iaixO	= "1.3.6.1.2.1.4.20.1.2";
 	my $ianmO	= "1.3.6.1.2.1.4.20.1.3";
@@ -690,17 +690,21 @@ sub IfAddresses {
 				$main::net{$dv}{$iaddr}{msk} = $ainm{"$ianmO.$iaddr"};
 				print "\n IP:$main::net{$dv}{$iaddr}{ifn}\t$iaddr/$main::net{$dv}{$iaddr}{msk}" if $main::opt{v};
 				if($iaddr !~ /^127.0.0|^0/){					
-					if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1st priority, use loopback IF
+					if ($main::int{$dv}{$aifx{$k}}{typ} == 24){				# 1.priority, use loopback IF
 						$ippri = 1;
 						$newip = $iaddr;
-					}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri != 1){		# 2nd priority, use virtual IF
-						$ippri = 2;
-						$newip = $iaddr;
-					}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 3){	# 3rd  priority, use ethernet IF (precedence of existing IP)
+					}elsif ($main::int{$dv}{$aifx{$k}}{typ} == 53 and $ippri > 3){		# 2.priority, use virtual IF(prefer existing IP)
 						if($iaddr eq $main::dev{$dv}{ip}){
 							$ippri = 3;
 						}else{
 							$ippri = 4;
+						}
+						$newip = $iaddr;
+					}elsif ($main::int{$dv}{$aifx{$k}}{typ} =~ /^[67]$/ and $ippri > 5){	# 3.priority, use ethernet IF (prefer existing IP)
+						if($iaddr eq $main::dev{$dv}{ip}){
+							$ippri = 5;
+						}else{
+							$ippri = 6;
 						}
 						$newip = $iaddr;
 					}

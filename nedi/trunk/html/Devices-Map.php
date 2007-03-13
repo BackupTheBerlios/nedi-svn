@@ -76,15 +76,27 @@ $kpos = strpos($locformat, "k");
 
 $levopt = "";
 if(!($cpos === false) ){
-	$s = ($lev == "c")?"selected":"";
+	if($lev == "c"){
+		$s = "selected";
+	}elseif(!$lev){
+		$lev = "c";
+	}
         $levopt .= "<OPTION VALUE=c $s>City\n";
 }
 if(!($bpos === false) ){
-	$s = ($lev == "b")?"selected":"";
+	if($lev == "b"){
+		$s = "selected";
+	}elseif(!$lev){
+		$lev = "b";
+	}
 	$levopt .= "<OPTION VALUE=b $s>Building";
 }
 if(!($fpos === false) ){
-	$s = ($lev == "f")?"selected":"";
+	if($lev == "f"){
+		$s = "selected";
+	}elseif(!$lev){
+		$lev = "f";
+	}
         $levopt .= "<OPTION VALUE=f $s>Device\n";
 }
 
@@ -205,11 +217,12 @@ if($bopt){
 </tr></table><p>
 <?
 if( isset($_GET['draw']) ){
+	echo "<h5>Live Map (clickable)</h5>";
 	Read($ina,$flt,$ipi,$ifi);
-	Map($lev);
+	Map();
 	Writemap($_SESSION['user'],count($dev) );
 }else{
-	echo "<h2>Previous Map (not clickable)</h2>";
+	echo "<h4>Previous Map (not clickable)</h4>";
 }
 if (file_exists("log/map_$_SESSION[user].php")) {
 ?>
@@ -358,27 +371,27 @@ function Drawbox($x1,$y1,$x2,$y2,$label) {
 #===================================================================
 # Draws a city, building or device.
 
-function Drawitem($x,$y,$opt,$label,$lev) {
+function Drawitem($x,$y,$opt,$label,$item) {
 
 	global $dev,$loi,$ipi,$redbuild,$mapinfo,$mapitems;
 
-	if($lev == "f"){
+	if($item == "f"){
 		$img = "dev/" . $dev[$label]['ic'];
 		$lcol = "bl1";
 		$font = "1";
-	}elseif($lev == "b"){
+	}elseif($item == "b"){
 		$img  = BldImg($opt,$label);
 		$lcol = "bl2";
 		$font = "2";
-	}elseif($lev == "c"){
+	}elseif($item == "c"){
 		$img = CtyImg($opt);
 		$lcol = "bl1";
 		$font = "5";
-	}elseif($lev == "fl"){
+	}elseif($item == "fl"){
 		$img = "stair";
 		$lcol = "blk";
 		$font = "3";
-	}elseif($lev == "ci"){
+	}elseif($item == "ci"){
 		$mapinfo[] = "\$icon = Imagecreatefrompng(\"../img/cityg.png\");";
 		$mapinfo[] = "\$w = Imagesx(\$icon);";
 		$mapinfo[] = "\$h = Imagesy(\$icon);";
@@ -390,7 +403,7 @@ function Drawitem($x,$y,$opt,$label,$lev) {
 	$mapitems[] = "\$icon = Imagecreatefrompng(\"../img/$img.png\");";
 	$mapitems[] = "\$w = Imagesx(\$icon);";
 	$mapitems[] = "\$h = Imagesy(\$icon);";
-	if ($lev == "f"){
+	if ($item == "f"){
 		if ($loi){$mapitems[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y - \$h/1.5 - 8), \"".$dev[$label]['rom']."\", \$bl3);";}
 		if ($ipi){$mapitems[] = "ImageString(\$image, $font, intval($x  - \$w/1.5), intval($y + \$h/1.5 + 8), \"".$dev[$label]['ip']."\", \$gry);";}
 	}
@@ -417,9 +430,9 @@ function Roomsort($a, $b){
 
 #===================================================================
 # Generate the map.
-function Map($lev) {
+function Map() {
 
-	global $maxcol,$xm,$ym,$xo,$yo,$csi,$bsi,$fsi,$cro,$bro,$cwt,$loi,$bwt,$dev,$ndev,$bdev,$fdev;
+	global $lev,$maxcol,$xm,$ym,$xo,$yo,$csi,$bsi,$fsi,$cro,$bro,$cwt,$loi,$bwt,$dev,$ndev,$bdev,$fdev;
 	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink,$nctylink,$nbldlink,$imgmap;
 
 	$ncty = count($ndev);
@@ -465,7 +478,7 @@ function Map($lev) {
 				if($lev == "b"){
 					Drawitem($xbl[$bld],$ybl[$bld],$bdev[$cty][$bld],$bld,$lev);
 					$area = ($xbl[$bld]-20) .",". ($ybl[$bld]-20) .",". ($xbl[$bld]+20) .",". ($ybl[$bld]+20);
-					$imgmap .= "<area href=?flt=". urlencode($bld) ."&lev=f&loi=1&ipi=1&draw=1 coords=\"$area\" shape=rect title=\"Show". $bdev[$cty][$bld] ." devices\">\n";
+					$imgmap .= "<area href=?flt=". urlencode($bld) ."&lev=f&loi=1&ipi=1&draw=1 coords=\"$area\" shape=rect title=\"Show ". $bdev[$cty][$bld] ." devices\">\n";
 				}else{
 					$cury = $nflr = $mdfl = 0;
 					$nflr = count($ndev[$cty][$bld]);
@@ -536,16 +549,16 @@ $curx++;
 
 #===================================================================
 # Arrange items according to their links.
-function Arrange($array,$lev){
+function Arrange($array,$alev){
 
 	global $actylink,$abldlink;
 
 	$tmparray = array();
 	$newtmparray = array();
 	
-	if($lev == "b"){
+	if($alev == "b"){
 		$lnkarr = $abldlink;
-	}elseif($lev == "c"){
+	}elseif($alev == "c"){
 		$lnkarr = $actylink;
 	}
 	foreach(array_keys($array) as $key){
@@ -585,7 +598,7 @@ function Arrange($array,$lev){
 function Read($ina,$filter,$ipi,$ifi){
 
 	global $link,$locsep,$fpos,$bpos,$cpos,$rpos,$resmsg;
-	global $dev,$ndev,$bdev,$fdev;
+	global $lev,$dev,$ndev,$bdev,$fdev;
 	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink;
 	global $nctylink,$nbldlink,$actylink,$abldlink;
 

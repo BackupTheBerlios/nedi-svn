@@ -118,8 +118,9 @@ if ($shw) {
 				}
 				echo "<tr bgcolor=#$bg>";
 				echo "<td bgcolor=$bi width=20 align=center><img src=img/16/$ntimg title=$ntit></td>\n";
-				echo "<td><a href=Nodes-List.php?ina=ip&opa==&sta=$net/$pfix&ord=ip>$net</a>/$pfix</td>\n";
-				echo "<td>$dvs</td><td>$pbar $pop[$dn] Nodes</td><td>$abar $avage days</td>\n";
+				echo "<td><a href=Devices-Map.php?ina=network&flt=$net%2F$pfix&draw=1>$net/$pfix</a></td>\n";
+				echo "<td>$dvs</td><td>$pbar <a href=Nodes-List.php?ina=ip&opa==&sta=$net/$pfix&ord=ip>$pop[$dn]</a></td>\n";
+				echo "<td>$abar $avage days</td>\n";
 				echo "</tr>\n";
 			}
 			echo "</table><table bgcolor=#666666 $tabtag >\n";

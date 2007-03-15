@@ -83,9 +83,10 @@ if($res){
 			$topino["$i[0];;$i[1]"] = $i[12];
 			$topoto["$i[0];;$i[1]"] = $i[14];
 		}
-		$ifsp["$i[0];;$i[1]"]   = $i[9];
+		$ifal["$i[0];;$i[1]"] = $i[7];
+		$ifsp["$i[0];;$i[1]"] = $i[9];
 		$ifdu["$i[0];;$i[1]"] = $i[10];
-		$ifvl["$i[0];;$i[1]"]   = $i[11];
+		$ifvl["$i[0];;$i[1]"] = $i[11];
 		if($i[8] == 2){$ndif++;$disif[$i[0]] .= "$i[1] ";}
 		$nif++;
 	}
@@ -196,7 +197,7 @@ if ( in_array("itr",$rep) ){
 		$d = explode(';;', $di);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a></td>\n";
+		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di]</td>\n";
 		if($rrdstep){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
@@ -229,7 +230,7 @@ if ( in_array("itr",$rep) ){
 		$d = explode(';;', $di);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a></td>\n";
+		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di]</td>\n";
 		if($rrdstep){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
@@ -260,7 +261,7 @@ if ( in_array("itr",$rep) ){
 		$d = explode(';;', $di);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a></td>\n";
+		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di]</td>\n";
 		if($rrdstep){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
@@ -293,7 +294,7 @@ if ( in_array("itr",$rep) ){
 		$d = explode(';;', $di);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a></td>\n";
+		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di]</td>\n";
 		if($rrdstep){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";

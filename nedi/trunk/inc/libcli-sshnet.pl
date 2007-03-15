@@ -319,7 +319,7 @@ sub GetCfg{
 
 	print " B:$main::dev{$_[0]}{us}:$main::dev{$_[0]}{cp} " if $main::opt{d};
 
-	if($main::dev{$_[0]}{os} eq "IOS"){
+	if($main::dev{$_[0]}{os} =~ /^IOS/){
 		&db::BackupCfg( $_[0], &cli::GetIosCfg($_[0]) );
 	}elsif($main::dev{$_[0]}{os} eq "CatOS"){
 		&db::BackupCfg( $_[0], &cli::GetCatCfg($_[0]) );
@@ -345,8 +345,9 @@ sub GetIosCfg{
 	my @cfg = ();
 
 	if($main::dev{$_[0]}{os} eq "IOS-fw"){									# Cisco firewall specific...
-		$pag = "terminal pager 0";
+		$pag = "pager 0";
 	}
+			print $pag;
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
 			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});

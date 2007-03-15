@@ -34,6 +34,7 @@ $devlink   = array();
 
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
+include_once ('inc/libgraph.php');
 
 $_GET = sanitize($_GET);
 $lev = isset($_GET['lev']) ? $_GET['lev'] : "";
@@ -73,32 +74,6 @@ $bpos = strpos($locformat, "b");
 $fpos = strpos($locformat, "f");
 $rpos = strpos($locformat, "r");
 $kpos = strpos($locformat, "k");
-
-$levopt = "";
-if(!($cpos === false) ){
-	if($lev == "c"){
-		$s = "selected";
-	}elseif(!$lev){
-		$lev = "c";
-	}
-        $levopt .= "<OPTION VALUE=c $s>City\n";
-}
-if(!($bpos === false) ){
-	if($lev == "b"){
-		$s = "selected";
-	}elseif(!$lev){
-		$lev = "b";
-	}
-	$levopt .= "<OPTION VALUE=b $s>Building";
-}
-if(!($fpos === false) ){
-	if($lev == "f"){
-		$s = "selected";
-	}elseif(!$lev){
-		$lev = "f";
-	}
-        $levopt .= "<OPTION VALUE=f $s>Device\n";
-}
 
 $imgmap    = "";
 
@@ -147,7 +122,35 @@ if($res){
 <table>
 <tr><td>Title</td><td><input type="text" name="tit" value="<?=$tit?>" size=18></td></tr>
 <tr><td>Level</td><td><select size=1 name="lev" title="Select detail level">
-<?=$levopt ?>
+<?
+if(!($cpos === false) ){
+	$s = "";
+	if($lev == "c"){
+		$s = "selected";
+	}elseif(!$lev){
+		$lev = "c";
+	}
+        echo "<OPTION VALUE=c $s>City\n";
+}
+if(!($bpos === false) ){
+	$s = "";
+	if($lev == "b"){
+		$s = "selected";
+	}elseif(!$lev){
+		$lev = "b";
+	}
+	echo "<OPTION VALUE=b $s>Building";
+}
+if(!($fpos === false) ){
+	$s = "";
+	if($lev == "f"){
+		$s = "selected";
+	}elseif(!$lev){
+		$lev = "f";
+	}
+        echo "<OPTION VALUE=f $s>Device\n";
+}
+?>
 </select>
 W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label weight">
 </td></tr>
@@ -262,7 +265,7 @@ function Writemap($usr,$nd) {
 			"header(\"Content-type: image/png\");",
 			$imgcreate,
 			"\$red = ImageColorAllocate(\$image, 150, 0, 0);",
-			"\$re2 = ImageColorAllocate(\$image, 220, 60, 60);",
+			"\$re2 = ImageColorAllocate(\$image, 240, 60, 60);",
 			"\$grn = ImageColorAllocate(\$image, 0, 200, 0);",
 			"\$gr2 = ImageColorAllocate(\$image, 0, 100, 0);",
 			"\$bl1 = ImageColorAllocate(\$image, 0, 0, 200);",
@@ -297,9 +300,10 @@ function Writemap($usr,$nd) {
 #===================================================================
 # Draws a link.
 
-function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
+function Drawlink($x1,$y1,$x2,$y2,$prop) {
 
-        global $maplinks,$bwi,$lwt,$lix,$liy,$rrdstep;
+        global $maplinks,$lev,$bwi,$ifi,$ipi,$lwt,$lix,$liy,$net,$rrdstep,$rrdpath,$rrdcmd;
+	
         if($x1 == $x2){
                 $lix[$x1]+= 2;
                 $x1 += $lix[$x1];
@@ -310,6 +314,28 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
                 $y1 += $liy[$y1];
                 $y2 = $y1;
         }
+
+	foreach(array_keys($prop['bw']) as $dv){
+		foreach(array_keys($prop['bw'][$dv]) as $if){
+			$rrd[$i] = "$rrdpath/" . rawurlencode($dv) . "/" . rawurlencode($if) . ".rrd";
+			if (!file_exists($rrd[$i])){echo "RRD $rrd[$i] not found!\n";}
+			foreach(array_keys($prop['bw'][$dv][$if]) as $ndv){
+				foreach(array_keys($prop['bw'][$dv][$if][$ndv]) as $nif){
+					$bw += $prop['bw'][$dv][$if][$ndv][$nif];
+				}
+			}
+		}
+	}
+
+	foreach(array_keys($prop['nbw']) as $dv){
+		foreach(array_keys($prop['nbw'][$dv]) as $if){
+			foreach(array_keys($prop['nbw'][$dv][$if]) as $ndv){
+				foreach(array_keys($prop['nbw'][$dv][$if][$ndv]) as $nif){
+					$nbw += $prop['nbw'][$dv][$if][$ndv][$nif];
+				}
+			}
+		}
+	}
 
 	if($bw == 11000000 or $bw == 54000000){
 		#$maplinks[] = "Imageline(\$image,$x1,$y1,$x2,$y2,\$org);";
@@ -333,13 +359,15 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 		$xl = intval($x1  + $x2) / 2;
 		$yl = intval($y1  + $y2) / 2;
 		if($rrdstep){
-			$maplinks[] = "\$icon = Imagecreatefrompng(\"../img/cityg.png\");";
+			list($drawin,$drawout,$tit) = GraphTraffic($rrd,'trf','inoct','outoct');
+			exec("$rrdcmd graph  log/$x1-$y1.png -a PNG -w70 -h50 -g -s -7d -L5 $drawin $drawout");
+			$maplinks[] = "\$icon = Imagecreatefrompng(\"$x1-$y1.png\");";
 			$maplinks[] = "\$w = Imagesx(\$icon);";
 			$maplinks[] = "\$h = Imagesy(\$icon);";
-			$maplinks[] = "Imagecopy(\$image, \$icon,$xl,$yl,0,0,\$w,\$h);";
+			$maplinks[] = "Imagecopy(\$image, \$icon,$xl-\$w/2,$yl-\$h/2,0,0,\$w,\$h);";
 			$maplinks[] = "Imagedestroy(\$icon);";
 		}else{
-			$label = ZFix($bw) . "/" . ZFix($rbw);
+			$label = ZFix($bw) . "/" . ZFix($nbw);
 			$maplinks[] = "ImageString(\$image, 1,$xl,$yl,\"$label\", \$grn);";
 		}
 	}
@@ -347,8 +375,14 @@ function Drawlink($x1,$y1,$x2,$y2,$bw,$rbw,$if=0,$nif=0) {
 	$xi2 = intval($x2+($x1-$x2)/(1 + $lwt/10));
 	$yi1 = intval($y1+($y2-$y1)/(1 + $lwt/10));
 	$yi2 = intval($y2+($y1-$y2)/(1 + $lwt/10));
-	if($if) {$maplinks[] = "ImageString(\$image, 1,$xi2,$yi2,\"$if\", \$gr2);";}
-	if($nif){$maplinks[] = "ImageString(\$image, 1,$xi1,$yi1,\"$nif\", \$gr2);";}
+	if($ifi) {
+		$maplinks[] = "ImageString(\$image, 1,$xi2,$yi2,\"". implode(",", $if) ."\", \$gr2);";
+		$maplinks[] = "ImageString(\$image, 1,$xi1,$yi1,\"". implode(",", $nif) ."\", \$gr2);";
+	}
+	if($ipi) {
+		$maplinks[] = "ImageString(\$image, 1,$xi2,$yi2+8,\"". implode(" ", $ip) ."\", \$gr2);";
+		$maplinks[] = "ImageString(\$image, 1,$xi1,$yi1+8,\"". implode(" ", $nip) ."\", \$gr2);";
+	}
 }
 #===================================================================
 # Draws box.
@@ -529,19 +563,19 @@ $curx++;
 	if($lev == "c"){
 		foreach(array_keys($ctylink) as $ctyl){
 			foreach(array_keys($ctylink[$ctyl]) as $ctyn){
-				Drawlink($xct[$ctyl],$yct[$ctyl],$xct[$ctyn],$yct[$ctyn],$ctylink[$ctyl][$ctyn]['bw'],$rctylink[$ctyl][$ctyn]['bw'],$ctylink[$ctyl][$ctyn]['il'],$rctylink[$ctyl][$ctyn]['il']);
+				Drawlink($xct[$ctyl],$yct[$ctyl],$xct[$ctyn],$yct[$ctyn],$ctylink[$ctyl][$ctyn]);
 			}
 		}
 	}elseif($lev == "b"){
 		foreach(array_keys($bldlink) as $bldl){
 			foreach(array_keys($bldlink[$bldl]) as $bldn){
-				Drawlink($xbl[$bldl],$ybl[$bldl],$xbl[$bldn],$ybl[$bldn],$bldlink[$bldl][$bldn]['bw'],$rbldlink[$bldl][$bldn]['bw'],$bldlink[$bldl][$bldn]['il'],$rbldlink[$bldl][$bldn]['il']);
+				Drawlink($xbl[$bldl],$ybl[$bldl],$xbl[$bldn],$ybl[$bldn],$bldlink[$bldl][$bldn]);
 			}
 		}
 	}elseif($lev == "f"){
 		foreach(array_keys($devlink) as $devl){
 			foreach(array_keys($devlink[$devl]) as $devn){
-				Drawlink($xd[$devl]-8,$yd[$devl]-4,$xd[$devn]-8,$yd[$devn]-4,$devlink[$devl][$devn]['bw'],$rdevlink[$devl][$devn]['bw'],$devlink[$devl][$devn]['il'],$rdevlink[$devl][$devn]['il']);
+				Drawlink($xd[$devl]-8,$yd[$devl]-4,$xd[$devn]-8,$yd[$devn]-4,$devlink[$devl][$devn]);
 			}
 		}
 	}
@@ -598,8 +632,8 @@ function Arrange($array,$alev){
 function Read($ina,$filter,$ipi,$ifi){
 
 	global $link,$locsep,$fpos,$bpos,$cpos,$rpos,$resmsg;
-	global $lev,$dev,$ndev,$bdev,$fdev;
-	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink;
+	global $lev,$net,$dev,$ndev,$bdev,$fdev;
+	global $devlink,$ctylink,$bldlink;
 	global $nctylink,$nbldlink,$actylink,$abldlink;
 
 	$net       = array();
@@ -688,38 +722,30 @@ function Read($ina,$filter,$ipi,$ifi){
 	if($res){
 		while( ($l = @DbFetchRow($res)) ){
 			if($dev[$l[1]]['ic'] and $dev[$l[3]]['ic']){							// both ends are ok, if an icon exists
-				if($ifi){
-					$inam = $l[2];
-				}else{
-					$inam = "";
-				}
-				if(isset($devlink[$l[3]][$l[1]]) ){							// opposite link doesn't exist?
-					$rdevlink[$l[3]][$l[1]]['bw'] += $l[5];
-					$rdevlink[$l[3]][$l[1]]['il'] .= $inam . $net[$l[1]][$l[2]];
-				}else{
-					$devlink[$l[1]][$l[3]]['bw'] += $l[5];
-					$devlink[$l[1]][$l[3]]['il'] .= $inam . $net[$l[1]][$l[2]];
+				if($lev == "f"){
+					if( isset($devlink[$l[3]][$l[1]]) ){						// opposite link doesn't exist?
+						$devlink[$l[3]][$l[1]]['nbw'][$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
+					}else{
+						$devlink[$l[1]][$l[3]]['bw'][$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];
+					}
 				}
 				if($dev[$l[1]]['bld'] != $dev[$l[3]]['bld'])			{			// is it same bld?
 					$nbldlink[$dev[$l[1]]['bld']] ++;
 					$abldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]++;				// needed for Arranging.
 					if(isset($bldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]) ){			// link defined already?
-						$rbldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]['bw'] += $l[5];
-						$rbldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]['il'] = $net[$l[1]][$l[2]];
+						$bldlink[$dev[$l[3]]['bld']][$dev[$l[1]]['bld']]['nbw'][$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
 					}else{
-						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['bw'] += $l[5];
-						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['il'] = $net[$l[1]][$l[2]];
+						$bldlink[$dev[$l[1]]['bld']][$dev[$l[3]]['bld']]['bw'][$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];
 					}
 				}
 				if($dev[$l[1]]['cty'] != $dev[$l[3]]['cty']){						// is it same cty?
 					$nctylink[$dev[$l[1]]['cty']]++;
 					$actylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]++;     	               	// needed for Arranging.
 					if(isset($ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]) ){			// link defined already?
-						$rctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['bw'] += $l[5];
-						$rctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['il'] = $net[$l[1]][$l[2]];
+						$ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['bw'][$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
 					}else{
-						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['bw'] += $l[5];
-						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['il'] = $net[$l[1]][$l[2]];
+
+						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['nbw'][$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];
 					}
 				}
 			}

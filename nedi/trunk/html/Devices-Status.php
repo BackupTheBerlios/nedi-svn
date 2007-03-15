@@ -281,7 +281,7 @@ if ($shd){
 <th><img src=img/32/powr.png title="PoE consumption in mW"><br>Power</th>
 <th><img src=img/32/fiap.png title="C=CDP,M=Mac,O=Oui,V=VoIP,L=LLDP,S=static"><br>Type</th></tr>
 <?
-	$query	= GenQuery('links','s','*','device','',array('device'),array('='),array($shd) );
+	$query	= GenQuery('links','s','*','ifname','',array('device'),array('='),array($shd) );
 	$res	= @DbQuery($query,$link);
 	$row  = 0;
 	$tpow = 0;							# China in your hand ;-)
@@ -309,7 +309,7 @@ if ($shd){
 </table>
 <h2>Interfaces</h2><p>
 <?
-	$query	= GenQuery('interfaces','s','*','ifidx','',array('device'),array('='),array($shd) );
+	$query	= GenQuery('interfaces','s','*','ifname','',array('device'),array('='),array($shd) );
 	$res	= @DbQuery($query,$link);
 	$nif = 0;
 	while( $i = @DbFetchRow($res) ){

@@ -32,7 +32,7 @@ $opa = isset($_GET['opa']) ? $_GET['opa'] : "";
 $opb = isset($_GET['opb']) ? $_GET['opb'] : "";
 $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
-$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','device','ifname','vlanid','firstseen','lastseen');
+$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','ifname','vlanid','firstseen','lastseen');
 
 $cols = array(	"name"=>"Name",
 		"ip"=>"IP Address",
@@ -128,7 +128,7 @@ if ($ina){
 	if( in_array("iplost",$col) )	{ColHead('iplost');}
 	if( in_array("mac",$col) )	{ColHead('mac');}
 	if( in_array("oui",$col) )	{ColHead('oui');}
-	if( in_array("device",$col) )	{ColHead('device');}
+	if( in_array("ifname",$col) )	{ColHead('ifname');}
 	if( in_array("vlanid",$col) )	{ColHead('vlanid');}
 	if( in_array("ifmetric",$col) )	{ColHead('ifmetric');}
 	if( in_array("ifupdate",$col) )	{ColHead('ifupdate');}
@@ -172,12 +172,9 @@ if ($ina){
 			if(in_array("iplost",$col))	{echo "<td align=right>$n[14]</td>";}
 			if(in_array("mac",$col))	{echo "<td>$n[2]</td>";}
 			if(in_array("oui",$col))	{echo "<td>$n[3]</td>";}
-			if(in_array("device",$col))	{
+			if(in_array("ifname",$col)){
 				echo "<td><a href=?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a>";
-				if(in_array("ifname",$col)){
-					echo " - <a href=?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a>";
-				}
-				echo "</td>\n";
+				echo " - <a href=?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a></td>";
 			}
 			if(in_array("vlanid",$col))	{echo "<td>$n[8]</td>";}
 			if(in_array("ifupdate",$col)){

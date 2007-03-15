@@ -60,9 +60,9 @@ function DbError($l){
 //
 function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),$st=array(),$co=array() ){
 
-	if( 'i' == $do ){
+	if($do == 'i'){
 		return "INSERT INTO $tab (". implode(',',$in) .") VALUES (\"". implode('","',$st) ."\")";
-	}elseif('u' == $do){
+	}elseif($do == 'u'){
 		if( $in[0] ){
 			$x = 0;
 			foreach ($in as $c){
@@ -71,16 +71,16 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 			}
 			return "UPDATE $tab SET ". implode(',',$s) ." WHERE $col=\"$ord\"";
 		}
-	}elseif( 't' == $do ){
+	}elseif($do ==  't'){
 		return "SHOW TABLES";
-	}elseif( 'c' == $do ){
+	}elseif($do == 'c'){
 		return "SHOW COLUMNS FROM $tab";
 	}else{
 		$l = ($lim) ? "LIMIT $lim" : "";
-		if('device' == $ord){
-			$o = "ORDER BY device,SUBSTRING_INDEX(ifname, '/', 1)+0, SUBSTRING_INDEX(ifname, '/', -1)*1+0";
-		}elseif('device desc' == $ord){
-			$o = "ORDER BY device desc,SUBSTRING_INDEX(ifname, '/', 1)+0, SUBSTRING_INDEX(ifname, '/', -1)*1+0";
+		if($ord == 'ifname'){
+			$o = "ORDER BY device,SUBSTRING_INDEX(ifname, '/', 1), SUBSTRING_INDEX(ifname, '/', -1)*1+0";
+		}elseif($ord == 'ifname desc'){
+			$o = "ORDER BY device desc,SUBSTRING_INDEX(ifname, '/', 1), SUBSTRING_INDEX(ifname, '/', -1)*1+0";
 		}elseif($ord){
 			$o = "ORDER BY $ord";
 		}else{
@@ -120,9 +120,9 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 		}else{
 			$w = "";
 		}
-		if('d' == $do){
+		if($do == 'd'){
 			return "DELETE FROM $tab $w $l";
-		}elseif('g' == $do){
+		}elseif($do == 'g'){
 			return "SELECT $col,count(*) FROM  $tab $w GROUP BY $col $o $l";
 		}else{
 			return "SELECT $col FROM $tab $w $o $l";

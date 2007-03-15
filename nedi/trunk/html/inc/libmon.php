@@ -4,6 +4,7 @@
 // Monitoring related functions (and variables)
 //===============================
 
+// Message icons based on level
 $mico['10']  = "fogy";
 $mico['50']  = "fogr";
 $mico['100'] = "fobl";

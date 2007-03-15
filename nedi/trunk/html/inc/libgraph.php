@@ -1,9 +1,39 @@
 <?php
 //===============================
-// Graphical functions.
+// Graphical functions  (and variables)
 //===============================
 
+// Paths for RRD graphs
+$rrdcmd  = "rrdtool";										# point to rrdtool
+$rrdpath = "/var/nedi/rrd";									# point to rrds
+$fahrtmp = 0;											# show temperature in degrees F too
 
+// Colors for RRD graphs
+
+function GraphTraffic($rrd,$t,$idef,$odef){
+
+	$c = 0;
+	$drawin = "";
+	$drawout= "";
+	$inmod  = 'AREA';
+	$outmod = 'LINE2';
+
+	if($t == 'trf'){
+		$tit = 'Traffic in Byte/s';
+		$cols = array('0000aa','008800','0044bb','00bb44','0088ee','00ee88','00aaff','00ffaa','0044ff','00ff44','0088ff','00ff88','3388ff','33ff88','6688ff','66ff88');
+	}else{
+		$tit = "Errors";
+		$cols = array('880000','886600','aa0000','aa8800','ee0000','eeaa00','ff0000','ffcc00','ff0066','ffcc66','ff0088','ffcc88','ff00aa','ffeeaa','ff00cc','ffccdd');
+	}
+	foreach (array_keys($rrd) as $i){
+		if($c){$inmod = 'STACK';$outmod = 'STACK';}
+		$drawin .= "DEF:$idef$c=$rrd[$i]:$idef:AVERAGE $inmod:$idef$c#$cols[$c]:\"$i  in\" ";
+		$c++;
+		$drawout .= "DEF:$odef$c=$rrd[$i]:$odef:AVERAGE $outmod:$odef$c#$cols[$c]:\"$i out\" ";
+		$c++;
+	}
+	return array($drawin,$drawout,$tit);	
+}
 
 class Graph {
 	

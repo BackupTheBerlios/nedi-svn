@@ -713,7 +713,7 @@ sub IfAddresses {
 			}
 		}
 	}
-	if ($ippri < 5 and !$main::opt{I}){
+	if ($ippri < 10 and !$main::opt{I}){
 		$main::dev{$dv}{oi} = $main::dev{$dv}{ip};
 		$main::dev{$dv}{ip} = $newip;
 		print "\n New IP:$main::dev{$dv}{ip} (Priority $ippri)" if $main::opt{v};

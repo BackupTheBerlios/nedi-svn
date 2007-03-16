@@ -2,7 +2,7 @@
 
 # General
 SNMPv	1
-Type	WS-C1924
+Type	WS-C1912
 OS	Cat1900
 Icon	w2lg
 Bridge	normal

@@ -166,6 +166,7 @@ sub Shif {
 		$n =~ s/^Dot11Radio/Do/;
 		$n =~ s/^[F|G]EC-//;										# Doesn't match telnet CAM table!
 		$n =~ s/^BayStack (.*?)- //;									# Nortel specific
+		$n =~ s/^Vlan/Vl/;										# MSFC2 and Cat6k5 discrepancy!
 		$n =~ s/(Port\d): .*/$1/g;									# Ruby specific
 		$n =~ s/pci|motorola|power|switch|network|interface|management//ig;				# Strip other garbage
 		$n =~ s/\s+//g;											# Strip spaces
@@ -770,7 +771,7 @@ sub RetireNod {
 
 	foreach my $mc (keys %main::nod){
 		if ($main::nod{$mc}{ls} < $retire){
-			print "$mc $main::nod{$mc}{na} $main::nod{$mc}{ip} $main::nod{$mc}{dv}-$main::nod{$mc}{if}\n"  if $main::opt{v};
+			print "NRE:$mc $main::nod{$mc}{na} $main::nod{$mc}{ip} $main::nod{$mc}{dv}-$main::nod{$mc}{if}\n"  if $main::opt{v};
 			delete $main::nod{$mc};
 			if( ! &db::Delete('nodiflog','mac',$mc) ){
 				die "DB error nodiflog!\n";

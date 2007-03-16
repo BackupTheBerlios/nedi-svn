@@ -56,11 +56,13 @@ if($_GET['t'] == 'cpu'){
 		$rrd[$i] = "$rrdpath/" . rawurlencode($_GET['dv']) . "/" . rawurlencode($i) . ".rrd";
 		if (!file_exists($rrd[$i])){$debug .= "RRD $rrd[$i] not found!\n";}
 	}
-	list($drawin,$drawout,$tit) = GraphTraffic($rrd,$_GET['t'],'inoct','outoct');
+	list($drawin,$drawout,$tit) = GraphTraffic($rrd,$_GET['t']);
 }
 
-if($_GET['s'] == 's'){
-	$opts = "-w70 -h50 -g -s -$_GET[dur]d -L5";
+if($_GET['s'] == 't'){
+	$opts = "-w30 -h20 -j -s -$_GET[dur]d -L5";
+}elseif($_GET['s'] == 's'){
+	$opts = "-w60 -h40 -g -s -$_GET[dur]d -L5";
 }elseif($_GET['s'] == 'm'){
 	$lbreak = "COMMENT:\"\\n\" ";
 	$opts = "-w320 -h100 -s -$_GET[dur]d";

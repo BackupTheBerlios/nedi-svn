@@ -84,6 +84,7 @@ if ($dv) {
 <th>
 Duration
 <SELECT size=1 name="dur">
+<OPTION VALUE="1" <?=($dur == "1")?"selected":""?> >Day
 <OPTION VALUE="7" <?=($dur == "7")?"selected":""?> >Week
 <OPTION VALUE="30" <?=($dur == "30")?"selected":""?> >Month
 <OPTION VALUE="90" <?=($dur == "90")?"selected":""?> >Quarter

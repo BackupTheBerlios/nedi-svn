@@ -553,10 +553,10 @@ Duplex Index</th><td>
 </td></tr>
 <tr><th align=right>
 Half Duplex</th><td>
-<input type="text" name="hdv" value="<?=$idx?>" size="2" title="Value used for half-duplex" onfocus=select(); onchange="update();">
+<input type="text" name="hdv" value="<?=$hdv?>" size="2" title="Value used for half-duplex" onfocus=select(); onchange="update();">
 </td><th align=right>
 Full Duplex</th><td>
-<input type="text" name="fdv" value="<?=$idx?>" size="2" title="Value used for full-duplex" onfocus=select(); onchange="update();">
+<input type="text" name="fdv" value="<?=$fdv?>" size="2" title="Value used for full-duplex" onfocus=select(); onchange="update();">
 </td></tr>
 <tr><th align=right>
 IF Vlan</th><td>

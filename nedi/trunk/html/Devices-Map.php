@@ -11,6 +11,7 @@
 # 10/03/06	new SQL query support
 # 17/07/06	enhanced info and new network filter
 # 21/02/07	refined layout and link weight computation, more hints and image map!
+# 16/03/07	changes to mapping and GUI for RRD graohs...
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -40,7 +41,7 @@ $_GET = sanitize($_GET);
 $lev = isset($_GET['lev']) ? $_GET['lev'] : "";
 $dep = isset($_GET['dep']) ? $_GET['dep'] : 8;
 $loi = isset($_GET['loi']) ? "checked" : "";
-$bwi = isset($_GET['bwi']) ? "checked" : "";
+$gra = isset($_GET['gra']) ? "checked" : "";
 $ifi = isset($_GET['ifi']) ? "checked" : "";
 $ipi = isset($_GET['ipi']) ? "checked" : "";
 $tit = isset($_GET['tit']) ? $_GET['tit'] : "NeDi Network Map";
@@ -60,7 +61,7 @@ elseif($res == "uxga") {$xm = "1600";$ym = "1200";}
 
 $csi = isset($_GET['csi']) ? $_GET['csi'] : intval($xm /5);
 $bsi = isset($_GET['bsi']) ? $_GET['bsi'] : intval($xm /4);
-$fsi = isset($_GET['fsi']) ? $_GET['fsi'] : 70;
+$fsi = isset($_GET['fsi']) ? $_GET['fsi'] : 80;
 $cwt = isset($_GET['cwt']) ? $_GET['cwt'] : 3;
 $bwt = isset($_GET['bwt']) ? $_GET['bwt'] : 3;
 $cro = isset($_GET['cro']) ? $_GET['cro'] : 0;
@@ -91,6 +92,7 @@ if($res){
 }else{
 	print @DbError($link);
 }
+
 ?>
 <h1>Device Map</h1>
 
@@ -156,7 +158,7 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label 
 </td></tr>
 <tr><td>Show</td><td>
 <INPUT type="checkbox" name="loi" <?=$loi?> title="Location info"> L
-<INPUT type="checkbox" name="bwi" <?=$bwi?> title="Bandwidth"> B
+<INPUT type="checkbox" name="gra" <?=$gra?> title="Graphs"> G
 <INPUT type="checkbox" name="ifi" <?=$ifi?> title="Interface"> I
 <INPUT type="checkbox" name="ipi" <?=$ipi?> title="IP addresses"> A
 </td></tr>
@@ -175,8 +177,8 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label 
 <input type="text" name="bwt" value="<?=$bwt?>" size=2 title="Weight of buildings based on # of links">W
 <input type="text" name="bro" value="<?=$bro?>" size=3 title="Rotation of building circle">@
 </td></tr>
-<tr><td>Floor</td><td>
-<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor size and columns(divided by 10)">S
+<tr><td>Misc</td><td>
+<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor&Graph(/4) size and floor columns(/10)">S
 <input type="text" name="xo" value="<?=$xo?>" size=2 title="Map X offset"> X
 <input type="text" name="yo" value="<?=$yo?>" size=2 title="Map Y offset"> Y
 </td></tr>
@@ -196,6 +198,7 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label 
 <tr><td><select size=1 name="cs" onchange="document.map.flt.value=document.map.cs.options[document.map.cs.selectedIndex].value">
 <option value="">or select
 <?
+
 if($copt){
 	echo '<option value="">------------';
 	ksort($copt);
@@ -221,11 +224,11 @@ if($bopt){
 <?
 if( isset($_GET['draw']) ){
 	echo "<h5>Live Map (clickable)</h5>";
-	Read($ina,$flt,$ipi,$ifi);
+	Read($ina,$flt);
 	Map();
 	Writemap($_SESSION['user'],count($dev) );
 }else{
-	echo "<h4>Previous Map (not clickable)</h4>";
+	echo "<h4>Previous Map (not clickable, no graphs only!)</h4>";
 }
 if (file_exists("log/map_$_SESSION[user].php")) {
 ?>
@@ -302,7 +305,10 @@ function Writemap($usr,$nd) {
 
 function Drawlink($x1,$y1,$x2,$y2,$prop) {
 
-        global $maplinks,$lev,$bwi,$ifi,$ipi,$lwt,$lix,$liy,$net,$rrdstep,$rrdpath,$rrdcmd;
+	$slab  = array();
+	$elab = array();
+	
+        global $maplinks,$lev,$gra,$fsi,$ifi,$ipi,$lwt,$lix,$liy,$net,$rrdstep,$rrdpath,$rrdcmd;
 	
         if($x1 == $x2){
                 $lix[$x1]+= 2;
@@ -317,20 +323,30 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 
 	foreach(array_keys($prop['bw']) as $dv){
 		foreach(array_keys($prop['bw'][$dv]) as $if){
-			$rrd[$i] = "$rrdpath/" . rawurlencode($dv) . "/" . rawurlencode($if) . ".rrd";
-			if (!file_exists($rrd[$i])){echo "RRD $rrd[$i] not found!\n";}
+			if($gra and $rrdstep){
+				$rrd["$dv-$if"] = "$rrdpath/" . rawurlencode($dv) . "/" . rawurlencode($if) . ".rrd";
+				if (!file_exists($rrd["$dv-$if"])){echo $rrd["$dv-$if"] ." not found!\n";}
+			}
 			foreach(array_keys($prop['bw'][$dv][$if]) as $ndv){
 				foreach(array_keys($prop['bw'][$dv][$if][$ndv]) as $nif){
-					$bw += $prop['bw'][$dv][$if][$ndv][$nif];
-				}
-			}
-		}
-	}
-
-	foreach(array_keys($prop['nbw']) as $dv){
-		foreach(array_keys($prop['nbw'][$dv]) as $if){
-			foreach(array_keys($prop['nbw'][$dv][$if]) as $ndv){
-				foreach(array_keys($prop['nbw'][$dv][$if][$ndv]) as $nif){
+					if($ipi){
+						if($net[$dv][$if])  {$ia = $net[$dv][$if];}
+						if($net[$ndv][$nif]){$nia= $net[$ndv][$nif];}
+					}
+					if($ifi){
+						if($lev == "f"){
+							$in = $if;
+							$nin= $nif;
+						}else{
+							$in = "$dv $if";
+							$nin= "$ndv $nif";
+						}
+					}
+					if ($ifi or $ipi){
+						array_push($slab,"$in $ia");
+						array_push($elab,"$nin $nia");
+					}
+					$bw  += $prop['bw'][$dv][$if][$ndv][$nif];
 					$nbw += $prop['nbw'][$dv][$if][$ndv][$nif];
 				}
 			}
@@ -355,33 +371,35 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 		$maplinks[] = "Imagesetthickness(\$image, 1);";
 	}
 
-	if($bwi){
-		$xl = intval($x1  + $x2) / 2;
-		$yl = intval($y1  + $y2) / 2;
-		if($rrdstep){
-			list($drawin,$drawout,$tit) = GraphTraffic($rrd,'trf','inoct','outoct');
-			exec("$rrdcmd graph  log/$x1-$y1.png -a PNG -w70 -h50 -g -s -7d -L5 $drawin $drawout");
-			$maplinks[] = "\$icon = Imagecreatefrompng(\"$x1-$y1.png\");";
-			$maplinks[] = "\$w = Imagesx(\$icon);";
-			$maplinks[] = "\$h = Imagesy(\$icon);";
-			$maplinks[] = "Imagecopy(\$image, \$icon,$xl-\$w/2,$yl-\$h/2,0,0,\$w,\$h);";
-			$maplinks[] = "Imagedestroy(\$icon);";
-		}else{
-			$label = ZFix($bw) . "/" . ZFix($nbw);
-			$maplinks[] = "ImageString(\$image, 1,$xl,$yl,\"$label\", \$grn);";
-		}
+	$xl = intval($x1  + $x2) / 2;
+	$yl = intval($y1  + $y2) / 2;
+	if($gra and $rrdstep){
+		list($drawin,$drawout,$tit) = GraphTraffic($rrd,'trf');
+		$gw = $fsi/4;
+		exec("$rrdcmd graph  log/$x1$y1$x2$y2.png -a PNG -w$gw -h40 -g -L5 $drawin $drawout");
+		$maplinks[] = "\$icon = Imagecreatefrompng(\"$x1$y1$x2$y2.png\");";
+		$maplinks[] = "\$w = Imagesx(\$icon);";
+		$maplinks[] = "\$h = Imagesy(\$icon);";
+		$maplinks[] = "Imagecopy(\$image, \$icon,$xl-\$w/2,$yl-\$h/2,0,0,\$w,\$h);";
+		$maplinks[] = "Imagedestroy(\$icon);";
+		$maplinks[] = "unlink(\"$x1$y1$x2$y2.png\");";
+	}else{
+		$clab = ZFix($bw) . "/" . ZFix($nbw);
+		$maplinks[] = "ImageString(\$image, 1,$xl,$yl,\"$clab\", \$grn);";
 	}
 	$xi1 = intval($x1+($x2-$x1)/(1 + $lwt/10));
 	$xi2 = intval($x2+($x1-$x2)/(1 + $lwt/10));
 	$yi1 = intval($y1+($y2-$y1)/(1 + $lwt/10));
 	$yi2 = intval($y2+($y1-$y2)/(1 + $lwt/10));
-	if($ifi) {
-		$maplinks[] = "ImageString(\$image, 1,$xi2,$yi2,\"". implode(",", $if) ."\", \$gr2);";
-		$maplinks[] = "ImageString(\$image, 1,$xi1,$yi1,\"". implode(",", $nif) ."\", \$gr2);";
+	$yof = 0;
+	foreach ($slab as $i){
+		$maplinks[] = "ImageString(\$image, 1,$xi2,$yi2+$yof,\"$i\", \$gr2);";
+		$yof += 8;
 	}
-	if($ipi) {
-		$maplinks[] = "ImageString(\$image, 1,$xi2,$yi2+8,\"". implode(" ", $ip) ."\", \$gr2);";
-		$maplinks[] = "ImageString(\$image, 1,$xi1,$yi1+8,\"". implode(" ", $nip) ."\", \$gr2);";
+	$yof = 0;
+	foreach ($elab as $i){
+		$maplinks[] = "ImageString(\$image, 1,$xi1,$yi1+$yof,\"$i\", \$gr2);";
+		$yof += 8;
 	}
 }
 #===================================================================
@@ -629,10 +647,10 @@ function Arrange($array,$alev){
 
 #===================================================================
 # Read devices and their neighbours and create the links.
-function Read($ina,$filter,$ipi,$ifi){
+function Read($ina,$filter){
 
 	global $link,$locsep,$fpos,$bpos,$cpos,$rpos,$resmsg;
-	global $lev,$net,$dev,$ndev,$bdev,$fdev;
+	global $lev,$ipi,$net,$dev,$ndev,$bdev,$fdev;
 	global $devlink,$ctylink,$bldlink;
 	global $nctylink,$nbldlink,$actylink,$abldlink;
 
@@ -722,7 +740,7 @@ function Read($ina,$filter,$ipi,$ifi){
 	if($res){
 		while( ($l = @DbFetchRow($res)) ){
 			if($dev[$l[1]]['ic'] and $dev[$l[3]]['ic']){							// both ends are ok, if an icon exists
-				if($lev == "f"){
+			if($lev == "f"){
 					if( isset($devlink[$l[3]][$l[1]]) ){						// opposite link doesn't exist?
 						$devlink[$l[3]][$l[1]]['nbw'][$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
 					}else{
@@ -742,10 +760,10 @@ function Read($ina,$filter,$ipi,$ifi){
 					$nctylink[$dev[$l[1]]['cty']]++;
 					$actylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]++;     	               	// needed for Arranging.
 					if(isset($ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]) ){			// link defined already?
-						$ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['bw'][$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
+						$ctylink[$dev[$l[3]]['cty']][$dev[$l[1]]['cty']]['nbw'][$l[3]][$l[4]][$l[1]][$l[2]] = $l[5];
 					}else{
 
-						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['nbw'][$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];
+						$ctylink[$dev[$l[1]]['cty']][$dev[$l[3]]['cty']]['bw'][$l[1]][$l[2]][$l[3]][$l[4]] = $l[5];
 					}
 				}
 			}

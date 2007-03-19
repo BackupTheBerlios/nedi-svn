@@ -95,7 +95,7 @@ if ($dev) {
 	while( ($i = @DbFetchRow($res)) ){
 		$ifn[$i[2]] = $i[1];
 		$ift[$i[2]] = $i[4];
-		$ifi[$i[2]] = "$i[6] $i[7] $i[16]";
+		$ifi[$i[2]] = "$i[6] $i[7] $i[20]";
 		$nif++;
 	}
 	@DbFreeResult($res);

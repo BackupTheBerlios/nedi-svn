@@ -606,7 +606,6 @@ sub UpNodif {
 	print " $newmet-> " if $main::opt{v};
 	foreach my $dv (keys(%{$portnew{$mc}}) ){								# Cycle thru ports...
 		my $if = $portnew{$mc}{$dv}{po};
-
 		if(!defined $portprop{$dv}{$if}{rtr}){$portprop{$dv}{$if}{rtr} = 0}
 		if(!defined $portprop{$dv}{$if}{upl}){$portprop{$dv}{$if}{upl} = 0}
 		if(!defined $portprop{$dv}{$if}{chn}){$portprop{$dv}{$if}{chn} = 0}

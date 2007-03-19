@@ -115,7 +115,7 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 <tr><th bgcolor=#<?=$bg1?>>IP Address</th>	<td bgcolor=#<?=$bga?>><?=$ip?> (<?=($n[1])?gethostbyaddr($ip):"";?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IP Update</th>	<td bgcolor=#<?=$a1c?>><?=$au?> (<?=$n[13]?> Changes / <?=$n[14]?> Lost)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Device</th>		<td bgcolor=#<?=$bga?>><?=$n[6]?></td></tr>
-<tr><th bgcolor=#<?=$bg1?>>Interface</th>	<td bgcolor=#<?=$bgb?>><?=$ifimg?> <?=$n[7]?> (<?=ZFix($if[9])?>-<?=$if[10]?>) <i><?=$if[7]?> <?=$if[16]?></i></td></tr>
+<tr><th bgcolor=#<?=$bg1?>>Interface</th>	<td bgcolor=#<?=$bgb?>><?=$ifimg?> <?=$n[7]?> (<?=ZFix($if[9])?>-<?=$if[10]?>) <i><?=$if[7]?> <?=$if[20]?></i></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Vlan</th>		<td bgcolor=#<?=$bga?>><?=$n[8]?> <?=$vl[2]?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Traffic</th>		<td bgcolor=#<?=$bgb?>>Bytes: <?=$if[12]?> Errors: <?=$if[13]?></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IF Update</th>	<td bgcolor=#<?=$i1c?>><?=$iu?> (Changes <?=$n[11]?> / Metric <?=$n[9]?>)</td></tr>

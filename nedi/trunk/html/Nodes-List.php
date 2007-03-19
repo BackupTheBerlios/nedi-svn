@@ -196,7 +196,7 @@ if ($ina){
 					}else{
 						$ifimg = "<img src=img/bulbg.png title=\"Enabled\">";
 					}
-					echo "<td> $ifimg ".Zfix($if[9])."-$if[10] <i>$if[7] $if[16]</i></td>";
+					echo "<td> $ifimg ".Zfix($if[9])."-$if[10] <i>$if[7] $if[20]</i></td>";
 				}else{
 					echo "<td>-</td>";
 				}

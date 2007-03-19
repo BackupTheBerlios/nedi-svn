@@ -41,9 +41,9 @@ $_GET = sanitize($_GET);
 $lev = isset($_GET['lev']) ? $_GET['lev'] : "";
 $dep = isset($_GET['dep']) ? $_GET['dep'] : 8;
 $loi = isset($_GET['loi']) ? "checked" : "";
-$gra = isset($_GET['gra']) ? "checked" : "";
 $ifi = isset($_GET['ifi']) ? "checked" : "";
 $ipi = isset($_GET['ipi']) ? "checked" : "";
+$gra = isset($_GET['gra']) ? $_GET['gra'] : "";
 $tit = isset($_GET['tit']) ? $_GET['tit'] : "NeDi Network Map";
 $flt = isset($_GET['flt']) ? $_GET['flt'] : ".";
 $ina = isset($_GET['ina']) ? $_GET['ina'] : "loc";
@@ -62,13 +62,12 @@ elseif($res == "uxga") {$xm = "1600";$ym = "1200";}
 $csi = isset($_GET['csi']) ? $_GET['csi'] : intval($xm /5);
 $bsi = isset($_GET['bsi']) ? $_GET['bsi'] : intval($xm /4);
 $fsi = isset($_GET['fsi']) ? $_GET['fsi'] : 80;
+$fco = isset($_GET['fco']) ? $_GET['fco'] : 6;
 $cwt = isset($_GET['cwt']) ? $_GET['cwt'] : 3;
 $bwt = isset($_GET['bwt']) ? $_GET['bwt'] : 3;
 $cro = isset($_GET['cro']) ? $_GET['cro'] : 0;
 $bro = isset($_GET['bro']) ? $_GET['bro'] : 0;
 $lwt = isset($_GET['lwt']) ? $_GET['lwt'] : 3;
-
-$maxcol = intval($fsi/10);
 
 $cpos = strpos($locformat, "c");
 $bpos = strpos($locformat, "b");
@@ -120,7 +119,7 @@ if($res){
 </table>
 </th>
 
-<th valign=top>Layers
+<th valign=top>General
 <table>
 <tr><td>Title</td><td><input type="text" name="tit" value="<?=$tit?>" size=18></td></tr>
 <tr><td>Level</td><td><select size=1 name="lev" title="Select detail level">
@@ -154,14 +153,32 @@ if(!($fpos === false) ){
 }
 ?>
 </select>
-W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label weight">
 </td></tr>
-<tr><td>Show</td><td>
-<INPUT type="checkbox" name="loi" <?=$loi?> title="Location info"> L
-<INPUT type="checkbox" name="gra" <?=$gra?> title="Graphs"> G
-<INPUT type="checkbox" name="ifi" <?=$ifi?> title="Interface"> I
-<INPUT type="checkbox" name="ipi" <?=$ipi?> title="IP addresses"> A
+<tr><td>Offset</td><td>
+<input type="text" name="xo" value="<?=$xo?>" size=2 title="Moves map horizontally"> X
+<input type="text" name="yo" value="<?=$yo?>" size=2 title="Moves map vertically"> Y
 </td></tr>
+</table>
+</th>
+
+<th valign=top>Layers
+<table><tr>
+<td><INPUT type="checkbox" name="ifi" <?=$ifi?> title="Interface"> IF</td>
+<td><INPUT type="checkbox" name="ipi" <?=$ipi?> title="IP addresses"> IP</td></tr>
+<tr>
+<td><INPUT type="checkbox" name="loi" <?=$loi?> title="Location info"> Loc</td>
+<td><input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Weight for IF labels">W</td>
+</tr>
+<tr>
+<td colspan=2><? if($rrdstep){?>
+<select size=1 name="gra">
+<option value="">IF Graphs
+<option value="t" <?=($gra == "t")?"selected":""?>>tiny
+<option value="s" <?=($gra == "s")?"selected":""?>>small
+<option value="m" <?=($gra == "m")?"selected":""?>>medium
+</select>
+<?}?></td>
+</tr>
 </table>
 </th>
 
@@ -172,15 +189,14 @@ W <input type="text" name="lwt" value="<?=$lwt?>" size=2 title="Interface Label 
 <input type="text" name="cwt" value="<?=$cwt?>" size=2 title="Weight of cities based on # of links">W
 <input type="text" name="cro" value="<?=$cro?>" size=3 title="Rotation of city circle">@
 </td></tr>
-<tr><td>Bld</td><td>
+<tr><td>Build</td><td>
 <input type="text" name="bsi" value="<?=$bsi?>" size=3 title="Length of building links">L
 <input type="text" name="bwt" value="<?=$bwt?>" size=2 title="Weight of buildings based on # of links">W
 <input type="text" name="bro" value="<?=$bro?>" size=3 title="Rotation of building circle">@
 </td></tr>
-<tr><td>Misc</td><td>
-<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor&Graph(/4) size and floor columns(/10)">S
-<input type="text" name="xo" value="<?=$xo?>" size=2 title="Map X offset"> X
-<input type="text" name="yo" value="<?=$yo?>" size=2 title="Map Y offset"> Y
+<tr><td>Floor</td><td>
+<input type="text" name="fsi" value="<?=$fsi?>" size=3 title="Floor size">S
+<input type="text" name="fco" value="<?=$fco?>" size=2 title="Floor columns">C
 </td></tr>
 </table>
 </th>
@@ -266,6 +282,7 @@ function Writemap($usr,$nd) {
 
        	$maphdr = array("<?PHP",
 			"header(\"Content-type: image/png\");",
+			"error_reporting(0);\n",
 			$imgcreate,
 			"\$red = ImageColorAllocate(\$image, 150, 0, 0);",
 			"\$re2 = ImageColorAllocate(\$image, 240, 60, 60);",
@@ -308,7 +325,7 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 	$slab  = array();
 	$elab = array();
 	
-        global $maplinks,$lev,$gra,$fsi,$ifi,$ipi,$lwt,$lix,$liy,$net,$rrdstep,$rrdpath,$rrdcmd;
+        global $maplinks,$lev,$gra,$ifi,$ipi,$lwt,$lix,$liy,$net,$rrdstep,$rrdpath,$rrdcmd;
 	
         if($x1 == $x2){
                 $lix[$x1]+= 2;
@@ -323,9 +340,13 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 
 	foreach(array_keys($prop['bw']) as $dv){
 		foreach(array_keys($prop['bw'][$dv]) as $if){
-			if($gra and $rrdstep){
-				$rrd["$dv-$if"] = "$rrdpath/" . rawurlencode($dv) . "/" . rawurlencode($if) . ".rrd";
-				if (!file_exists($rrd["$dv-$if"])){echo $rrd["$dv-$if"] ." not found!\n";}
+			if($gra){
+				$rrd = "$rrdpath/" . rawurlencode($dv) . "/" . rawurlencode($if) . ".rrd";
+				if (file_exists($rrd)){
+					$rrdif["$dv-$if"] = $rrd;
+				}else{
+					echo "RRD:$rrd not found!\n";
+				}
 			}
 			foreach(array_keys($prop['bw'][$dv][$if]) as $ndv){
 				foreach(array_keys($prop['bw'][$dv][$if][$ndv]) as $nif){
@@ -373,19 +394,26 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 
 	$xl = intval($x1  + $x2) / 2;
 	$yl = intval($y1  + $y2) / 2;
-	if($gra and $rrdstep){
-		list($drawin,$drawout,$tit) = GraphTraffic($rrd,'trf');
-		$gw = $fsi/4;
-		exec("$rrdcmd graph  log/$x1$y1$x2$y2.png -a PNG -w$gw -h40 -g -L5 $drawin $drawout");
+	$clab = ZFix($bw) . "/" . ZFix($nbw);
+	if($gra and is_array($rrdif) ){
+		if($gra == "t"){
+			$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl-18,\"$clab\", \$grn);";
+			$size = "-w32 -h16 -j -c CANVAS#ddeedd";
+		}elseif($gra == "s"){
+			$size = "-w60 -h50 -g -L5";
+		}elseif($gra == "m"){
+			$size = "-w160 -h80 -L5 -s -7d";
+		}
+		list($drawin,$drawout,$tit) = GraphTraffic($rrdif,'trf');
+		exec("$rrdcmd graph log/$x1$y1$x2$y2.png -a PNG $size $drawin $drawout");
 		$maplinks[] = "\$icon = Imagecreatefrompng(\"$x1$y1$x2$y2.png\");";
 		$maplinks[] = "\$w = Imagesx(\$icon);";
 		$maplinks[] = "\$h = Imagesy(\$icon);";
 		$maplinks[] = "Imagecopy(\$image, \$icon,$xl-\$w/2,$yl-\$h/2,0,0,\$w,\$h);";
 		$maplinks[] = "Imagedestroy(\$icon);";
-		$maplinks[] = "unlink(\"$x1$y1$x2$y2.png\");";
+		#$maplinks[] = "unlink(\"$x1$y1$x2$y2.png\");";
 	}else{
-		$clab = ZFix($bw) . "/" . ZFix($nbw);
-		$maplinks[] = "ImageString(\$image, 1,$xl,$yl,\"$clab\", \$grn);";
+		$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl,\"$clab\", \$grn);";
 	}
 	$xi1 = intval($x1+($x2-$x1)/(1 + $lwt/10));
 	$xi2 = intval($x2+($x1-$x2)/(1 + $lwt/10));
@@ -484,7 +512,7 @@ function Roomsort($a, $b){
 # Generate the map.
 function Map() {
 
-	global $lev,$maxcol,$xm,$ym,$xo,$yo,$csi,$bsi,$fsi,$cro,$bro,$cwt,$loi,$bwt,$dev,$ndev,$bdev,$fdev;
+	global $lev,$fco,$xm,$ym,$xo,$yo,$csi,$bsi,$fsi,$cro,$bro,$cwt,$loi,$bwt,$dev,$ndev,$bdev,$fdev;
 	global $devlink,$ctylink,$bldlink,$rdevlink,$rctylink,$rbldlink,$nctylink,$nbldlink,$imgmap;
 
 	$ncty = count($ndev);
@@ -536,15 +564,15 @@ function Map() {
 					$nflr = count($ndev[$cty][$bld]);
 					$mdfl =  max(array_values($fdev[$cty][$bld]) );
 					foreach(array_keys($fdev[$cty][$bld]) as $flr){
-						if($fdev[$cty][$bld][$flr] > $maxcol){
-							$afl  = intval($fdev[$cty][$bld][$flr] / $maxcol);
-							$rem  = bcmod($fdev[$cty][$bld][$flr] , $maxcol);
+						if($fdev[$cty][$bld][$flr] > $fco){
+							$afl  = intval($fdev[$cty][$bld][$flr] / $fco);
+							$rem  = bcmod($fdev[$cty][$bld][$flr] , $fco);
 							if($rem){
 								$nflr = $nflr + $afl;
 							}else{
 								$nflr = $nflr + $afl - 1;
 							}
-							$mdfl = $maxcol;
+							$mdfl = $fco;
 						}
 					}
 					$xb1 = intval($xbl{$bld} - $fsi/2 * $mdfl - 50);
@@ -561,7 +589,7 @@ function Map() {
 						$yf = $ybl{$bld} +  intval($fsi * ($cury - $nflr/2));
 						Drawitem($xf,$yf,0,$flr,"fl");
 						foreach($ndev[$cty][$bld][$flr] as $dv){
-							if($curx == $maxcol){
+							if($curx == $fco){
 								$curx = 0;
 								$cury++;
 							} 

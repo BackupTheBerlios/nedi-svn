@@ -78,8 +78,8 @@ if ($opt{D}){
 #	&db::WriteDev();
 #	&db::WriteVlan();
 #	&db::WriteInt();
-#	&db::WriteNet();
-	&db::WriteLink();
+	&db::WriteNet();
+#	&db::WriteLink();
 #	&db::WriteNod();
 
 	die "\n=== Debugging ended! ===\n";

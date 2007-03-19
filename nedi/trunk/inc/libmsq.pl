@@ -83,8 +83,9 @@ sub InitDB{
 	$dbh->do("CREATE TABLE interfaces(	device VARCHAR(64), ifname VARCHAR(32), ifidx SMALLINT unsigned,
 						fwdidx SMALLINT unsigned, type INT unsigned, mac CHAR(12),
 						description VARCHAR(64), alias VARCHAR(64), status TINYINT unsigned,
-						speed BIGINT unsigned, duplex CHAR(2), vlid SMALLINT unsigned, inoct BIGINT unsigned,
-						inerr INT unsigned, outoct BIGINT unsigned, outerr INT unsigned,
+						speed BIGINT unsigned, duplex CHAR(2), vlid SMALLINT unsigned,
+						inoct BIGINT unsigned, inerr INT unsigned, outoct BIGINT unsigned, outerr INT unsigned,
+						dinoct BIGINT signed, dinerr INT signed, doutoct BIGINT signed, douterr INT signed,
 						comment VARCHAR(255), index (device(8)), index (ifname(8)),index (ifidx) )");
  	$dbh->commit;
 
@@ -201,29 +202,28 @@ sub ReadDev {
 	my $sth = $dbh->prepare("SELECT * FROM devices $where");
 	$sth->execute();
 	while ((my @f) = $sth->fetchrow_array) {
-		my $na = $f[0];
-		$main::dev{$na}{ip} = &misc::Dec2Ip($f[1]);
-		$main::dev{$na}{oi} = &misc::Dec2Ip($f[19]);								# Used for community tracking too
-		$main::dev{$na}{sn} = $f[2];
-		$main::dev{$na}{ty} = $f[3];
-		$main::dev{$na}{fs} = $f[4];
-		$main::dev{$na}{ls} = $f[5];
-		$main::dev{$na}{sv} = $f[6];
-		$main::dev{$na}{de} = $f[7];
-		$main::dev{$na}{os} = $f[8];
-		$main::dev{$na}{bi} = $f[9];
-		$main::dev{$na}{lo} = $f[10];
-		$main::dev{$na}{co} = $f[11];
-		$main::dev{$na}{vd} = $f[12];
-		$main::dev{$na}{vm} = $f[13];
-		$main::dev{$na}{sp} = $f[14] & 127;
-		$main::dev{$na}{hc} = $f[14] & 128;
-		$main::dev{$na}{cm} = $f[15];
-		$misc::dcomm{$main::dev{$na}{ip}} = $f[15];								# Tie community to IPs,
-		$misc::dcomm{$main::dev{$na}{oi}} = $f[15];								# that's all we'll know at first
-		$main::dev{$na}{cp} = $f[16];
-		$main::dev{$na}{us} = $f[17];
-		$main::dev{$na}{ic} = $f[18];
+		$main::dev{$f[0]}{ip} = &misc::Dec2Ip($f[1]);
+		$main::dev{$f[0]}{oi} = &misc::Dec2Ip($f[19]);								# Used for community tracking too
+		$main::dev{$f[0]}{sn} = $f[2];
+		$main::dev{$f[0]}{ty} = $f[3];
+		$main::dev{$f[0]}{fs} = $f[4];
+		$main::dev{$f[0]}{ls} = $f[5];
+		$main::dev{$f[0]}{sv} = $f[6];
+		$main::dev{$f[0]}{de} = $f[7];
+		$main::dev{$f[0]}{os} = $f[8];
+		$main::dev{$f[0]}{bi} = $f[9];
+		$main::dev{$f[0]}{lo} = $f[10];
+		$main::dev{$f[0]}{co} = $f[11];
+		$main::dev{$f[0]}{vd} = $f[12];
+		$main::dev{$f[0]}{vm} = $f[13];
+		$main::dev{$f[0]}{sp} = $f[14] & 127;
+		$main::dev{$f[0]}{hc} = $f[14] & 128;
+		$main::dev{$f[0]}{cm} = $f[15];
+		$misc::dcomm{$main::dev{$f[0]}{ip}} = $f[15];								# Tie community to IPs,
+		$misc::dcomm{$main::dev{$f[0]}{oi}} = $f[15];								# that's all we'll know at first
+		$main::dev{$f[0]}{cp} = $f[16];
+		$main::dev{$f[0]}{us} = $f[17];
+		$main::dev{$f[0]}{ic} = $f[18];
 		$npdev++;
 	}
 	$sth->finish if $sth;
@@ -242,21 +242,20 @@ sub ReadNod {
 	my $sth = $dbh->prepare("SELECT * FROM nodes");
 	$sth->execute();
 	while ((my @f) = $sth->fetchrow_array) {
-		my $mc = $f[2];
-		$main::nod{$mc}{na} = $f[0];
-		$main::nod{$mc}{ip} = &misc::Dec2Ip($f[1]);
-		$main::nod{$mc}{nv} = $f[3];
-		$main::nod{$mc}{fs} = $f[4];
-		$main::nod{$mc}{ls} = $f[5];
-		$main::nod{$mc}{dv} = $f[6];
-		$main::nod{$mc}{if} = $f[7];
-		$main::nod{$mc}{vl} = $f[8];
-		$main::nod{$mc}{im} = $f[9];
-		$main::nod{$mc}{iu} = $f[10];
-		$main::nod{$mc}{ic} = $f[11];
-		$main::nod{$mc}{au} = $f[12];
-		$main::nod{$mc}{ac} = $f[13];
-		$main::nod{$mc}{al} = $f[14];
+		$main::nod{$f[2]}{na} = $f[0];
+		$main::nod{$f[2]}{ip} = &misc::Dec2Ip($f[1]);
+		$main::nod{$f[2]}{nv} = $f[3];
+		$main::nod{$f[2]}{fs} = $f[4];
+		$main::nod{$f[2]}{ls} = $f[5];
+		$main::nod{$f[2]}{dv} = $f[6];
+		$main::nod{$f[2]}{if} = $f[7];
+		$main::nod{$f[2]}{vl} = $f[8];
+		$main::nod{$f[2]}{im} = $f[9];
+		$main::nod{$f[2]}{iu} = $f[10];
+		$main::nod{$f[2]}{ic} = $f[11];
+		$main::nod{$f[2]}{au} = $f[12];
+		$main::nod{$f[2]}{ac} = $f[13];
+		$main::nod{$f[2]}{al} = $f[14];
 		$nnod++;
 	}
 	$sth->finish if $sth;
@@ -411,9 +410,19 @@ sub WriteInt {
 	my $nint = 0;
 
 	my $dbh = DBI->connect("DBI:mysql:$misc::dbname:$misc::dbhost", "$misc::dbuser", "$misc::dbpass", { RaiseError => 1, AutoCommit => 0});
+	my $sth = $dbh->prepare("SELECT * FROM interfaces");
+	$sth->execute();
+	while ((my @f) = $sth->fetchrow_array) {
+		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{dio} = $main::int{$f[0]}{$f[2]}{ioc} - $f[12]}
+		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{die} = $main::int{$f[0]}{$f[2]}{ier} - $f[13]}
+		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{doo} = $main::int{$f[0]}{$f[2]}{ooc} - $f[14]}
+		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{doe} = $main::int{$f[0]}{$f[2]}{oer} - $f[15]}
+	}
+	$sth->finish if $sth;
 	$dbh->do("TRUNCATE interfaces") if (!$_[0]);
-	my $sth = $dbh->prepare("INSERT INTO interfaces(device,ifname,ifidx,fwdidx,type,mac,description,alias,status,speed,duplex,vlid,
-							inoct,inerr,outoct,outerr,comment) VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
+	$sth = $dbh->prepare("INSERT INTO interfaces(device,ifname,ifidx,fwdidx,type,mac,description,alias,status,speed,duplex,vlid,
+							inoct,inerr,outoct,outerr,dinoct,dinerr,doutoct,douterr,comment) 
+							VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? )");
 
 	foreach my $dv ( sort keys(%main::int) ){
 		foreach my $i ( sort keys( %{$main::int{$dv}} ) ){
@@ -433,6 +442,10 @@ sub WriteInt {
 				$main::int{$dv}{$i}{ier},
 				$main::int{$dv}{$i}{ooc},
 				$main::int{$dv}{$i}{oer},
+				$main::int{$dv}{$i}{dio},
+				$main::int{$dv}{$i}{die},
+				$main::int{$dv}{$i}{doo},
+				$main::int{$dv}{$i}{doe},
 				$main::int{$dv}{$i}{com} );
 			$nint++;
 		}

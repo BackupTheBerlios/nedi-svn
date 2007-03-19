@@ -605,6 +605,10 @@ sub Interfaces {
 		$main::int{$dv}{$i}{oer} = (defined $ifoe{"$ifoteO.$i"}?$ifoe{"$ifoteO.$i"}:0);
 		$main::int{$dv}{$i}{ali} = (defined $alias{$i}?$alias{$i}:"");
 		$main::int{$dv}{$i}{vln} = (defined $vlid{$i}?$vlid{$i}:0);
+		$main::int{$dv}{$i}{dio} = 0;
+		$main::int{$dv}{$i}{die} = 0;
+		$main::int{$dv}{$i}{doo} = 0;
+		$main::int{$dv}{$i}{doe} = 0;
 		$main::int{$dv}{$i}{com} = "";
 		
 		if ( $ifmc{"$ifmacO.$i"} ){

@@ -196,7 +196,7 @@ $ddest	= ip2long($dst);														// fixes potential signing problem
 		$ina[$i[2]] = $i[1];
 		$ity[$i[2]] = $i[4];
 		$ial[$i[2]] = $i[7];
-		$icm[$i[2]] = $i[16];
+		$icm[$i[2]] = $i[20];
 		$isp[$i[2]] = $i[9];
 	}
 	@DbFreeResult($res);

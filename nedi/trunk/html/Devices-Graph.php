@@ -28,7 +28,7 @@ $if = isset($_GET['if']) ? $_GET['if'] : array();
 $cpu = isset($_GET['cpu']) ? $_GET['cpu'] : "";
 $mem = isset($_GET['mem']) ? $_GET['mem'] : "";
 $tmp = isset($_GET['tmp']) ? $_GET['tmp'] : "";
-$dur = isset($_GET['dur']) ? $_GET['dur'] : "";
+$dur = isset($_GET['dur']) ? $_GET['dur'] : 7;
 $sze = isset($_GET['sze']) ? "m" : "l";
 ?>
 <h1>Device Graphs</h1>
@@ -84,7 +84,7 @@ if ($dv) {
 <th>
 Duration
 <SELECT size=1 name="dur">
-<OPTION VALUE="1" <?=($dur == "1")?"selected":""?> >Day
+<OPTION VALUE="1">Day
 <OPTION VALUE="7" <?=($dur == "7")?"selected":""?> >Week
 <OPTION VALUE="30" <?=($dur == "30")?"selected":""?> >Month
 <OPTION VALUE="90" <?=($dur == "90")?"selected":""?> >Quarter

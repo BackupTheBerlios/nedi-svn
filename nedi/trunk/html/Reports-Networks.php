@@ -26,7 +26,6 @@ include_once ("inc/header.php");
 $_GET = sanitize($_GET);
 $opr = isset($_GET['opr']) ? $_GET['opr'] : "";
 $ipf = isset($_GET['ipf']) ? $_GET['ipf'] : "";
-$shw = isset($_GET['shw']) ? $_GET['shw'] : "";
 ?>
 <h1>Network Report</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="netlist">
@@ -47,7 +46,7 @@ IP Address
 </th>
 </tr></table></form>
 <?
-if ($shw) {
+if ($ipf) {
 	$query	= GenQuery('networks','s','*','ip','',array('ip'),array('='),array($ipf) );
 	$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 	$res	= @DbQuery($query,$link);

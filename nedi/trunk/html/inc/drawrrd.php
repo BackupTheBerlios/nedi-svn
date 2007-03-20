@@ -65,7 +65,7 @@ if($_GET['s'] == 't'){
 	$opts = "-w60 -h40 -g -s -$_GET[dur]d -L5";
 }elseif($_GET['s'] == 'm'){
 	$lbreak = "COMMENT:\"\\n\" ";
-	$opts = "-w320 -h100 -s -$_GET[dur]d";
+	$opts = "-w240 -h100 -s -$_GET[dur]d";
 }elseif($_GET['s'] == 'l'){
 	$lbreak = "COMMENT:\"\\n\" ";
 	$title = "--title=\"$_GET[dv] $tit on ". date('d-m-Y') ." for the last $_GET[dur] days\" ";

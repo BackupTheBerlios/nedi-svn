@@ -11,7 +11,7 @@
 # 10/03/06	new SQL query support
 # 17/07/06	enhanced info and new network filter
 # 21/02/07	refined layout and link weight computation, more hints and image map!
-# 16/03/07	changes to mapping and GUI for RRD graohs...
+# 20/03/07	changes to mapping and GUI for RRD graohs...
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -172,7 +172,8 @@ if(!($fpos === false) ){
 <tr>
 <td colspan=2><? if($rrdstep){?>
 <select size=1 name="gra">
-<option value="">IF Graphs
+<option value="">Graphs
+<option value="">-------
 <option value="t" <?=($gra == "t")?"selected":""?>>tiny
 <option value="s" <?=($gra == "s")?"selected":""?>>small
 <option value="m" <?=($gra == "m")?"selected":""?>>medium
@@ -402,7 +403,7 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 		}elseif($gra == "s"){
 			$size = "-w60 -h50 -g -L5";
 		}elseif($gra == "m"){
-			$size = "-w160 -h80 -L5 -s -7d";
+			$size = "-w240 -h100 -L5 -s -7d";
 		}
 		list($drawin,$drawout,$tit) = GraphTraffic($rrdif,'trf');
 		exec("$rrdcmd graph log/$x1$y1$x2$y2.png -a PNG $size $drawin $drawout");

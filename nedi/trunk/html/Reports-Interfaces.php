@@ -8,6 +8,7 @@
 # -----------------------------------------------------------
 # 21/04/05	initial version.
 # 20/03/06	new SQL query support
+# 20/03/07	relative counter support
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -35,9 +36,9 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 <th>Select Report(s)</th>
 <th>
 <SELECT MULTIPLE name="rep[]" size=4>
-<OPTION VALUE="aif" <? if(in_array("aif",$rep)){echo "selected";} ?> >Active Interfaces
+<OPTION VALUE="uif" <? if(in_array("uif",$rep)){echo "selected";} ?> >Used Interfaces
 <OPTION VALUE="dif" <? if(in_array("dif",$rep)){echo "selected";} ?> >Disabled Interfaces
-<OPTION VALUE="itr" <? if(in_array("itr",$rep)){echo "selected";} ?> >Total Traffic
+<OPTION VALUE="itr" <? if(in_array("itr",$rep)){echo "selected";} ?> >Traffic
 <OPTION VALUE="lmi" <? if(in_array("lmi",$rep)){echo "selected";} ?> >Link Mismatch
 </SELECT>
 
@@ -48,7 +49,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 </SELECT>
 </th>
 <th>
-<INPUT type="checkbox" name="ord"  <?=$ord?> title="Only ethernet on active IF, normalize ERR to OCT, OCT to BW or show incomplete links"> alternative order
+<INPUT type="checkbox" name="ord"  <?=$ord?> title="Show ethernet only on active IF, relative and normalized OCT and ERR, incomplete links"> alternative order
 </th>
 </SELECT></th>
 <th width=80><input type="submit" name="gen" value="Show"></th>
@@ -65,23 +66,23 @@ if($res){
 	$nummo	= array();
 	while( ($i = @DbFetchRow($res)) ){
 		if($ord){
-			if($i[4] == 6){							# alternatively only show ethernet IFs
+			if($i[4] == 6){							# alternatively only show ethernet IF or relative counters
 				$numif[$i[0]]++;
 				if($i[12] > 70){$nactif[$i[0]]++;}
 			}
-			if($i[12]){$topier["$i[0];;$i[1]"] = $i[13]/$i[12];}		# Using a flat array for  value based sorting
-			if($i[14]){$topoer["$i[0];;$i[1]"] = $i[15]/$i[14];}
-			if($i[9]){
-				$topino["$i[0];;$i[1]"] = $i[12]/$i[9];
-				$topoto["$i[0];;$i[1]"] = $i[14]/$i[9];
+			if($i[16]){$topier["$i[0];;$i[1]"] = $i[17]/$i[16];}		# Using a flat array for  value based sorting
+			if($i[18]){$topoer["$i[0];;$i[1]"] = $i[19]/$i[18];}		# Normalize errors to traffic...
+			if($i[9]){							# ...and traffic to IF speed in bytes
+				$topino["$i[0];;$i[1]"] = $i[16]/$i[9]/8;
+				$topoto["$i[0];;$i[1]"] = $i[18]/$i[9]/8;
 			}
 		}else{
 			$numif[$i[0]]++;
 			if($i[12] > 70){$nactif[$i[0]]++;}
-			$topier["$i[0];;$i[1]"] = $i[13];
-			$topoer["$i[0];;$i[1]"] = $i[15];
 			$topino["$i[0];;$i[1]"] = $i[12];
+			$topier["$i[0];;$i[1]"] = $i[13];
 			$topoto["$i[0];;$i[1]"] = $i[14];
+			$topoer["$i[0];;$i[1]"] = $i[15];
 		}
 		$ifal["$i[0];;$i[1]"] = $i[7];
 		$ifsp["$i[0];;$i[1]"] = $i[9];
@@ -96,7 +97,7 @@ if($res){
 	die;
 }
 
-if ( in_array("aif",$rep) ){
+if ( in_array("uif",$rep) ){
 	foreach ($numif as $dv => $ni){
 		$ainorm[$dv] = intval(100 * $nactif[$dv] / $ni);
 	}
@@ -106,11 +107,11 @@ if ( in_array("aif",$rep) ){
 <table cellspacing=10 width=100%>
 <tr><td width=50% valign=top align=center>
 
-<h2>Most Active Interfaces</h2><p>
+<h2>Most Used Devices</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Total Interfaces</th>
-<th><img src=img/32/cnic.png><br>Active Interfaces</th>
+<th><img src=img/32/cnic.png><br>Used Interfaces</th>
 <?
 	$row = 0;
 	foreach ($ainorm as $dv => $up){
@@ -125,15 +126,15 @@ if ( in_array("aif",$rep) ){
 	}
 	if($ord){$nif .= " <b>ethernet</b>";}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$nif interfaces on $row devices in total</td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>$row most used devices shown</td></tr></table>\n";
 ?>
 </td><td width=50% valign=top align=center>
 
-<h2>Least Active Interfaces</h2><p>
+<h2>Least Used Devices</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Total Interfaces</th>
-<th><img src=img/32/cnic.png><br>Active Interfaces</th>
+<th><img src=img/32/cnic.png><br>Used Interfaces</th>
 <?
 	asort($ainorm);
 	$row = 0;
@@ -148,7 +149,7 @@ if ( in_array("aif",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$nif interfaces on $row devices in total</td></tr></table></td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>$row least used devices shown</td></tr></table></td></tr></table>\n";
 }
 
 if ( in_array("dif",$rep) ){
@@ -202,7 +203,7 @@ if ( in_array("itr",$rep) ){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
 				echo "<a href=Devices-Graph.php?dv=$dn&if%5B%5D=$if>";
-				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=trf border=0 title=\"$io octets\"></a>\n";
+				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=trf border=0 title=\"$io\"></a>\n";
 			}else{
 				echo "<td></td>";
 			}
@@ -235,7 +236,7 @@ if ( in_array("itr",$rep) ){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
 				echo "<a href=Devices-Graph.php?dv=$dn&if%5B%5D=$if>";
-				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=err border=0 title=\"$ie errors\"></a>\n";
+				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=err border=0 title=\"$ie\"></a>\n";
 			}else{
 				echo "<td></td>";
 			}
@@ -266,7 +267,7 @@ if ( in_array("itr",$rep) ){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
 				echo "<a href=Devices-Graph.php?dv=$dn&if%5B%5D=$if>";
-				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=trf border=0 title=\"$oo octets\"></a>\n";
+				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=trf border=0 title=\"$oo\"></a>\n";
 			}else{
 				echo "<td></td>";
 			}
@@ -299,7 +300,7 @@ if ( in_array("itr",$rep) ){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
 				echo "<a href=Devices-Graph.php?dv=$dn&if%5B%5D=$if>";
-				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=err border=0 title=\"$oe errors\"></a>\n";
+				echo "<img src=inc/drawrrd.php?dv=$dn&if%5B%5D=$if&s=s&t=err border=0 title=\"$oe\"></a>\n";
 			}else{
 				echo "<td></td>";
 			}

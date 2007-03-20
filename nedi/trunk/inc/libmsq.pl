@@ -408,15 +408,17 @@ sub WriteDev {
 sub WriteInt {
 
 	my $nint = 0;
+	my $ntrf = 0;
 
 	my $dbh = DBI->connect("DBI:mysql:$misc::dbname:$misc::dbhost", "$misc::dbuser", "$misc::dbpass", { RaiseError => 1, AutoCommit => 0});
 	my $sth = $dbh->prepare("SELECT * FROM interfaces");
 	$sth->execute();
 	while ((my @f) = $sth->fetchrow_array) {
-		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{dio} = $main::int{$f[0]}{$f[2]}{ioc} - $f[12]}
-		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{die} = $main::int{$f[0]}{$f[2]}{ier} - $f[13]}
-		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{doo} = $main::int{$f[0]}{$f[2]}{ooc} - $f[14]}
-		if(exists($main::int{$f[0]}{$f[2]}) ){$main::int{$f[0]}{$f[2]}{doe} = $main::int{$f[0]}{$f[2]}{oer} - $f[15]}
+		if(exists($main::int{$f[0]}{$f[2]}) and defined($f[12]) ){$main::int{$f[0]}{$f[2]}{dio} = $main::int{$f[0]}{$f[2]}{ioc} - $f[12]}
+		if(exists($main::int{$f[0]}{$f[2]}) and defined($f[13]) ){$main::int{$f[0]}{$f[2]}{die} = $main::int{$f[0]}{$f[2]}{ier} - $f[13]}
+		if(exists($main::int{$f[0]}{$f[2]}) and defined($f[14]) ){$main::int{$f[0]}{$f[2]}{doo} = $main::int{$f[0]}{$f[2]}{ooc} - $f[14]}
+		if(exists($main::int{$f[0]}{$f[2]}) and defined($f[15]) ){$main::int{$f[0]}{$f[2]}{doe} = $main::int{$f[0]}{$f[2]}{oer} - $f[15]}
+
 	}
 	$sth->finish if $sth;
 	$dbh->do("TRUNCATE interfaces") if (!$_[0]);
@@ -426,34 +428,77 @@ sub WriteInt {
 
 	foreach my $dv ( sort keys(%main::int) ){
 		foreach my $i ( sort keys( %{$main::int{$dv}} ) ){
-       		$sth->execute (	$dv,
-				$main::int{$dv}{$i}{ina},
-				$i,
-				$main::int{$dv}{$i}{fwd},
-				$main::int{$dv}{$i}{typ},
-				$main::int{$dv}{$i}{mac},
-				$main::int{$dv}{$i}{des},
-				$main::int{$dv}{$i}{ali},
-				$main::int{$dv}{$i}{sta},
-				$main::int{$dv}{$i}{spd},
-				$main::int{$dv}{$i}{dpx},
-				$main::int{$dv}{$i}{vln},
-				$main::int{$dv}{$i}{ioc},
-				$main::int{$dv}{$i}{ier},
-				$main::int{$dv}{$i}{ooc},
-				$main::int{$dv}{$i}{oer},
-				$main::int{$dv}{$i}{dio},
-				$main::int{$dv}{$i}{die},
-				$main::int{$dv}{$i}{doo},
-				$main::int{$dv}{$i}{doe},
-				$main::int{$dv}{$i}{com} );
+			$sth->execute (	$dv,
+					$main::int{$dv}{$i}{ina},
+					$i,
+					$main::int{$dv}{$i}{fwd},
+					$main::int{$dv}{$i}{typ},
+					$main::int{$dv}{$i}{mac},
+					$main::int{$dv}{$i}{des},
+					$main::int{$dv}{$i}{ali},
+					$main::int{$dv}{$i}{sta},
+					$main::int{$dv}{$i}{spd},
+					$main::int{$dv}{$i}{dpx},
+					$main::int{$dv}{$i}{vln},
+					$main::int{$dv}{$i}{ioc},
+					$main::int{$dv}{$i}{ier},
+					$main::int{$dv}{$i}{ooc},
+					$main::int{$dv}{$i}{oer},
+					$main::int{$dv}{$i}{dio},
+					$main::int{$dv}{$i}{die},
+					$main::int{$dv}{$i}{doo},
+					$main::int{$dv}{$i}{doe},
+					$main::int{$dv}{$i}{com} );
 			$nint++;
+			if($misc::notify =~ /t/ and $misc::rrdstep and $main::int{$dv}{$i}{spd}){
+				my $rioct = int( $main::int{$dv}{$i}{dio} * 800 / ($misc::rrdstep * $main::int{$dv}{$i}{spd}) );
+				my $rooct = int( $main::int{$dv}{$i}{doo} * 800 / ($misc::rrdstep * $main::int{$dv}{$i}{spd}) );
+				my $rierr = 0;
+				my $roerr = 0;
+				if($main::int{$dv}{$i}{dio}){$rierr = int( $main::int{$dv}{$i}{die} * 100 / $main::int{$dv}{$i}{dio})}
+				if($main::int{$dv}{$i}{doo}){$roerr = int( $main::int{$dv}{$i}{doe} * 100 / $main::int{$dv}{$i}{doo})}
+
+				if($rioct > 50){
+					if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$dv\",\"Average input traffic is $rioct% for $misc::rrdstep seconds on $main::int{$dv}{$i}{ina}!\"") ){
+						die "DB error messages!\n";
+					}
+					$ntrf++;
+				}elsif($rioct > 75){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average input traffic is $rioct% for $misc::rrdstep seconds on $main::int{$dv}{$i}{ina}!\"") ){
+						die "DB error messages!\n";
+					}
+					$ntrf++;
+				}
+				if($rooct > 50){
+					if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$dv\",\"Average output traffic is $rooct% for $misc::rrdstep seconds on $main::int{$dv}{$i}{ina}!\"") ){
+						die "DB error messages!\n";
+					}
+					$ntrf++;
+				}elsif($rooct > 75){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average output traffic is $rooct% for $misc::rrdstep seconds on $main::int{$dv}{$i}{ina}!\"") ){
+						die "DB error messages!\n";
+					}
+					$ntrf++;
+				}
+				if($rierr > 1){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average input errors are $rierr% for $misc::rrdstep seconds on $main::int{$dv}{$i}{ina}!\"") ){
+						die "DB error messages!\n";
+					}
+					$ntrf++;
+				}
+				if($roerr > 1){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average output errors are $rierr% for $misc::rrdstep seconds on $main::int{$dv}{$i}{ina}!\"") ){
+						die "DB error messages!\n";
+					}
+					$ntrf++;
+				}
+			}
 		}
 	}
 	$dbh->commit;
 	$sth->finish if $sth;
 	$dbh->disconnect;
-	return "$nint	interfaces written to MySQL:$misc::dbname.interfaces\n";
+	return "$nint	interfaces (causing $ntrf messages) written to MySQL:$misc::dbname.interfaces\n";
 }
 
 #===================================================================

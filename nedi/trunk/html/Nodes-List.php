@@ -184,9 +184,14 @@ if ($ina){
 			}
 			if(in_array("ifmetric",$col))	{echo "<td align=right>$n[9]</td>";}
 			if(in_array("ifchanges",$col))	{echo "<td align=right>$n[13]</td>";}
+			if($rrdstep and in_array("graph",$col)){
+				echo "<td nowrap align=center>\n";
+				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$if><img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=trf border=0>\n";
+				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=err border=0></a>\n";
+			}
 			if(in_array("ifdet",$col)){
 				$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
-				$iquery	= GenQuery('interfaces','s','*','','',array('device','name'),array('=','='),array($n[6],$n[7]),array('AND') );
+				$iquery	= GenQuery('interfaces','s','*','','',array('device','ifname'),array('=','='),array($n[6],$n[7]),array('AND') );
 				$ires	= @DbQuery($iquery,$link);
 				$nif	= @DbNumRows($ires);
 				if ($nif == 1) {
@@ -201,11 +206,6 @@ if ($ina){
 					echo "<td>-</td>";
 				}
 				@DbFreeResult($ires);
-			}
-			if($rrdstep and in_array("graph",$col)){
-				echo "<td nowrap align=center>\n";
-				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$if><img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=trf border=0>\n";
-				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=err border=0></a>\n";
 			}
 			if(in_array("firstseen",$col)){
 				$fs       = date("j.M G:i:s",$n[4]);

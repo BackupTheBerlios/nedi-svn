@@ -18,10 +18,8 @@ $debug = isset( $_GET['d']) ? "Debugging" : "";
 $_GET['dur'] = isset( $_GET['dur']) ? $_GET['dur'] : 7;
 if(!preg_match('/[0-9]{1,3}/',$_GET['dur']) ){$_GET['dur'] = 7;}
 
-$title	= "";
 $drawin	= "";
 $drawout= "";
-$lbreak	= "";
 
 if($_GET['t'] == 'cpu'){
 	$tit = 'CPU Load';
@@ -58,26 +56,14 @@ if($_GET['t'] == 'cpu'){
 	}
 	list($drawin,$drawout,$tit) = GraphTraffic($rrd,$_GET['t']);
 }
-
-if($_GET['s'] == 't'){
-	$opts = "-w30 -h20 -j -s -$_GET[dur]d -L5";
-}elseif($_GET['s'] == 's'){
-	$opts = "-w60 -h40 -g -s -$_GET[dur]d -L5";
-}elseif($_GET['s'] == 'm'){
-	$lbreak = "COMMENT:\"\\n\" ";
-	$opts = "-w240 -h100 -s -$_GET[dur]d";
-}elseif($_GET['s'] == 'l'){
-	$lbreak = "COMMENT:\"\\n\" ";
-	$title = "--title=\"$_GET[dv] $tit on ". date('d-m-Y') ." for the last $_GET[dur] days\" ";
-	$opts = "-w800 -h200 -s -$_GET[dur]d";
-}
+$opts = GraphOpts($_GET['s'],$_GET['dur'],$tit);
 
 if($debug){
 	echo "<b>$debug</b>";
-	echo "<pre>$rrdcmd graph  - -a PNG $title $opts\n\t$drawin\n\t$lbreak\n\t$drawout</pre>";
+	echo "<pre>$rrdcmd graph  - -a PNG $opts\n\t$drawin\n\t$drawout</pre>";
 }else{
 	header("Content-type: image/png");
-	passthru("$rrdcmd graph  - -a PNG $title $opts $drawin $lbreak $drawout");
+	passthru("$rrdcmd graph  - -a PNG $opts $drawin $drawout");
 }
 
 ?>

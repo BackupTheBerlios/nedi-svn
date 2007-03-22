@@ -27,14 +27,33 @@ function GraphTraffic($rrd,$t){
 		$tit = "Errors";
 		$cols = array('880000','886600','aa0000','aa8800','ee0000','eeaa00','ff0000','ffcc00','ff0066','ffcc66','ff0088','ffcc88','ff00aa','ffeeaa','ff00cc','ffccdd');
 	}
+	$n = count($rrd);
 	foreach (array_keys($rrd) as $i){
-		if($c){$inmod = 'STACK';$outmod = 'STACK';}
-		$drawin .= "DEF:$idef$c=$rrd[$i]:$idef:AVERAGE $inmod:$idef$c#$cols[$c]:\"$i  in\" ";
+		$drawin .= "DEF:$idef$c=$rrd[$i]:$idef:AVERAGE $inmod:$idef$c#$cols[$c]:\"$i  in";
+		if($c == 2 * $n - 2){$drawin .= "\\l";}
 		$c++;
+		$drawin .= "\" ";
 		$drawout .= "DEF:$odef$c=$rrd[$i]:$odef:AVERAGE $outmod:$odef$c#$cols[$c]:\"$i out\" ";
 		$c++;
+		$inmod = 'STACK';
+		$outmod = 'STACK';
 	}
 	return array($drawin,$drawout,$tit);	
+}
+function GraphOpts($s,$dur,$tit){
+
+	if($s == 't'){
+		return "-w32 -h16 -j -c CANVAS#ddeedd";
+	}elseif($s == 's'){
+		$dur = $dur?$dur:1;
+		return "-w60 -h40 -g -s -". $dur ."d -L5";
+	}elseif($s == 'm'){
+		$dur = $dur?$dur:5;
+		return "--title=\"$tit\" -w240 -h100 -s -". $dur ."d";
+	}elseif($s == 'l'){
+		$dur = $dur?$dur:7;
+		return "--title=\"$tit on ". date('r') ." for the last $dur days\" -w800 -h200 -s -". $dur ."d";
+	}
 }
 
 class Graph {

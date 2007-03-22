@@ -8,7 +8,7 @@
 # -----------------------------------------------------------
 # 21/04/05	initial version.
 # 20/03/06	new SQL query support
-# 20/03/07	relative counter support
+# 22/03/07	relative counter support, new option scheme
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -25,13 +25,14 @@ include_once ("inc/header.php");
 $_GET = sanitize($_GET);
 $rep = isset($_GET['rep']) ? $_GET['rep'] : array();
 $lim = isset($_GET['lim']) ? $_GET['lim'] : 10;
-$ord = isset($_GET['ord']) ? "checked" : "";
+$alt = isset($_GET['alt']) ? "checked" : "";
+$opt = isset($_GET['opt']) ? "checked" : "";
 ?>
 <h1>Interface Reports</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/ddum.png border=0 title="Use alternative order for more specific details">
+<img src=img/32/ddum.png border=0 title="Use alternative and optimize for more specific details">
 </a></th>
 <th>Select Report(s)</th>
 <th>
@@ -49,7 +50,10 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 </SELECT>
 </th>
 <th>
-<INPUT type="checkbox" name="ord"  <?=$ord?> title="Show ethernet only on active IF, relative and normalized OCT and ERR, incomplete links"> alternative order
+<INPUT type="checkbox" name="opt"  <?=$opt?> title="Make traffic relative to IF speed and errors relative to traffic"> optimize
+</th>
+<th>
+<INPUT type="checkbox" name="alt"  <?=$alt?> title="Show ethernet only on used IFs, incomplete link mismatches and total traffic counters"> alternative
 </th>
 </SELECT></th>
 <th width=80><input type="submit" name="gen" value="Show"></th>
@@ -65,24 +69,40 @@ if($res){
 	$ndif = 0;
 	$nummo	= array();
 	while( ($i = @DbFetchRow($res)) ){
-		if($ord){
-			if($i[4] == 6){							# alternatively only show ethernet IF or relative counters
+		if($alt){
+			if($i[4] == 6){								# alternatively only show ethernet IF or absolute counters
 				$numif[$i[0]]++;
 				if($i[12] > 70){$nactif[$i[0]]++;}
 			}
-			if($i[16]){$topier["$i[0];;$i[1]"] = $i[17]/$i[16];}		# Using a flat array for  value based sorting
-			if($i[18]){$topoer["$i[0];;$i[1]"] = $i[19]/$i[18];}		# Normalize errors to traffic...
-			if($i[9]){							# ...and traffic to IF speed in bytes
-				$topino["$i[0];;$i[1]"] = $i[16]/$i[9]/8;
-				$topoto["$i[0];;$i[1]"] = $i[18]/$i[9]/8;
+			if($opt){
+				if($i[12]){$topier["$i[0];;$i[1]"] = $i[13]/$i[12];}		# Using a flat array for  value based sorting
+				if($i[14]){$topoer["$i[0];;$i[1]"] = $i[15]/$i[14];}		# Normalize errors to traffic...
+				if($i[9]){							# ...and traffic to IF speed if available
+					$topino["$i[0];;$i[1]"] = $i[12]/$i[9];
+					$topoto["$i[0];;$i[1]"] = $i[14]/$i[9];
+				}
+			}else{
+				$topino["$i[0];;$i[1]"] = $i[12];
+				$topier["$i[0];;$i[1]"] = $i[13];
+				$topoto["$i[0];;$i[1]"] = $i[14];
+				$topoer["$i[0];;$i[1]"] = $i[15];
 			}
 		}else{
 			$numif[$i[0]]++;
 			if($i[12] > 70){$nactif[$i[0]]++;}
-			$topino["$i[0];;$i[1]"] = $i[12];
-			$topier["$i[0];;$i[1]"] = $i[13];
-			$topoto["$i[0];;$i[1]"] = $i[14];
-			$topoer["$i[0];;$i[1]"] = $i[15];
+			if($opt){
+				if($i[16]){$topier["$i[0];;$i[1]"] = $i[17]/$i[16];}
+				if($i[18]){$topoer["$i[0];;$i[1]"] = $i[19]/$i[18];}
+				if($i[9]){
+					$topino["$i[0];;$i[1]"] = $i[16]/$i[9]/8;
+					$topoto["$i[0];;$i[1]"] = $i[18]/$i[9]/8;
+				}
+			}else{
+				$topino["$i[0];;$i[1]"] = $i[16];
+				$topier["$i[0];;$i[1]"] = $i[17];
+				$topoto["$i[0];;$i[1]"] = $i[18];
+				$topoer["$i[0];;$i[1]"] = $i[19];
+			}
 		}
 		$ifal["$i[0];;$i[1]"] = $i[7];
 		$ifsp["$i[0];;$i[1]"] = $i[9];
@@ -124,7 +144,6 @@ if ( in_array("uif",$rep) ){
 		echo "<td align=center>".$numif[$dv]."</td><td>$ubar $up % (".$nactif[$dv].")</td></tr>\n";
 		if($row == $_GET['lim']){break;}
 	}
-	if($ord){$nif .= " <b>ethernet</b>";}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$row most used devices shown</td></tr></table>\n";
 ?>
@@ -160,7 +179,7 @@ if ( in_array("dif",$rep) ){
 <th><img src=img/32/bstp.png><br>Disabled Interfaces</th>
 <?
 	if($ndif){
-		if($ord){
+		if($alt){
 			krsort($disif);
 		}else{
 			ksort($disif);
@@ -180,11 +199,14 @@ if ( in_array("dif",$rep) ){
 }
 
 if ( in_array("itr",$rep) ){
+	if($opt){$relt = "relative";}else{$relt = "absolute";}
+	if($alt){$tott = "in total";}else{$tott = "recently";}
+
 ?>
 <table cellspacing=10 width=100%>
 <tr><td width=50% valign=top align=center>
 
-<h2>Input Traffic</h2><p>
+<h2>Inbound Traffic</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Interface</th>
@@ -198,7 +220,8 @@ if ( in_array("itr",$rep) ){
 		$d = explode(';;', $di);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di]</td>\n";
+		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di] (";
+		echo Zfix($ifsp[$di]) .")</td>\n";
 		if($rrdstep){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
@@ -213,11 +236,11 @@ if ( in_array("itr",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by in octets</td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by $relt traffic $tott</td></tr></table>\n";
 ?>
 </td><td width=50% valign=top align=center>
 
-<h2>Input Errors</h2><p>
+<h2>Inbound Errors</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Interface</th>
@@ -246,9 +269,9 @@ if ( in_array("itr",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by in errors</td></tr></table></td></tr><tr><td>\n";
+	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by $relt errors $tott</td></tr></table></td></tr><tr><td>\n";
 ?>
-<h2>Output Traffic</h2><p>
+<h2>Outbound Traffic</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Interface</th>
@@ -262,7 +285,8 @@ if ( in_array("itr",$rep) ){
 		$d = explode(';;', $di);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$d[0]>$d[0]</a></td>\n";
-		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di]</td>\n";
+		echo "<td><a href=Nodes-List.php?ina=device&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a> $ifal[$di] (";
+		echo Zfix($ifsp[$di]) .")</td>\n";
 		if($rrdstep){
 			if($dn = rawurlencode($d[0]) and $if = rawurlencode($d[1]) ){
 				echo "<td align=center>\n";
@@ -277,11 +301,11 @@ if ( in_array("itr",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by in octets</td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by $relt traffic $tott</td></tr></table>\n";
 ?>
 </td><td width=50% valign=top align=center>
 
-<h2>Output Errors</h2><p>
+<h2>Outbound Errors</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2 width=25%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/dumy.png><br>Interface</th>
@@ -310,7 +334,7 @@ if ( in_array("itr",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by in errors</td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>Top $lim Interfaces by $relt errors $tott</td></tr></table>\n";
 
 
 	echo '</td></tr></table>';
@@ -351,7 +375,7 @@ if ( in_array("lmi",$rep) ){
 				foreach(array_keys($libw[$dv][$if][$nb]) as $ni){
 					$ud = urlencode($dv);
 					$un = urlencode($nb);
-					if($ord or $libw[$dv][$if][$nb][$ni] and $libw[$nb][$ni][$dv][$if]){
+					if($alt or $libw[$dv][$if][$nb][$ni] and $libw[$nb][$ni][$dv][$if]){
 						if($libw[$dv][$if][$nb][$ni] != $libw[$nb][$ni][$dv][$if]){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
@@ -364,7 +388,7 @@ if ( in_array("lmi",$rep) ){
 							echo "<th>".Zfix($libw[$nb][$ni][$dv][$if])."</th></tr>\n";
 						}
 					}
-					if ($ord or strlen($lidu[$dv][$if][$nb][$ni]) == 2 and strlen($lidu[$nb][$ni][$dv][$if]) == 2){ 
+					if ($alt or strlen($lidu[$dv][$if][$nb][$ni]) == 2 and strlen($lidu[$nb][$ni][$dv][$if]) == 2){ 
 						if($lidu[$dv][$if][$nb][$ni] != $lidu[$nb][$ni][$dv][$if]){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
@@ -377,7 +401,7 @@ if ( in_array("lmi",$rep) ){
 							echo "<th>".$lidu[$nb][$ni][$dv][$if]."</th></tr>\n";
 						}
 					}
-					if($ord or $livl[$dv][$if][$nb][$ni] and $livl[$nb][$ni][$dv][$if]){
+					if($alt or $livl[$dv][$if][$nb][$ni] and $livl[$nb][$ni][$dv][$if]){
 						if($livl[$dv][$if][$nb][$ni] != $livl[$nb][$ni][$dv][$if]){
 							if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 							$row++;
@@ -398,7 +422,7 @@ if ( in_array("lmi",$rep) ){
 		}
 		if($row == $lim){break;}
 	}
-	if($ord){$nli .= " <b>incomplete</b>";}
+	if($alt){$nli .= " <b>incomplete</b>";}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$row canditates of $nli links in total</td></tr></table>\n";
 }

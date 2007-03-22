@@ -46,7 +46,7 @@ IP Address
 </th>
 </tr></table></form>
 <?
-if ($ipf) {
+if (isset($ipf) ) {
 	$query	= GenQuery('networks','s','*','ip','',array('ip'),array('='),array($ipf) );
 	$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 	$res	= @DbQuery($query,$link);

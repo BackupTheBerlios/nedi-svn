@@ -397,22 +397,16 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 	$yl = intval($y1  + $y2) / 2;
 	$clab = ZFix($bw) . "/" . ZFix($nbw);
 	if($gra and is_array($rrdif) ){
-		if($gra == "t"){
-			$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl-18,\"$clab\", \$grn);";
-			$size = "-w32 -h16 -j -c CANVAS#ddeedd";
-		}elseif($gra == "s"){
-			$size = "-w60 -h50 -g -L5";
-		}elseif($gra == "m"){
-			$size = "-w240 -h100 -L5 -s -7d";
-		}
+		$opts = GraphOpts($gra,0,'Link Traffic');
 		list($drawin,$drawout,$tit) = GraphTraffic($rrdif,'trf');
-		exec("$rrdcmd graph log/$x1$y1$x2$y2.png -a PNG $size $drawin $drawout");
+		exec("$rrdcmd graph log/$x1$y1$x2$y2.png -a PNG $opts $drawin $drawout");
+		if($gra == "t"){$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl-18,\"$clab\", \$grn);";}
 		$maplinks[] = "\$icon = Imagecreatefrompng(\"$x1$y1$x2$y2.png\");";
 		$maplinks[] = "\$w = Imagesx(\$icon);";
 		$maplinks[] = "\$h = Imagesy(\$icon);";
 		$maplinks[] = "Imagecopy(\$image, \$icon,$xl-\$w/2,$yl-\$h/2,0,0,\$w,\$h);";
 		$maplinks[] = "Imagedestroy(\$icon);";
-		#$maplinks[] = "unlink(\"$x1$y1$x2$y2.png\");";
+		$maplinks[] = "unlink(\"$x1$y1$x2$y2.png\");";
 	}else{
 		$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl,\"$clab\", \$grn);";
 	}

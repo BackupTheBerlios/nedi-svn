@@ -230,9 +230,11 @@ sub GetMacTab{
 	my $line = "";
 	my $nspo = 0;
 	my @cam  = ();
-	my $cmd = "sh mac-address-table dyn";
+	my $cmd  = "sh mac-address-table dyn";
+	my $cap  = 0;
 
 	if($main::dev{$_[0]}{os} eq "IOS-wl"){									# Cisco WLan specific...
+		$cap = 1;											# Needed to avoid using counters as vlans
 		$cmd = 'sh bridge | exclude \*\*\*';								# Work around aged (***) forwarding entries
 	}
 	if( $main::dev{$_[0]}{cp} == 22 ){
@@ -293,7 +295,7 @@ sub GetMacTab{
 					}
 				}
 				elsif ($col =~ /^[0-9|a-f]{4}\./){$mc = $col}			
-				elsif ($col =~ /^[0-9]{1,4}$/ and !$vl){$vl = $col}				# Fails if there's an age column :-(
+				elsif (!$cap and $col =~ /^[0-9]{1,4}$/ and !$vl){$vl = $col}			# Only use this, if it's not a Cisco AP
 			}
 			$mc =~ s/\.//g;
 			if ($po =~ /^.EC-|^Po[0-9]|channel/){

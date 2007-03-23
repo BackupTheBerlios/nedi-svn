@@ -34,7 +34,7 @@ $stco['150'] = "used";
 $stco['200'] = "broken";
 
 // Monitoring Terms
-$icat['0']	= "New";
+$icat['1']	= "New";
 $icat['2']	= "Other";
 $icat['3']	= "Unkown";
 $icat['10']	= "---Facility---";
@@ -46,7 +46,7 @@ $icat['21']	= "Power Supply";
 $icat['22']	= "Chassis";
 $icat['23']	= "Module";
 $icat['24']	= "Software";
-$icat['25']	= "Verkehr";
+$icat['25']	= "Traffic";
 $icat['30']	= "---People---";
 $icat['31']	= "Maintenance";
 $icat['32']	= "Configuration";

@@ -10,6 +10,7 @@
 # 07/06/05	initial version.
 # 17/03/06	new SQL query support
 # 11/07/06	added paging
+# 23/03/07	improved paging
 */
 
 $bg1	= "CC9999";
@@ -48,15 +49,13 @@ $st[] = $sta;
 $st[] = $stb;
 $co[] = $cop;
 
-$nof = 0;
+$nof = $off;
 if( isset($_GET['p']) ){
 	$nof = abs($off - $lim);
 }elseif( isset($_GET['n']) ){
 	$nof = $off + $lim;
-	$dlim = "$nof,$lim";
-}else{
-	$dlim = "$lim";
 }
+$dlim = "$nof,$lim";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if( isset($_GET['del']) ){

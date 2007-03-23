@@ -8,6 +8,7 @@
 # -----------------------------------------------------------
 # 08/07/06	initial version.
 # 05/01/07	variables cleanup.
+# 23/03/07	more cleanup, improved paging
 */
 
 $bg1	 = "ddbb99";
@@ -29,17 +30,15 @@ $ucm = isset($_GET['ucm']) ? $_GET['ucm'] : "";
 $cmt = isset($_GET['cmt']) ? $_GET['cmt'] : "";
 $cat = isset($_GET['cat']) ? $_GET['cat'] : 0;
 $lim = isset($_GET['lim']) ? $_GET['lim'] : 10;
-$off = isset($_GET['off']) ? $_GET['off'] : 0;
+$off = (isset($_GET['off']) and !isset($_GET['sho']))? $_GET['off'] : 0;
 
-$nof = 0;
+$nof = $off;
 if( isset($_GET['p']) ){
 	$nof = abs($off - $lim);
 }elseif( isset($_GET['n']) ){
 	$nof = $off + $lim;
-	$dlim = "$nof,$lim";
-}else{
-	$dlim = "$lim";
 }
+$dlim = "$nof,$lim";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if($dli){
@@ -58,7 +57,7 @@ if($dli){
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/bomb.png border=0 title="Acknowledge and classify incidents">
+<img src=img/32/bomb.png border=0 title="Classify incidents (Show will reset paging in case you get lost)">
 </a></th>
 <th>
 Category Filter <select size=1 name="cat">
@@ -129,6 +128,8 @@ if($res){
 <input type="hidden" name="uca" value="<?=$i[0]?>">
 <input type="hidden" name="who" value="<?=($i[6])?$i[6]:$_SESSION['user']?>">
 <input type="hidden" name="tme" value="<?=($i[7])?$i[7]:time()?>">
+<input type="hidden" name="lim" value="<?=$lim?>">
+<input type="hidden" name="off" value="<?=$nof?>">
 <select size=1 name="cat" onchange="this.form.submit();" title="categorize incident for reporting">
 <?
 foreach (array_keys($icat) as $ic){
@@ -143,6 +144,8 @@ foreach (array_keys($icat) as $ic){
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="who" value="<?=($i[6])?$i[6]:$_SESSION['user']?>">
 <input type="hidden" name="ucm" value="<?=$i[0]?>">
+<input type="hidden" name="lim" value="<?=$lim?>">
+<input type="hidden" name="off" value="<?=$nof?>">
 <input type="text" name="cmt" size=40 value="<?=$i[9]?>" onchange="this.form.submit();">
 <a href=<?=$_SERVER['PHP_SELF']?>?dli=<?=$i[0]?>><img src=img/16/bcnl.png border=0 hspace=8 onclick="return confirm('Delete incident?');" title="Delete Incident"></a>
 </form>

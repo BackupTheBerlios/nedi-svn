@@ -34,7 +34,7 @@ $stco['150'] = "gebraucht";
 $stco['200'] = "defekt";
 
 // Ueberwachungsbegriffe
-$icat['0']	= "Neu";
+$icat['1']	= "Neu";
 $icat['2']	= "Andere";
 $icat['3']	= "Unbekannt";
 $icat['10']	= "---Infrastruktur---";
@@ -46,7 +46,7 @@ $icat['21']	= "Netzteil";
 $icat['22']	= "Chassis";
 $icat['23']	= "Modul";
 $icat['24']	= "Software";
-$icat['25']	= "Traffic";
+$icat['25']	= "Verkehr";
 $icat['30']	= "---Menschen---";
 $icat['31']	= "Wartung";
 $icat['32']	= "Konfiguration";

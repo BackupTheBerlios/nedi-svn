@@ -19,7 +19,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 $bg1	= "5599BB";
 $bg2	= "66AACC";
 $btag	= "";
-$nocache= 1;
+$nocache= 0;
 $calendar= 0;
 $refresh = 0;
 

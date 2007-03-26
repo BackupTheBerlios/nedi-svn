@@ -78,7 +78,7 @@ if ($opt{D}){
 #	&db::WriteDev();
 #	&db::WriteVlan();
 #	&db::WriteInt();
-	&db::WriteNet();
+#	&db::WriteNet();
 #	&db::WriteLink();
 #	&db::WriteNod();
 
@@ -250,5 +250,5 @@ sub Help {
 	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 23.Mar 2007\n";
+	die "NeDi 1.0.w 26.Mar 2007\n";
 }

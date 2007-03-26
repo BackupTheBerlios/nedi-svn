@@ -697,7 +697,7 @@ sub BuildNod {
 	print "Building Nodes (i:IP n:non-IP x:ignored f:no IF):\n"  if $main::opt{d};
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
 	foreach my $mc (keys(%arp)){
-		if (!grep /^$arp{$mc}$/,@doneip or $main::opt{N}){						# Don't use devices as nodes.
+		if (!grep(/^$arp{$mc}$/,@doneip) or $main::opt{N}){						# Don't use devices as nodes.
 			print " NOD:$mc [" if $main::opt{v};
 			if ( exists $portnew{$mc} ){
 				my $nodex = 0;

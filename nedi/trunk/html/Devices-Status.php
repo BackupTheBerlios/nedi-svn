@@ -463,7 +463,7 @@ if ($shd){
 		foreach ($net[$in] as $ip => $dmsk){
 			list($pfix,$msk,$bmsk)	= Masker($dmsk);
 			$dnet = long2ip($ip);
-			echo "<a href=Reports-Networks.php?ipf=$dnet/$pfix title=\"$dnet/$pfix Nodes-List\">$dnet</a>/$pfix ";
+			echo "<a href=Reports-Networks.php?ipf=$dnet%2F$pfix&shw=1 title=\"$dnet/$pfix Report-Networks\">$dnet</a>/$pfix ";
 		}
 		echo "</td></tr>\n";
 	}

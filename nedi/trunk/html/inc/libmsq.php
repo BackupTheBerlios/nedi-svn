@@ -46,7 +46,7 @@ function DbError($l){
 //
 // $tab	= table to apply query to
 // $do 	's'= select (is default), 'i'=insert (using $in for columns and $st for values), 't'=show tables, 'c'=show columns,
-//	'g'=group ( $col is counted/grouped), 'u'=update (using $in,$st to set and $col,$ord to match), 'd'=delete
+//	'g'=group ( $col is counted/grouped), 'a'=average, 'u'=update (using $in,$st to set and $col,$ord to match), 'd'=delete
 // $col	= column(s) to display (* is default), or to group by
 // $ord	= order by (where device also takes numerical interface sorting (with /) into account)
 // $lim	= limiting results
@@ -124,6 +124,8 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 			return "DELETE FROM $tab $w $l";
 		}elseif($do == 'g'){
 			return "SELECT $col,count(*) FROM  $tab $w GROUP BY $col $o $l";
+		}elseif($do == 'a'){
+			return "SELECT $col,count(*),avg($lim) FROM  $tab $w GROUP BY $col $o";
 		}else{
 			return "SELECT $col FROM $tab $w $o $l";
 		}

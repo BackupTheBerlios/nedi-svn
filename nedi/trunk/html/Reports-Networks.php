@@ -26,6 +26,7 @@ include_once ("inc/header.php");
 $_GET = sanitize($_GET);
 $opr = isset($_GET['opr']) ? $_GET['opr'] : "";
 $ipf = isset($_GET['ipf']) ? $_GET['ipf'] : "";
+$shw = isset($_GET['shw']) ? $_GET['shw'] : "";
 ?>
 <h1>Network Report</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="netlist">
@@ -46,7 +47,7 @@ IP Address
 </th>
 </tr></table></form>
 <?
-if (isset($ipf) ) {
+if ($shw) {
 	$query	= GenQuery('networks','s','*','ip','',array('ip'),array('='),array($ipf) );
 	$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 	$res	= @DbQuery($query,$link);
@@ -67,20 +68,21 @@ if (isset($ipf) ) {
 					}
 				}
 			}else{
-				$nets[$dnet]		= $n[3];
+				$nets[$dnet] = $n[3];
+				$pop[$dnet] = 0;
+				$age[$dnet] = 0;
 				if($n[3] == -1){
-					$devs[$dnet][$n[0]]	= "<span style=\"color : yellow\">Loopback</span> on $n[1]";
+					$devs[$dnet][$n[0]] = "<span style=\"color : yellow\">Loopback</span> on $n[1]";
 				}else{
-					$devs[$dnet][$n[0]]	= "<span style=\"color : blue\">mask base</span> on $n[1]";
+					$devs[$dnet][$n[0]] = "<span style=\"color : blue\">mask base</span> on $n[1]";
+					$nquery	= GenQuery('nodes','a',"ip & $n[3]",'','lastseen - firstseen',array("ip & $n[3]"),array('='),array($dnet) );
+					$nodres	= @DbQuery($nquery,$link);
+					$nnod	= @DbNumRows($nodres);
+					$no		= @DbFetchRow($nodres);
+					$pop[$dnet]	= $no[1];
+					$age[$dnet]	= intval($no[2]/86400);
+					@DbFreeResult($nodres);
 				}
-
-				$nquery	= GenQuery('nodes','s','*','ip','',array("ip & $n[3]"),array('='),array($dnet) );
-				$nodres	= @DbQuery($nquery,$link);
-				while( ($nod = @DbFetchRow($nodres)) ){
-					if($n[3]){$pop[$dnet]++;}							//  Only count if mask is not 0!
-					$age[$dnet] += $nod[5] - $nod[4];
-				}
-				@DbFreeResult($nodres);
 			}
 		}
 		@DbFreeResult($res);
@@ -102,14 +104,8 @@ if (isset($ipf) ) {
 				$net	= long2ip($dn);
 				list($pfix,$mask,$bmsk)	= Masker($nets[$dn]);
 				list($ntimg,$ntit)	= Nettype( $net );
-				if( isset($pop[$dn]) ){
-					$avage = intval($age[$dn] / ($pop[$dn] * 86400));
-				}else{
-					$pop[$dn]	= 0;
-					$avage		= 0;
-				}
 				$pbar = Bar($pop[$dn],110);
-				$abar = Bar($avage);
+				$abar = Bar($age[$dn]);
 				$dvs = "";
 				foreach( array_keys($devs[$dn]) as $dv ){
 					$du = rawurlencode($dv);
@@ -119,7 +115,7 @@ if (isset($ipf) ) {
 				echo "<td bgcolor=$bi width=20 align=center><img src=img/16/$ntimg title=$ntit></td>\n";
 				echo "<td><a href=Devices-Map.php?ina=network&flt=$net%2F$pfix&draw=1>$net/$pfix</a></td>\n";
 				echo "<td>$dvs</td><td>$pbar <a href=Nodes-List.php?ina=ip&opa==&sta=$net/$pfix&ord=ip>$pop[$dn]</a></td>\n";
-				echo "<td>$abar $avage days</td>\n";
+				echo "<td>$abar $age[$dn] days</td>\n";
 				echo "</tr>\n";
 			}
 			echo "</table><table bgcolor=#666666 $tabtag >\n";

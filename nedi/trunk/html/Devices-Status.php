@@ -309,7 +309,7 @@ if ($shd){
 </table>
 <h2>Interfaces</h2><p>
 <?
-	$query	= GenQuery('interfaces','s','*','ifname','',array('device'),array('='),array($shd) );
+	$query	= GenQuery('interfaces','s','*','ifidx','',array('device'),array('='),array($shd) );
 	$res	= @DbQuery($query,$link);
 	$nif = 0;
 	while( $i = @DbFetchRow($res) ){

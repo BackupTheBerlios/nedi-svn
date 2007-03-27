@@ -190,10 +190,10 @@ if($res){
 			echo "<a href=Devices-Config.php?shc=$usrc><img src=img/16/cfg2.png hspace=8 border=0></a>";
 		}elseif(strstr($m[4],"not discoverable!")){
 			echo "<a href=Nodes-List.php?ina=ip&opa==&sta=$m[3]><img src=img/16/cubs.png hspace=8 border=0></a>";
-		}elseif(preg_match("/reappeared!/",$m[4]) ){
+		}elseif(strstr($m[4],"reappeared!")){
 			echo "<a href=Nodes-Status.php?mac=$m[3]><img src=img/16/ngrn.png hspace=8 border=0></a>";
 		}else{
-			echo "<a href=Devices-Status.php?dev=$usrc><img src=img/16/hwif.png hspace=8 border=0></a>";
+			echo "<a href=Devices-Status.php?dev=$usrc&shp=on><img src=img/16/hwif.png hspace=8 border=0></a>";
 		}
 		echo "</th><td>$hint $m[4]</td></tr>\n";
 		$nmsg++;

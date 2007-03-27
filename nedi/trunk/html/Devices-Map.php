@@ -19,7 +19,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 $bg1	= "5599BB";
 $bg2	= "66AACC";
 $btag	= "";
-$nocache= 0;
+$nocache= 1;
 $calendar= 0;
 $refresh = 0;
 
@@ -399,14 +399,14 @@ function Drawlink($x1,$y1,$x2,$y2,$prop) {
 	if($gra and is_array($rrdif) ){
 		$opts = GraphOpts($gra,0,'Link Traffic');
 		list($drawin,$drawout,$tit) = GraphTraffic($rrdif,'trf');
-		exec("$rrdcmd graph log/$x1$y1$x2$y2.png -a PNG $opts $drawin $drawout");
+		exec("$rrdcmd graph log/$xl$yl.png -a PNG $opts $drawin $drawout");
 		if($gra == "t"){$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl-18,\"$clab\", \$grn);";}
-		$maplinks[] = "\$icon = Imagecreatefrompng(\"$x1$y1$x2$y2.png\");";
+		$maplinks[] = "\$icon = Imagecreatefrompng(\"$xl$yl.png\");";
 		$maplinks[] = "\$w = Imagesx(\$icon);";
 		$maplinks[] = "\$h = Imagesy(\$icon);";
 		$maplinks[] = "Imagecopy(\$image, \$icon,$xl-\$w/2,$yl-\$h/2,0,0,\$w,\$h);";
 		$maplinks[] = "Imagedestroy(\$icon);";
-		$maplinks[] = "unlink(\"$x1$y1$x2$y2.png\");";
+		$maplinks[] = "unlink(\"$xl$yl.png\");";
 	}else{
 		$maplinks[] = "ImageString(\$image, 1,$xl-16,$yl,\"$clab\", \$grn);";
 	}

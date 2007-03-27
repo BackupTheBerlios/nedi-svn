@@ -152,7 +152,7 @@ if ( in_array("sum",$rep) ){
 
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><th bgcolor=#$bi><img src=img/oui/$img></th>\n";
-		echo "<td><a href=Nodes-List.php?ina=oui&opa==&sta=$uo>$o</a></td><td>$obar $nn</td></tr>\n";
+		echo "<td><a href=http://www.google.com/search?q=$uo&btnI=1>$o</a></td><td>$obar <a href=Nodes-List.php?ina=oui&opa==&sta=$uo>$nn</a></td></tr>\n";
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
@@ -238,8 +238,8 @@ if ( in_array("ips",$rep) ){
 
 			echo "<tr bgcolor=#$bg>\n";
 			echo "<th bgcolor=#$bi>$row</th>\n";
-			echo "<td><a href=Nodes-List.php?ina=ip&&opa==&sta=$ip&ord=lastseen>$ip</a></td>\n";
-			echo "<td>$mbar $nm</td></tr>\n";
+			echo "<td>$ip</td>\n";
+			echo "<td>$mbar <a href=Nodes-List.php?ina=ip&&opa==&sta=$ip&ord=lastseen>$nm</a></td></tr>\n";
 			if($row == $lim){break;}
 		}
 	}
@@ -277,8 +277,8 @@ if ( in_array("ifs",$rep) ){
 			$ud = urlencode($d[0]);
 			echo "<tr bgcolor=#$bg>\n";
 			echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$ud>$d[0]</a></td>\n";
-			echo "<td><a href=Nodes-List.php?ina=device&&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$d[1]</a></td>\n";
-			echo "<td align=center>$ifvl[$di]</td><td>$mbar $nm</td></tr>\n";
+			echo "<td>$d[1]</td><td align=center><a href=Devices-Map.php?ina=vlan&flt=$ifvl[$di]&draw=1>$ifvl[$di]</a></td>\n";
+			echo "<td>$mbar <a href=Nodes-List.php?ina=device&&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$nm</a></td></tr>\n";
 			if($row == $lim){break;}
 		}
 	}

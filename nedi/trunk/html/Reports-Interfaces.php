@@ -37,7 +37,7 @@ $opt = isset($_GET['opt']) ? "checked" : "";
 <th>Select Report(s)</th>
 <th>
 <SELECT MULTIPLE name="rep[]" size=4>
-<OPTION VALUE="uif" <? if(in_array("uif",$rep)){echo "selected";} ?> >Used Interfaces
+<OPTION VALUE="uif" <? if(in_array("uif",$rep)){echo "selected";} ?> >Active Interfaces
 <OPTION VALUE="dif" <? if(in_array("dif",$rep)){echo "selected";} ?> >Disabled Interfaces
 <OPTION VALUE="itr" <? if(in_array("itr",$rep)){echo "selected";} ?> >Traffic
 <OPTION VALUE="lmi" <? if(in_array("lmi",$rep)){echo "selected";} ?> >Link Mismatch
@@ -118,6 +118,7 @@ if($res){
 }
 
 if ( in_array("uif",$rep) ){
+	if($alt){$ifty = "ethernet";}else{$ifty = "all";}
 	foreach ($numif as $dv => $ni){
 		$ainorm[$dv] = intval(100 * $nactif[$dv] / $ni);
 	}
@@ -145,7 +146,7 @@ if ( in_array("uif",$rep) ){
 		if($row == $_GET['lim']){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$row most used devices shown</td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>$row most used devices by $ifty interfaces</td></tr></table>\n";
 ?>
 </td><td width=50% valign=top align=center>
 
@@ -168,7 +169,7 @@ if ( in_array("uif",$rep) ){
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$row least used devices shown</td></tr></table></td></tr></table>\n";
+	echo "<tr bgcolor=#$bg2><td>$row least used devices by $ifty interfaces</td></tr></table></td></tr></table>\n";
 }
 
 if ( in_array("dif",$rep) ){

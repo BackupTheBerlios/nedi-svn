@@ -128,7 +128,7 @@ while(1) {
 			print "Up " if $opt{V};
 			if($depdown{$d}){								# Wrong configuration, notify user
 				print ", but dep is down! " if $opt{V};
-				if( ! &db::Insert('messages','level,time,source,info',"\"50\",\"$now\",\"$d\",\"Is up even though a parent dependency is down? You should review your configuration!\"") ){
+				if( ! &db::Insert('messages','level,time,source,info',"\"50\",\"$now\",\"$d\",\"Is up even though a parent dependency is down?\"") ){
 					die "DB error messages!\n";
 				}
 				&MarkDep($d,0,0);

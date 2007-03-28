@@ -459,35 +459,35 @@ sub WriteInt {
 				if($main::int{$dv}{$i}{doo}){$roerr = int( $main::int{$dv}{$i}{doe} * 100 / $main::int{$dv}{$i}{doo})}
 
 				if($rioct > 75){
-					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average input traffic on $main::int{$dv}{$i}{ina} is $rioct% for $misc::rrdstep s!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average input traffic on $main::int{$dv}{$i}{ina} is $rioct% for $misc::rrdstep seconds!\"") ){
 						die "DB error messages!\n";
 					}
 					$ntrf++;
 				}elsif($rioct > 50){
-					if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$dv\",\"Average input traffic on $main::int{$dv}{$i}{ina} is $rioct% for $misc::rrdstep s!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$dv\",\"Average input traffic on $main::int{$dv}{$i}{ina} is $rioct% for $misc::rrdstep seconds!\"") ){
 						die "DB error messages!\n";
 					}
 					$ntrf++;
 				}
 				if($rooct > 75){
-					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average output traffic on $main::int{$dv}{$i}{ina} is $rooct% for $misc::rrdstep s!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average output traffic on $main::int{$dv}{$i}{ina} is $rooct% for $misc::rrdstep seconds!\"") ){
 						die "DB error messages!\n";
 					}
 					$ntrf++;
 				}elsif($rooct > 50){
-					if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$dv\",\"Average output traffic on $main::int{$dv}{$i}{ina} is $rooct% for $misc::rrdstep s!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"100\",\"$main::now\",\"$dv\",\"Average output traffic on $main::int{$dv}{$i}{ina} is $rooct% for $misc::rrdstep seconds!\"") ){
 						die "DB error messages!\n";
 					}
 					$ntrf++;
 				}
 				if($rierr > 1){
-					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average input errors on $main::int{$dv}{$i}{ina} are $rierr% for $misc::rrdstep s!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average input errors on $main::int{$dv}{$i}{ina} are $rierr% for $misc::rrdstep seconds!\"") ){
 						die "DB error messages!\n";
 					}
 					$ntrf++;
 				}
 				if($roerr > 1){
-					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average output errors on $main::int{$dv}{$i}{ina} are $rierr% for $misc::rrdstep s!\"") ){
+					if( ! &db::Insert('messages','level,time,source,info',"\"200\",\"$main::now\",\"$dv\",\"Average output errors on $main::int{$dv}{$i}{ina} are $rierr% for $misc::rrdstep seconds!\"") ){
 						die "DB error messages!\n";
 					}
 					$ntrf++;

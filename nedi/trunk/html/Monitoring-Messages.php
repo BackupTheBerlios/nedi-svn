@@ -33,7 +33,7 @@ $opb = isset($_GET['opb']) ? $_GET['opb'] : "";
 $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $lvl = isset($_GET['lvl']) ? $_GET['lvl'] : "";
 $lim = isset($_GET['lim']) ? $_GET['lim'] : 10;
-$off = isset($_GET['off']) ? $_GET['off'] : 0;
+$off = (isset($_GET['off']) and !isset($_GET['sho']))? $_GET['off'] : 0;
 
 if($lvl){
 	$in[] = 'level';
@@ -127,6 +127,12 @@ foreach (array_keys($mlvl) as $ml){
 }
 ?>
 </SELECT>
+<p>
+<a href=?ina=info&opa=regexp&sta=traffic><img src=img/16/dlog.png border=0 title="Traffic messages"></a>
+<a href=?ina=info&opa=regexp&sta=config><img src=img/16/cfg2.png border=0 title="Configuration changes"></a>
+<a href=?ina=info&opa=regexp&sta=discover><img src=img/16/fiqu.png border=0 title="Discoveries"></a>
+<a href=?ina=info&opa=regexp&sta=login%7Cuser><img src=img/16/user.png border=0 title="Login messages"></a>
+<a href=?ina=info&opa=regexp&sta=reboot|coldstart><img src=img/16/brld.png border=0 title="Reboots"></a>
 </th>
 <th valign=top>Limit<p>
 <SELECT size=1 name="lim">
@@ -135,7 +141,7 @@ foreach (array_keys($mlvl) as $ml){
 </th>
 
 <th width=80>
-<input type="submit" name="show" value="Show">
+<input type="submit" name="sho" value="Show">
 <p>
 <input type="hidden" name="off" value="<?=$nof?>">
 <input type="submit" name="p" value="<-">
@@ -186,14 +192,14 @@ if($res){
 #			}elseif(strstr($m[4],"disconnected")){
 #				$hint = "<img src=img/bulbr.png hspace=6>";
 #			}
-		}elseif(preg_match("/Config(ured from| changed)/",$m[4]) ){
+		}elseif(preg_match("/[cC]onfig(ured from| changed)/",$m[4]) ){
 			echo "<a href=Devices-Config.php?shc=$usrc><img src=img/16/cfg2.png hspace=8 border=0></a>";
 		}elseif(strstr($m[4],"not discoverable!")){
 			echo "<a href=Nodes-List.php?ina=ip&opa==&sta=$m[3]><img src=img/16/cubs.png hspace=8 border=0></a>";
 		}elseif(strstr($m[4],"reappeared!")){
 			echo "<a href=Nodes-Status.php?mac=$m[3]><img src=img/16/ngrn.png hspace=8 border=0></a>";
 		}else{
-			echo "<a href=Devices-Status.php?dev=$usrc&shp=on><img src=img/16/hwif.png hspace=8 border=0></a>";
+			echo "<a href=Devices-Status.php?dev=$usrc&shg=on&shp=on><img src=img/16/hwif.png hspace=8 border=0></a>";
 		}
 		echo "</th><td>$hint $m[4]</td></tr>\n";
 		$nmsg++;

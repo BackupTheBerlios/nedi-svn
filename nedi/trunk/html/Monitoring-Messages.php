@@ -10,7 +10,7 @@
 # 07/06/05	initial version.
 # 17/03/06	new SQL query support
 # 11/07/06	added paging
-# 23/03/07	improved paging
+# 30/03/07	improved paging, added shortcuts
 */
 
 $bg1	= "CC9999";
@@ -132,7 +132,7 @@ foreach (array_keys($mlvl) as $ml){
 <a href=?ina=info&opa=regexp&sta=config><img src=img/16/cfg2.png border=0 title="Configuration changes"></a>
 <a href=?ina=info&opa=regexp&sta=discover><img src=img/16/fiqu.png border=0 title="Discoveries"></a>
 <a href=?ina=info&opa=regexp&sta=login%7Cuser><img src=img/16/user.png border=0 title="Login messages"></a>
-<a href=?ina=info&opa=regexp&sta=reboot|coldstart><img src=img/16/brld.png border=0 title="Reboots"></a>
+<a href=?ina=info&opa=regexp&sta=reboot|coldstart><img src=img/16/exit.png border=0 title="Reboots"></a>
 </th>
 <th valign=top>Limit<p>
 <SELECT size=1 name="lim">

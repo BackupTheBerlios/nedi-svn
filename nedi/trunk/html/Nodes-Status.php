@@ -13,10 +13,10 @@
 # 02/28/07	Added IP & IF tracking tables.
 */
 
-$bg1	= "BBDDCC";
-$bg2	= "CCEEDD";
-$btag	= "";
-$nocache= 0;
+$bg1	 = "BBDDCC";
+$bg2	 = "CCEEDD";
+$btag	 = "";
+$nocache = 0;
 $calendar= 0;
 $refresh = 0;
 
@@ -53,11 +53,11 @@ if ($mac){
 
 		$name		= preg_replace("/^(.*?)\.(.*)/","$1", $n[0]);
 		$ip		= long2ip($n[1]);
-		$au		= date("r",$n[12]);
+		$au		= date($datfmt,$n[12]);
 		list($a1c,$a2c) = Agecol($n[12],$n[12],1);
 		$img		= Nimg("$n[2];$n[3]");
-		$fs		= date("r",$n[4]);
-		$ls		= date("r",$n[5]);
+		$fs		= date($datfmt,$n[4]);
+		$ls		= date($datfmt,$n[5]);
 		$ud 		= urlencode($n[6]);
 		list($fc,$lc)	= Agecol($n[4],$n[5],0);
 
@@ -76,7 +76,7 @@ if ($mac){
 				}
 			}
 			@DbFreeResult($res);
-			$iu		= date("r",$n[10]);
+			$iu		= date($datfmt,$n[10]);
 			list($i1c,$i2c) = Agecol($n[10],$n[10],1);
 		}
 		$vl[2] = "-";
@@ -174,7 +174,7 @@ while( $l = @DbFetchRow($res) ){
 	$row++;
 	$lip = long2ip($l[3]);
 	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th>\n";
-	echo "<td>". date("r",$l[1]) ."</td><td>$l[2]</td><td><a href=Nodes-List.php?ina=ip&opa==&sta=$lip>$lip</a></td></tr>\n";
+	echo "<td>". date($datfmt,$l[1]) ."</td><td>$l[2]</td><td><a href=Nodes-List.php?ina=ip&opa==&sta=$lip>$lip</a></td></tr>\n";
 }
 @DbFreeResult($res);
 
@@ -201,7 +201,7 @@ while( $l = @DbFetchRow($res) ){
 	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 	$row++;
 	$uld = urlencode($l[2]);
-	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th><td>". date("r",$l[1]) ."</td>\n";
+	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th><td>". date($datfmt,$l[1]) ."</td>\n";
 	echo "<td><a href=Devices-Status.php?dev=$uld&shp=on>$l[2]</a></td><td>$l[3]</td><td>$l[4]</td><td>$l[5]</td></tr>\n";
 }
 @DbFreeResult($res);

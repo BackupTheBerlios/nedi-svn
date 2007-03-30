@@ -538,7 +538,7 @@ function Map() {
 			if($nbld != 1){
 				$bldscalx = 1.3;
 				$bldscaly = 1;
-				if ($loi and $cty != "nureini"){
+				if ($loi and $cty != "-"){
 					Drawitem($xct[$cty],$yct[$cty],'0',$cty,'ci');
 				}
 			}
@@ -713,22 +713,22 @@ function Read($ina,$filter){
 		while( ($unit = @DbFetchRow($res)) ){
 			$locitems = explode($locsep, $unit[10]);
 			if($cpos === false){
-				$cty = "nureini";
+				$cty = "-";
 			}else{
 				$cty = $locitems[$cpos];
 			}
 			if($bpos === false){
-				$bld = "nureins";
+				$bld = "-";
 			}else{
 				$bld = $locitems[$bpos];
 			}
 			if($fpos === false){
-				$flr = "nureine";
+				$flr = "-";
 			}else{
 				$flr = $locitems[$fpos];
 			}
 			if($rpos === false){
-				$rom = "nureine";
+				$rom = "-";
 			}else{
 				$rom = $locitems[$rpos];
 			}

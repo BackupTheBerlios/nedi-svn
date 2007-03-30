@@ -164,8 +164,8 @@ sub Identify {
 			if(!$err){$main::dev{$name}{lo} = &misc::Strip($r->{$locO})}
 			$r = $session->get_request($srvO);
 			$err = $session->error;
-			if($err or $r->{$srvO !~ /^[0-9]+$/}){
-				$main::dev{$name}{sv} = 6; 						# Could be a buggy SNMP implementation, so we don't set this to 0 and check the device anyway
+			if($err or $r->{$srvO !~ /^\d+$/}){
+				$main::dev{$name}{sv} = 6; 						# Could be a buggy SNMP implementation, so we don't set this to 6 and check the device anyway
 			}else{
 				$main::dev{$name}{sv} = &misc::Strip($r->{$srvO});
 			}
@@ -1054,8 +1054,8 @@ sub MacTable {
 
 			foreach my $fpo (keys (%fwdpo)){
 				my @dmac = split(/\./,$fpo);
-				my $mc   = sprintf "%02x%02x%02x%02x%02x%02x",$dmac[11],$dmac[12],$dmac[13],$dmac[14],$dmac[15],$dmac[16];
 				if (defined $dmac[16]){								# Some devs have incomplete MACs here!
+					my $mc   = sprintf "%02x%02x%02x%02x%02x%02x",$dmac[11],$dmac[12],$dmac[13],$dmac[14],$dmac[15],$dmac[16];
 					my $ifx  = $fwdix{"$fwdxO.$fwdpo{$fpo}"};
 					if (defined $ifx){
 						my $po = "fwd$ifx";						# Fallback name for weird switches...

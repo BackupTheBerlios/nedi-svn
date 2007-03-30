@@ -6,6 +6,7 @@
 // Some defaults 
 
 $lang	= 'eng';
+$datfmt = "j.M G:i:s";
 
 $bga	= "D0D0D0";
 $bgb	= "C0C0C0";

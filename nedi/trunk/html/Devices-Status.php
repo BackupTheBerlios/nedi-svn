@@ -103,8 +103,8 @@ if ($shd){
 	$oi		= ($dev[19]) ? long2ip($dev[19]) : 0;
 	$img		= $dev[18];
 	list($fc,$lc)	= Agecol($dev[4],$dev[5],0);
-	$fs		= date("r",$dev[4]);
-	$ls		= date("r",$dev[5]);
+	$fs		= date($datfmt,$dev[4]);
+	$ls		= date($datfmt,$dev[5]);
 
 	$sv		= Syssrv($dev[6]);
 	$os		= $dev[8];
@@ -433,7 +433,7 @@ if ($shd){
 		if($shp){
 			if($niflog[$in]){
 				$bnl = sprintf("%02x","40" + $off);
-				echo "<td bgcolor=#$bg3$bg3$boo title=\"Last node tracked ". date("r",$niflog[$in]) ."\" nowrap>";
+				echo "<td bgcolor=#$bg3$bg3$boo title=\"Last node tracked ". date($datfmt,$niflog[$in]) ."\" nowrap>";
 			}else{
 				echo "<td nowrap>";
 			}

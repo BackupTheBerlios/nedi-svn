@@ -217,7 +217,7 @@ if ( in_array("ust",$rep) ){
 		$lbar = Bar($devup[$d]['ls'],1);
 		$fd   = rawurlencode(date("m/d/Y H:i:s",$d));
 		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bg1>".date("r",$d)."</th>\n";
+		echo "<th bgcolor=#$bg1>".date($datfmt,$d)."</th>\n";
 		echo "<td>$fbar <a href=Devices-List.php?ina=firstseen&opa==&sta=$fd>".$devup[$d]['fs']."</a> first seen<br>\n";
 		echo "$lbar <a href=Devices-List.php?ina=lastseen&opa==&sta=$fd>".$devup[$d]['ls']."</a> last seen</td></tr>\n";
 		if($row == $lim){break;}

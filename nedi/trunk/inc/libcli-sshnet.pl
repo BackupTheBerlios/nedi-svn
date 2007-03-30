@@ -349,7 +349,6 @@ sub GetIosCfg{
 	if($main::dev{$_[0]}{os} eq "IOS-fw"){									# Cisco firewall specific...
 		$pag = "pager 0";
 	}
-			print $pag;
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
 			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
@@ -402,7 +401,7 @@ sub GetIosCfg{
 			$cl++;
 		}
 	}
-	if( $cfg[$#cfg] eq "" ){pop @cfg}									# Remove empty line at the end.
+	if(defined($cfg[$#cfg]) and $cfg[$#cfg] eq "" ){pop @cfg}						# Remove empty line at the end.
 	print "Bi";
 	print "-$cl" if $main::opt{d};
 	return @cfg;

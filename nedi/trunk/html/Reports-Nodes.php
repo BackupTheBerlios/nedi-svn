@@ -439,7 +439,7 @@ if ( in_array("ust",$rep) ){
 		$abar = Bar($nodup[$d]['au'],0);
 		$fd   = urlencode(date("m/d/Y H:i:s",$d));
 		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bg1>".date("r",$d)."\n";
+		echo "<th bgcolor=#$bg1>".date("j.M G:i:s",$d)."\n";
 		echo "<td>$fbar <a href=Nodes-List.php?ina=firstseen&opa==&sta=".$fd.">".$nodup[$d]['fs']."</a> first seen<br>\n";
 		echo "$lbar <a href=Nodes-List.php?ina=lastseen&opa==&sta=".$fd.">".$nodup[$d]['ls']."</a> last seen <br>\n";
 		echo "$abar <a href=Nodes-List.php?ina=ipupdate&opa==&sta=".$fd.">".$nodup[$d]['au']."</a> IP Updates<br>\n";

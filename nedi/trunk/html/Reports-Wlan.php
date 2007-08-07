@@ -11,8 +11,8 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "D0DDD6";
-$bg2	= "E0EEE6";
+$bg1	= "DFDFD0";
+$bg2	= "EFEFE0";
 $btag	= "";
 $nocache= 0;
 $calendar= 0;

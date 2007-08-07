@@ -9,12 +9,13 @@
 # 15/06/05	initial version.
 # 20/03/06	new SQL query support
 # 05/07/06	uptime report
+# 25/07/07	implemented new location scheme
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "EEDDBB";
-$bg2	= "FFEECC";
+$bg1	= "DFD0D0";
+$bg2	= "EFE0E0";
 $btag	= "";
 $nocache= 0;
 $calendar= 0;
@@ -28,9 +29,6 @@ $_GET = sanitize($_GET);
 $rep = isset($_GET['rep']) ? $_GET['rep'] : array();
 $lim = isset($_GET['lim']) ? $_GET['lim'] : 10;
 $ord = isset($_GET['ord']) ? "checked" : "";
-
-$cpos = strpos($locformat, "c");
-$bpos = strpos($locformat, "b");
 ?>
 <h1>Monitoring Reports</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
@@ -53,11 +51,11 @@ $bpos = strpos($locformat, "b");
 </SELECT>
 </th>
 <th>
-<INPUT type="checkbox" name="ord" <?=($ord)?"checked":""?> > alternative order
+<INPUT type="checkbox" name="ord" <?=($ord)?"checked":""?> title="Reverse or order by levels in Message Sources"> alternative order
 </th>
 </SELECT></th>
 
-<th width=80><input type="submit" name="shw" value="Show"></th>
+<th width=80><input type="submit" name="do" value="Show"></th>
 </tr></table></form><p>
 <?
 if($rep){
@@ -83,36 +81,24 @@ if($res){
 	print @DbError($link);
 	die;
 }
-$query	= GenQuery('devices');
+$query	= GenQuery('devices','s','name,ip,type,location,contact,icon');
 $res	= @DbQuery($query,$link);
 if($res){
 	$ndev = 0;
 	while( ($d = @DbFetchRow($res)) ){
 		$dip[$d[0]]  = long2ip($d[1]);
-		$dtyp[$d[0]] = $d[3];
-		$dico[$d[0]] = $d[18];
-		$dcon[$d[0]] = $d[11];
-		$l = explode($locsep, $d[10]);
-		if(!($cpos === false) ){
-			$c = $l[$cpos];
-		}else{
-			$c = 'Campus';
-		}
+		$dtyp[$d[0]] = $d[2];
+		$dcon[$d[0]] = $d[4];
+		$dico[$d[0]] = $d[5];
+		$l = explode($locsep, $d[3]);
+		$dcity["$l[0]$locsep$l[1]"]['nd']++;
+		$dbuild["$l[0]$locsep$l[1]"][$l[2]]['nd']++;
 		if($mavl[$d[0]]){
-			$dcity[$c]['su'] += $mavl[$d[0]];
-;			$dcity[$c]['md']++;
+			$dcity["$l[0]$locsep$l[1]"]['su'] += $mavl[$d[0]];
+;			$dcity["$l[0]$locsep$l[1]"]['md']++;
+			$dbuild["$l[0]$locsep$l[1]"][$l[2]]['su'] += $mavl[$d[0]];
+;			$dbuild["$l[0]$locsep$l[1]"][$l[2]]['md']++;
 		}
-		$dcity[$c]['nd']++;
-		if(!($bpos === false) ){
-			$b = $l[$bpos];
-		}else{
-			$b = 'Building';
-		}
-		if($mavl[$d[0]]){
-			$dbuild[$c][$b]['su'] += $mavl[$d[0]];
-;			$dbuild[$c][$b]['md']++;
-		}
-		$dbuild[$c][$b]['nd']++;
 	}
 	@DbFreeResult($res);
 }else{
@@ -124,7 +110,7 @@ if ( in_array("dav",$rep) ){
 ?>
 <h2>Device Availability</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th colspan=2  width=10%><img src=img/32/dev.png><br>Device</th>
+<th colspan=2  width=20%><img src=img/32/dev.png><br>Device</th>
 <th><img src=img/32/umgr.png><br>Contact</th>
 <th><img src=img/32/bup.png><br>Availability</th>
 </tr>
@@ -154,11 +140,11 @@ if ( in_array("dav",$rep) ){
 if ( in_array("lav",$rep) ){
 ?>
 <h2>Location Availability</h2><p>
-<table cellspacing=10 width=100%>
+<table width=100%>
 <tr><td width=50% valign=top align=center>
 
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th width=10%><img src=img/32/glob.png><br>City</th>
+<th width=20%><img src=img/32/glob.png><br>City</th>
 <th><img src=img/32/bup.png><br>Availability</th>
 </tr>
 <?
@@ -170,16 +156,17 @@ if ( in_array("lav",$rep) ){
 	$row = 0;
 	foreach (array_keys($dcity) as $cty){
 		if($dcity[$cty]['md']){
+			$l = explode($locsep, $cty);
 			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 			$row++;
 			$img  = CtyImg($dcity[$cty]['nd']);
 			$tit  = $dcity[$cty]['md']." monitored devices of ". $dcity[$cty]['nd']." in total";
-			$ucty = str_replace(" ","%20",$cty);
-
 			$av  = sprintf("%01.2f",$dcity[$cty]['su']/$dcity[$cty]['md']);
 			$cbar = Bar($av,-99);
+			$ur = rawurlencode($l[0]);
+			$uc = rawurlencode($l[1]);
 			echo "<tr bgcolor=#$bg>\n";
-			echo "<th bgcolor=#$bi><a href=Devices-Table.php?cty=$ucty><img src=img/$img.png border=0 title=\"$tit\"></a><p>$cty</th>\n";
+			echo "<th bgcolor=#$bi><a href=Topology-Table.php?reg=$ur&cty=$uc><img src=img/$img.png border=0 title=\"$tit\"></a><p>$l[1]</th>\n";
 			echo "<td>$cbar $av %</td></tr>\n";
 			if($row == $lim){break;}
 		}
@@ -188,10 +175,10 @@ if ( in_array("lav",$rep) ){
 	echo "<tr bgcolor=#$bg2><td>$row cities with $nmon monitored devices in total</td></tr></table>\n";
 
 ?>
-</td><td width=50% valign=top align=center>
+</td><td></td><td width=50% valign=top align=center>
 
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th  width=10%><img src=img/32/glob.png><br>Building</th>
+<th  width=20%><img src=img/32/glob.png><br>Building</th>
 <th><img src=img/32/bup.png><br>Availability</th>
 </tr>
 
@@ -208,6 +195,9 @@ if ( in_array("lav",$rep) ){
 		}else{
 			ksort($dbuild[$cty]);
 		}
+		$l = explode($locsep, $cty);
+		$ur = rawurlencode($l[0]);
+		$uc = rawurlencode($l[1]);
 		foreach (array_keys($dbuild[$cty]) as $bld){
 			if($dbuild[$cty][$bld]['md']){
 				if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
@@ -217,12 +207,9 @@ if ( in_array("lav",$rep) ){
 
 				$av  = sprintf("%01.2f",$dbuild[$cty][$bld]['su']/$dbuild[$cty][$bld]['md']);
 				$cbar = Bar($av,-99);
-
-				$ucty = str_replace(" ","%20",$cty);
-				$ubld = str_replace(" ","%20",$bld);
-
+				$ub = rawurlencode($bld);
 				echo "<tr bgcolor=#$bg>\n";
-				echo "<th bgcolor=#$bi><a href=Devices-Table.php?cty=$ucty&bld=$ubld><img src=img/$img.png border=0 title=\"$tit\"></a><p>$bld</th>\n";
+				echo "<th bgcolor=#$bi><a href=Topology-Table.php?reg=$ur&cty=$uc&bld=$ub><img src=img/$img.png border=0 title=\"$tit\"></a><p>$bld</th>\n";
 				echo "<td>$cbar $av %</td></tr>\n";
 				if($row == $lim){break;}
 			}
@@ -240,12 +227,12 @@ if ( in_array("mss",$rep) ){
 <h2>Message Sources</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th width=10%><img src=img/32/say.png><br>Source</th>
-<th><img src=img/32/umgr.png><br>Contact</th>
-<th><img src=img/32/say.png><br>Messages</th>
+<th width=20%><img src=img/32/umgr.png><br>Contact</th>
+<th colspan=2><img src=img/32/say.png><br>Messages</th>
 </tr>
 <?
-	$rord = ($ord)? " desc" : "";
-	$query	= GenQuery('messages','g','source,level',"source$rord");
+	$msgord = ($ord)? "level desc" : "source";
+	$query	= GenQuery('messages','g','source,level',$msgord);
 	$res	= @DbQuery($query,$link);
 	if($res){
 		while( ($s = @DbFetchRow($res)) ){
@@ -260,16 +247,24 @@ if ( in_array("mss",$rep) ){
 	foreach (array_keys($source) as $s){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
-		$img = isset($dico[$s]) ? $dico[$s] : "genh";
-		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bi><a href=Monitoring-Messages.php?ina=source&opa==&sta=$s><img src=img/dev/$img.png border=0 title=\"$dtyp[$dv]\"><p></a>$s</th>\n";
-		echo "<td>$dcon[$s]</td><td>";
+		$us  = rawurlencode($s);
+		echo "<tr bgcolor=#$bg><th bgcolor=#$bi>\n";
+		if( isset($dico[$s]) ){
+			echo "<a href=Devices-Status.php?dev=$us>\n";
+			echo "<img src=img/dev/$dico[$s].png border=0 title=\"$dtyp[$dv]\"></a>\n";
+			echo "<p>$s</th><td align=center>$dcon[$s]</td><td>\n";
+		}else{
+			echo "<img src=img/dev/genh.png><p>$s</th><td align=center>-</td><td>\n";
+		}
+		$tmsg = 0;
 		foreach (array_keys($source[$s]) as $lvl){
 			$nmsg = $source[$s][$lvl];
+			$tmsg += $nmsg;
 			$mbar = Bar($nmsg,0);
-			echo "<a href=Monitoring-Messages.php?ina=source&opa==&sta=$s&cop=AND&inb=level&opb==&stb=$lvl><img src=img/16/$mico[$lvl].png title=\"$mlvl[$lvl]\" border=0></a> $mbar $nmsg $mlvl[$lvl]<br>\n";
+			echo "<img src=img/16/$mico[$lvl].png title=\"$mlvl[$lvl]\"> $mbar \n";
+			echo "<a href=Monitoring-Messages.php?ina=source&opa==&sta=$us&cop=AND&inb=level&opb==&stb=$lvl>$nmsg</a> $mlvl[$lvl]<br>\n";
 		}
-		echo "</td></tr>\n";
+		echo "</td><td><a href=Monitoring-Messages.php?ina=source&opa==&sta=$us>$tmsg</a> total</td></tr>\n";
 		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";

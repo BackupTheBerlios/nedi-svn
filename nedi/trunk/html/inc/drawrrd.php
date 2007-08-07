@@ -56,14 +56,14 @@ if($_GET['t'] == 'cpu'){
 	}
 	list($drawin,$drawout,$tit) = GraphTraffic($rrd,$_GET['t']);
 }
-$opts = GraphOpts($_GET['s'],$_GET['dur'],$tit);
+$opts = GraphOpts($_GET['s'],$_GET['dur'],$tit,0);
 
 if($debug){
 	echo "<b>$debug</b>";
-	echo "<pre>$rrdcmd graph  - -a PNG $opts\n\t$drawin\n\t$drawout</pre>";
+	echo "<pre>$rrdcmd graph - -a PNG $opts\n\t$drawin\n\t$drawout</pre>";
 }else{
 	header("Content-type: image/png");
-	passthru("$rrdcmd graph  - -a PNG $opts $drawin $drawout");
+	passthru("$rrdcmd graph - -a PNG $opts $drawin $drawout");
 }
 
 ?>

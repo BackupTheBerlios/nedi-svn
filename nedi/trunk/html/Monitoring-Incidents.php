@@ -38,7 +38,7 @@ if( isset($_GET['p']) ){
 }elseif( isset($_GET['n']) ){
 	$nof = $off + $lim;
 }
-$dlim = "$nof,$lim";
+$dlim = ($lim)?"$nof,$lim":0;
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if($dli){

@@ -16,8 +16,8 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "D0EED6";
-$bg2	= "E0FFE6";
+$bg1	= "D0DFD7";
+$bg2	= "E0EFE7";
 $btag	= "";
 $nocache= 0;
 $calendar= 0;
@@ -148,8 +148,7 @@ if ( in_array("sum",$rep) ){
 		$row++;
 		$obar = Bar($nn);
 		$img  = Nimg($o);
-		$uo = urlencode($o);
-
+		$uo = rawurlencode($o);
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bi>$row</th><th bgcolor=#$bi><img src=img/oui/$img></th>\n";
 		echo "<td><a href=http://www.google.com/search?q=$uo&btnI=1>$o</a></td><td>$obar <a href=Nodes-List.php?ina=oui&opa==&sta=$uo>$nn</a></td></tr>\n";
@@ -274,10 +273,10 @@ if ( in_array("ifs",$rep) ){
 			$row++;
 			$d = explode(';;', $di);
 			$mbar = Bar($nm,8);
-			$ud = urlencode($d[0]);
+			$ud = rawurlencode($d[0]);
 			echo "<tr bgcolor=#$bg>\n";
 			echo "<th bgcolor=#$bi>$row</th><td><a href=Devices-Status.php?dev=$ud>$d[0]</a></td>\n";
-			echo "<td>$d[1]</td><td align=center><a href=Devices-Map.php?ina=vlan&flt=$ifvl[$di]&draw=1>$ifvl[$di]</a></td>\n";
+			echo "<td>$d[1]</td><td align=center><a href=Devices-Vlans.php?ina=vlanid&opa==&sta=$ifvl[$di]&draw=1>$ifvl[$di]</a></td>\n";
 			echo "<td>$mbar <a href=Nodes-List.php?ina=device&&opa==&sta=$d[0]&cop=AND&inb=ifname&opb==&stb=$d[1]>$nm</a></td></tr>\n";
 			if($row == $lim){break;}
 		}
@@ -349,7 +348,8 @@ if ( in_array("vln",$rep) ){
 		$uvlandev = array();
 		while( ($vl = @DbFetchRow($res)) ){
 			if(! $uvlid[$vl[0]][$vl[1]] and ! preg_match("/$ignoredvlans/",$vl[1]) ){
-				$uvlandev[$vl[1]] .= "<a href=Devices-Status.php?dev=$vl[0]>$vl[0]</a> ($vl[2]) ";
+				$ud = rawurlencode($vl[0]);
+				$uvlandev[$vl[1]] .= "<a href=Devices-Status.php?dev=$ud>$vl[0]</a> ($vl[2]) ";
 				$nunvl++;
 			}
 			$nvl++;
@@ -370,7 +370,7 @@ if ( in_array("vln",$rep) ){
 		$row++;
 		$ubar = Bar($up,50);
 		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bi>$vl</th>\n";
+		echo "<th bgcolor=#$bi><a href=Devices-Vlans.php?ina=vlanid&opa==&sta=$vl><b>$vl</b></th>\n";
 		echo "<td>$dvs</td></tr>\n";
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
@@ -437,7 +437,7 @@ if ( in_array("ust",$rep) ){
 		$lbar = Bar($nodup[$d]['ls'],1);
 		$ibar = Bar($nodup[$d]['iu'],0);
 		$abar = Bar($nodup[$d]['au'],0);
-		$fd   = urlencode(date("m/d/Y H:i:s",$d));
+		$fd   = rawurlencode(date("m/d/Y H:i:s",$d));
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bg1>".date("j.M G:i:s",$d)."\n";
 		echo "<td>$fbar <a href=Nodes-List.php?ina=firstseen&opa==&sta=".$fd.">".$nodup[$d]['fs']."</a> first seen<br>\n";

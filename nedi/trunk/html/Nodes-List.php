@@ -11,6 +11,7 @@
 # 31/03/05	decimal IPs
 # 17/03/06	new SQL query support
 # 29/01/07	new Sorting approach
+# 12/04/07	Minor GUI fixes
 */
 
 $bg1	= "AACCBB";
@@ -36,24 +37,24 @@ $col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','ifname','vlanid',
 
 $cols = array(	"name"=>"Name",
 		"ip"=>"IP Address",
+		"ipupdate"=>"IP Update",
+		"ipchanges"=>"IP Chg",
+		"iplost"=>"IP Lost",
 		"mac"=>"MAC Address",
 		"oui"=>"OUI Vendor",
 		"firstseen"=>"Firstseen",
 		"lastseen"=>"Lastseen",
 		"device"=>"Device",
-		"ifname"=>"Ifname",
 		"vlanid"=>"Vlan",
+		"ifname"=>"Ifname",
 		"ifmetric"=>"IF Metric",
 		"ifupdate"=>"IF Update",
 		"ifchanges"=>"IF Chg",
-		"ipupdate"=>"IP Update",
-		"ipchanges"=>"IP Chg",
-		"iplost"=>"IP Lost",
 		);
 
 ?>
 <h1>Node List</h1>
-<form method="get" name="list" action="<?=$_SERVER['PHP_SELF']?>" name="search">
+<form method="get" name="list" action="<?=$_SERVER['PHP_SELF']?>" name="list">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
 <img src=img/32/cubs.png border=0 title="List those nodes...">
@@ -100,27 +101,22 @@ foreach ($cols as $k => $v){
        $selopt = (in_array($k,$col))?"selected":"";
        echo "<option value=\"$k\" $selopt >$v\n";
 }
-if($rrdstep){
-	echo '<OPTION VALUE="graph" ';
-	if(in_array("graph",$col)){echo "selected";}
-	echo "> Graphs";
-}
 ?>
 <OPTION VALUE="ifdet" <?=(in_array("ifdet",$col))?"selected":""?> >IF Details
+<OPTION VALUE="graph" <?=(in_array("graph",$col))?"selected":""?> >Graphs
 <OPTION VALUE="ssh" <?=(in_array("ssh",$col))?"selected":""?> >SSH Server
 <OPTION VALUE="tel" <?=(in_array("tel",$col))?"selected":""?> >Telnet Server
 <OPTION VALUE="www" <?=(in_array("www",$col))?"selected":""?> >Web Server
+<OPTION VALUE="nbt" <?=(in_array("nbt",$col))?"selected":""?> >Netbios
 </SELECT>
 </th>
-<th width=80><input type="submit" value="Search"></th>
+<th width=80><input type="submit" value="Show"></th>
 </tr></table></form><p>
 <?
 
 if ($ina){
-
 	echo "<table bgcolor=#666666 $tabtag><tr bgcolor=#$bg2>\n";
-
-	echo "<th width=80>&nbsp;</th>\n";
+	echo "<td width=80></td>\n";
 	if( in_array("name",$col) )	{ColHead('name');}
 	if( in_array("ip",$col) )	{ColHead('ip');}
 	if( in_array("ipupdate",$col) )	{ColHead('ipupdate');}
@@ -140,6 +136,7 @@ if ($ina){
 	if( in_array("ssh",$col) )	{echo "<th>SSH server</th>";}
 	if( in_array("tel",$col) )	{echo "<th>Telnet server</th>";}
 	if( in_array("www",$col) )	{echo "<th>Web server</th>";}
+	if( in_array("nbt",$col) )	{echo "<th>Netbios</th>";}
 	echo "</tr>\n";
 
 	$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
@@ -154,8 +151,8 @@ if ($ina){
 			$ip		= long2ip($n[1]);
 			$img		= Nimg("$n[2];$n[3]");
 			list($fc,$lc)	= Agecol($n[4],$n[5],$row % 2);
-			$ud = urlencode($n[6]);
-			$if = urlencode($n[7]);
+			$ud = rawurlencode($n[6]);
+			$ui = rawurlencode($n[7]);
 
 			echo "<tr bgcolor=#$bg>\n";
 			echo "<th bgcolor=#$bi><a href=Nodes-Status.php?mac=$n[2]><img src=img/oui/$img title=\"$n[3] ($n[2])\" border=0></a></th>\n";
@@ -170,25 +167,20 @@ if ($ina){
 			}
 			if(in_array("ipchanges",$col))	{echo "<td align=right>$n[13]</td>";}
 			if(in_array("iplost",$col))	{echo "<td align=right>$n[14]</td>";}
-			if(in_array("mac",$col))	{echo "<td>$n[2]</td>";}
-			if(in_array("oui",$col))	{echo "<td>$n[3]</td>";}
+			if(in_array("mac",$col))	{echo "<td class=drd>$n[2]</td>";}
+			if(in_array("oui",$col))	{echo "<td><a href=http://www.google.com/search?q=".urlencode($n[3])."&btnI=1>$n[3]</a></td>";}
 			if(in_array("ifname",$col)){
 				echo "<td><a href=?ina=device&opa==&sta=$ud&ord=ifname>$n[6]</a>";
-				echo " - <a href=?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$if>$n[7]</a></td>";
+				echo " - <a href=?ina=device&opa==&inb=ifname&opb==&sta=$ud&cop=AND&stb=$ui>$n[7]</a></td>";
 			}
 			if(in_array("vlanid",$col))	{echo "<td>$n[8]</td>";}
+			if(in_array("ifmetric",$col))	{echo "<td align=right>$n[9]</td>";}
 			if(in_array("ifupdate",$col)){
 				$iu       = date("j.M G:i:s",$n[10]);
 				list($i1c,$i2c) = Agecol($n[10],$n[10],$row % 2);
 				echo "<td bgcolor=#$i1c>$iu</td>";
 			}
-			if(in_array("ifmetric",$col))	{echo "<td align=right>$n[9]</td>";}
-			if(in_array("ifchanges",$col))	{echo "<td align=right>$n[13]</td>";}
-			if($rrdstep and in_array("graph",$col)){
-				echo "<td nowrap align=center>\n";
-				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$if><img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=trf border=0>\n";
-				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$if&s=s&t=err border=0></a>\n";
-			}
+			if(in_array("ifchanges",$col))	{echo "<td align=right>$n[11]</td>";}
 			if(in_array("ifdet",$col)){
 				$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 				$iquery	= GenQuery('interfaces','s','*','','',array('device','ifname'),array('=','='),array($n[6],$n[7]),array('AND') );
@@ -207,6 +199,11 @@ if ($ina){
 				}
 				@DbFreeResult($ires);
 			}
+			if(in_array("graph",$col)){
+				echo "<td nowrap align=center>\n";
+				echo "<a href=Devices-Graph.php?dv=$ud&if%5B%5D=$ui><img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=trf border=0>\n";
+				echo "<img src=inc/drawrrd.php?dv=$ud&if%5B%5D=$ui&s=s&t=err border=0></a>\n";
+			}
 			if(in_array("firstseen",$col)){
 				$fs       = date("j.M G:i:s",$n[4]);
 				echo "<td bgcolor=#$fc>$fs</td>";
@@ -217,15 +214,19 @@ if ($ina){
 			}
 			if(in_array("ssh",$col)){
 				echo "<td><a href=ssh://$ip><img src=img/16/lokc.png border=0></a>\n";
-				echo "<td>". CheckTCP($ip,'22','') ."</td>";
+				echo CheckTCP($ip,'22','') ."</td>";
 			}
 			if(in_array("tel",$col)){
-				echo "<td><a href=telnet://$ip><img src=img/16/kons.png border=0></a>\n";
+				echo "<td><a href=telnet://$ip><img src=img/16/loko.png border=0></a>\n";
 				echo CheckTCP($ip,'23','') ."</td>";
 			}
 			if(in_array("www",$col)){
 				echo "<td><a href=http://$ip target=window><img src=img/16/glob.png border=0></a>\n";
 				echo CheckTCP($ip,'80'," \r\n\r\n") ."</td>";
+			}
+			if(in_array("nbt",$col)){
+				echo "<td><img src=img/16/nwin.png>\n";
+				echo NbtStat($ip) ."</td>";
 			}
 			echo "</tr>\n";
 		}

@@ -3,9 +3,9 @@
 # General
 SNMPv	2HC
 Type	ciscoAirAp350IOS
-OS	IOS
+OS	IOS-wl
 Icon	apbl
-Bridge	CAP
+Bridge	VLX
 Dispro	CDP
 Serial	1.3.6.1.4.1.9.3.6.3.0
 Bimage	1.3.6.1.4.1.9.2.1.73.0

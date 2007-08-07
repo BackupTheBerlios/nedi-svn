@@ -3,7 +3,7 @@
 # General
 SNMPv	2HC
 Type	ciscoAIRAP1240
-OS	IOS
+OS	IOS-wl
 Icon	apdb
 Bridge	VLX
 Dispro	CDP

@@ -113,7 +113,7 @@ sub Process {
 	}
 	my $msg = $_[1];
 	$msg =~ s/<(\d+)>(.*)/$2/;
-	$msg =~ s/[^\w\t\/\Q(){}[]!@#$%^&*-+=',.<>? \E]//g;
+	$msg =~ s/[^\w\t\/\Q(){}[]!@#$%^&*-+=',.:<>? \E]//g;
 	print "$src ($_[0])\tS:$sev\tL:$level\t$msg\n"  if $opt{v};
 	if( $level == 200){&mon::SendMail("$src Syslog Alert!","$msg!")}
 	if( ! &db::Insert('messages','level,time,source,info',"\"$level\",\"$now\",\"$src\",\"$msg\"") ){

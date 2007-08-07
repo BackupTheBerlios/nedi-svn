@@ -13,8 +13,8 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "D0D6DD";
-$bg2	= "E0E6EE";
+$bg1	= "D0D7DF";
+$bg2	= "E0E7EF";
 $btag	= "";
 $nocache= 0;
 $calendar= 0;
@@ -54,7 +54,7 @@ $ord = isset($_GET['ord']) ? "checked" : "";
 </th>
 </SELECT></th>
 
-<th width=80><input type="submit" name="gen" value="Show"></th>
+<th width=80><input type="submit" name="do" value="Show"></th>
 </tr></table></form><p>
 <?
 if($rep){
@@ -100,8 +100,8 @@ if ( in_array("typ",$rep) ){
 		$tbar	= Bar($n,0);
 		$utyp	= rawurlencode($typ);
 		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bi width=10%><img src=img/dev/$img.png title=\"$typ\"></th>\n";
-		echo "<td><a href=Devices-List.php?ina=type&opa==&sta=$utyp>$typ</a></td>\n";
+		echo "<th bgcolor=#$bi width=10%><a href=Devices-List.php?ina=type&opa==&sta=$utyp><img src=img/dev/$img.png title=\"$typ\" border=0></a></th>\n";
+		echo "<td><a href=Reports-Modules.php?rep[]=inv&flt=$utyp>$typ</a></td>\n";
 		echo "<td>$tbar $n</td></tr>\n";
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
@@ -115,7 +115,7 @@ if ( in_array("sft",$rep) ){
 
 <h2>Operating Systems</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th><img src=img/32/cog.png><br>OS</th>
+<th><img src=img/32/os.png><br>OS</th>
 <th><img src=img/32/dev.png><br>Devices</th>
 <?
 	ksort($dops);

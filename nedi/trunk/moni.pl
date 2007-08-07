@@ -7,7 +7,8 @@
 # ------------------------------------------------------------------------
 # 15/06/05	initial version
 # 17/05/06	non-blocking uptime queries and optimized dependency resolution
-# 17/01/07 v1.0.w updated path handling
+# 17/01/07	updated path handling
+# 04/06/07	improved stability
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -66,8 +67,7 @@ while(1) {
 	print "==================================================================================\n" if ($opt{v}  or $opt{V});
 
 	foreach my $d (keys %mon){
-	#if ($d eq "GwhgaU10"){$main::dev{$d}{ip} = "1.1.1.1"}								# For me to debug...
-		if($dev{$d}{cm}){									# Query only if device has a community set
+		if(defined $dev{$d}{cm}){								# Query only if device has a community set
 			if($mon{$d}{dp} ne 'none'){							# Does it have a dependency configured?
 				if(exists $dev{$mon{$d}{dp}}){						# And does it  exist in devices?
 					push (@{$depdevs{$mon{$d}{dp}}},$d);				# Add it to dependency tree
@@ -102,15 +102,6 @@ while(1) {
 			$session->get_request(	-varbindlist => ['1.3.6.1.2.1.1.3.0'],
 						-callback    => [\&ProcessUpt, $d]
 			);
-		}else{
-			print "No SNMP community, removing from monitoring!!\n" if ($opt{v}  or $opt{V});# Remove it from monitoring and notify
-			if( ! &db::Delete('monitoring','device',$d) ){
-				die "DB error messages!\n";
-			}
-			if( ! &db::Insert('messages','level,time,source,info',"\"50\",\"$now\",\"$d\",\"No community string, removed from monitoring.\"") ){
-				die "DB error messages!\n";
-			}
-			delete $mon{$d};
 		}
 	}
 	snmp_dispatcher();										# Shoots out the queries above
@@ -187,7 +178,11 @@ while(1) {
 				my $cr  = "";
 				if( $dev{$d}{lo} =~ /$misc::redbuild/){$lvl = 250;$cr = "Emergency"}
 				my $downmsg = "Down!";
-				if($depcount{$d}){$downmsg = "Down, affecting $depcount{$d} devices!!"}
+				if($depcount{$d}){
+					$downmsg = "Down, affecting $depcount{$d} devices!!";
+				}else{
+					$depcount{$d} = 0;						# Prevents potential DB error
+				}
 				if( ! &db::Insert('messages','level,time,source,info',"\"$lvl\",\"$now\",\"$d\",\"$downmsg (no answer for $misc::thres times) \"") ){
 					die "DB error messages!\n";
 				}
@@ -241,7 +236,7 @@ sub MarkDep {
 #===================================================================
 # Recursively count dependants
 #===================================================================
-sub CountDep {
+sub CountDep {	
 	if($_[1] < $maxi and exists $depdevs{$_[0]} ){
 		my $c = scalar @{$depdevs{$_[0]}};
 		print "$_[1]:$_[0]+$c " if $opt{V};
@@ -249,6 +244,8 @@ sub CountDep {
 			$c += &CountDep($d,$_[1]+1);
 		}
 		return $c;
+	}else{
+		return 0;
 	}
 }
 

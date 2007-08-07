@@ -26,7 +26,7 @@ function DbFetchRow($r){
 }
 
 function DbFetchArray($r){
-        return @mysql_fetch_array($r);
+        return mysql_fetch_array($r, MYSQL_ASSOC);
 }
 
 function DbFreeResult($r){
@@ -96,15 +96,15 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 					$v = $st[$x];
 					if( preg_match("/^(firstseen|lastseen|time|i[fp]update)$/",$c) and !preg_match("/^[0-9]+$/",$v) ){
 						$v = strtotime($v);
-					}elseif('mac' == $c){
+					}elseif($c == 'mac'){
 						$v = preg_replace("/[.:-]/","", $v);
-					}elseif('ip' == $c and !preg_match('/^[0-9]+$/',$v) ){
+					}elseif(preg_match("/^(origip|ip)$/",$c) and !preg_match('/^[0-9]+$/',$v) ){
 						if( strstr($v,'/') ){
 							list($ip, $prefix) = explode('/', $v);
 							$dip = sprintf("%u", ip2long($ip));
 							$dmsk = 0xffffffff << (32 - $prefix);
 							$dnet = sprintf("%u", ip2long($ip) & $dmsk );
-							$c = "ip & $dmsk";
+							$c = "$c & $dmsk";
 							$v = $dnet;
 						}else{
 							$v = sprintf("%u", ip2long($v));
@@ -121,7 +121,7 @@ function GenQuery($tab,$do='s',$col='*',$ord='',$lim='',$in=array(),$op=array(),
 			$w = "";
 		}
 		if($do == 'd'){
-			return "DELETE FROM $tab $w $l";
+			return "DELETE FROM $tab $w $o $l";
 		}elseif($do == 'g'){
 			return "SELECT $col,count(*) FROM  $tab $w GROUP BY $col $o $l";
 		}elseif($do == 'a'){

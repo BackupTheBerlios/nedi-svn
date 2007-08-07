@@ -1,12 +1,12 @@
 <?PHP
 
-//===============================
-// Device related functions  (and variables)
-//===============================
+//===================================================================
+// Device related functions
+//===================================================================
 
 //===================================================================
 // sort based on floor
-function floorsort($a, $b) {
+function Floorsort($a, $b){
 
 	if (is_numeric($a) and is_numeric($b) ){
 		if ($a == $b) return 0;
@@ -18,7 +18,7 @@ function floorsort($a, $b) {
 
 //===================================================================
 // Return Sys Services
-function Syssrv($sv) {
+function Syssrv($sv){
 
 	$srv = "";
 
@@ -36,7 +36,7 @@ function Syssrv($sv) {
 
 //===================================================================
 // Return VTP mode
-function VTPmod($vn) {
+function VTPmod($vn){
 
 	$vmod = "";
 
@@ -48,22 +48,22 @@ function VTPmod($vn) {
 
 //===================================================================
 // Return city image
-function CtyImg($nd) {
+function CtyImg($nd){
 
-	if($nd > 99){
-		return "cityl";
-	}elseif($nd > 9){
-		return "citym";
-	}elseif($nd){
-		return "citys";
-	}else{
+	if($nd > 19){
 		return "cityx";
+	}elseif($nd > 9){
+		return "cityl";
+	}elseif($nd > 2){
+		return "citym";
+	}else{
+		return "citys";
 	}
 }
 
 //===================================================================
 // Return building image
-function BldImg($nd,$na) {
+function BldImg($nd,$na){
 
 	global $redbuild;
 	
@@ -72,7 +72,6 @@ function BldImg($nd,$na) {
 	}else{
 		$bc = "";
 	}
-
 	if($nd > 19){
 		return "bldh$bc";
 	}elseif($nd > 9){
@@ -86,7 +85,7 @@ function BldImg($nd,$na) {
 
 //===================================================================
 // Return Interface Type
-function Iftype($it) {
+function Iftype($it){
 
 	if ($it == "6"){$img = "p45";$tit="ethernetCsmacd";
 	}elseif ($it == "7"){$img = "p45";$tit="iso88023Csmacd";
@@ -95,7 +94,9 @@ function Iftype($it) {
 	}elseif ($it == "24"){$img = "tape";$tit="softwareLoopback";
 	}elseif ($it == "28"){$img = "ppp";$tit="slip";
 	}elseif ($it == "37"){$img = "ppp";$tit="atm";
+	}elseif ($it == "39"){$img = "neto";$tit="sonet";
 	}elseif ($it == "44"){$img = "plug";$tit="frameRelayService";
+	}elseif ($it == "49"){$img = "netr";$tit="AAL5 over ATM";
 	}elseif ($it == "56"){$img = "bsw";$tit="fibreChannel";
 	}elseif ($it == "58"){$img = "gsw";$tit="frameRelayInterconnect";
 	}elseif ($it == "53"){$img = "chip";$tit="propVirtual";
@@ -104,29 +105,45 @@ function Iftype($it) {
 	}elseif ($it == "75"){$img = "tel";$tit="isdns";
 	}elseif ($it == "77"){$img = "plug";$tit="lapd";
 	}elseif ($it == "81"){$img = "tel";$tit="ds0";
+	}elseif ($it == "134"){$img = "netr";$tit="ATM Sub Interface";
+	}elseif ($it == "135"){$img = "chip";$tit="Layer 2 Virtual LAN using 802.1Q";
+	}elseif ($it == "209"){$img = "netg";$tit="Transparent bridge interface";
 	}else{$img = "qg";$tit="Other-$it";}
 
 	return array("$img.png",$tit);
 }
 
 //===================================================================
-// Return Routing Protocol
-function RteProto($p) {
+// Generate location string for DB query
+function TopoLoc($reg="",$cty="",$bld=""){
 
-	if	($p == "local")	{return "fogr";}
-	elseif	($p == "netmgmt"){return "fobl";}
-	elseif	($p == "icmp")	{return "fobl";}
-	elseif	($p == "egp")	{return "fobl";}
-	elseif	($p == "ggp")	{return "fobl";}
-	elseif	($p == "hello")	{return "fobl";}
-	elseif	($p == "rip")	{return "fovi";}
-	elseif	($p == "is-is")	{return "fobl";}
-	elseif	($p =="es-is")	{return "fobl";}
-	elseif	($p =="ciscoIgrp"){return "fogy";}
-	elseif	($p =="bbnSpfIgp"){return "fogy";}
-	elseif	($p =="ospf")	{return "foor";}
-	elseif	($p =="bgp")	{return "ford";}
-	else{return "impt";}
+	global $locsep;
+	$l = "";
+	if($reg or $cty or $bld){								# Any sub locations?
+		$l .= "^$reg$locsep";								# Start at region level
+		$l .= ($cty)?"$cty$locsep":"";							# Append city if set
+		$l .= ($bld)?"$bld$locsep":"";							# Append building if set
+	}
+	return $l;
+}
+
+//===================================================================
+// Find best map using a nice recursive function
+function TopoMap($reg="",$cty=""){
+	if($reg){
+		if($cty){
+			if (file_exists("log/map-$reg-$cty.png")) {
+				return "map-$reg-$cty.png";
+			}else{
+				return TopoMap($reg);
+			}
+		}else{
+			if (file_exists("log/map-$reg.png")) {
+				return "map-$reg.png";
+			}
+		}
+	}
+	return "map-top.png";
 }
 
 ?>

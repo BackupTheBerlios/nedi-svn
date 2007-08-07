@@ -7,25 +7,24 @@
 #
 # DATE		COMMENT
 # -----------------------------------------------------------
-# 05/06/05	initial version.
-# 01/03/06	bulk add with auto dependencies
-# 17/03/06	new SQL query support
+# 05/06/05		initial version.
+# 01/03/06		bulk add with auto dependencies
+# 17/03/06		new SQL query support
+# 25/05/07		Minor SQL and cosmetic improvements
+# 12/07/07		new location scheme
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
 
 $bg1	= "AA9999";
 $bg2	= "BBAAAA";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
 include_once ('inc/libmon.php');
 
 $_GET = sanitize($_GET);
+$gen = isset($_GET['gen']) ? $_GET['gen'] : "";
 $loc = isset($_GET['loc']) ? $_GET['loc'] : "";
 $crm = isset($_GET['crm']) ? $_GET['crm'] : "";
 $cad = isset($_GET['cad']) ? $_GET['cad'] : "";
@@ -34,30 +33,7 @@ $nad = isset($_GET['nad']) ? $_GET['nad'] : "";
 $dev = isset($_GET['dev']) ? $_GET['dev'] : "";
 $dep = isset($_GET['dep']) ? $_GET['dep'] : "";
 $dpo = isset($_GET['dpo']) ? $_GET['dpo'] : "";
-$cal = isset($_GET['cal']) ? $_GET['cal'] : "";
 $ars = isset($_GET['ars']) ? $_GET['ars'] : "";
-
-$cpos = strpos($locformat, "c");
-$bpos = strpos($locformat, "b");
-$fpos = strpos($locformat, "f");
-$rpos = strpos($locformat, "r");
-$kpos = strpos($locformat, "k");
-
-$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
-$query	= GenQuery('devices');
-$res	= @DbQuery($query,$link);
-if($res){
-	while( ($d = @DbFetchRow($res)) ){
-		$devs[] = $d[0];
-		$locitems = explode($locsep, $d[10]);
-		if(!($cpos === false) ){$copt[$locitems[$cpos]]++;}
-		if(!($bpos === false) ){$bopt[$locitems[$bpos]]++;}
-	}
-	@DbFreeResult($res);
-}else{
-	print @DbError($link);
-}
-
 ?>
 <h1>Monitoring Setup</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="lflt">
@@ -66,29 +42,31 @@ if($res){
 <img src=img/32/sys.png border=0 title="Set devices to be monitored and their dependencies">
 </a></th>
 <th>
-Location Filter
-<input type="text" name="loc" value="<? echo $loc?>" size="20">
+Location
+<input type="text" name="loc" value="<? echo $loc?>" size="40">
 <select size=1 name="sl" onchange="document.lflt.loc.value=document.lflt.sl.options[document.lflt.sl.selectedIndex].value">
-<option value="">or select
+<option value="">or select ->
 <?
-if($copt){
-	echo '<option value="">------------';
-	ksort($copt);
-	while( list($cty,$nd)=each($copt) ){
-		$ucty = str_replace(" ","%20",$cty);
-		echo "<option value=$ucty ";
-		if($loc == $cty){echo "selected";}
-		echo ">$cty ($nd)\n";
+$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
+$query	= GenQuery('devices','s','name,location','location');
+$res	= @DbQuery($query,$link);
+if($res){
+	while( ($d = @DbFetchRow($res)) ){
+		$devs[] = $d[0];
+		$l = explode($locsep, $d[1]);
+		$lopt[$l[0]][$l[1]]++;
 	}
+	@DbFreeResult($res);
+}else{
+	print @DbError($link);
 }
-if($bopt){
-	echo '<option value="">------------';
-	ksort($bopt);
-	while( list($bld,$nd)=each($bopt) ){
-		$ubld = str_replace(" ","%20",$bld);
-		echo "<option value=$ubld ";
-		if($loc == $bld){echo "selected";}
-		echo ">$bld ($nd)\n";
+foreach(array_keys($lopt) as $r){
+?><option value="<?=TopoLoc($r)?>" style="color:red"><?=$r?>
+
+<?
+	foreach(array_keys($lopt[$r]) as $c){
+?><option value="<?=TopoLoc($r,$c)?>"><?=$c?> (<?=$lopt[$r][$c]?>)
+<?
 	}
 }
 ?>
@@ -96,10 +74,10 @@ if($bopt){
 </th>
 <th>
 <input type="checkbox" name="ars"> auto resolve &nbsp;&nbsp;
-<input type="submit" value="Monitor" name="cal" onclick="return confirm('Monitor matching devices?')" >
+<input type="submit" value="Monitor" name="gen" onclick="return confirm('Monitor matching devices?')" >
 </th>
 <th width=80>
-<input type="submit" value="Show" name="show">
+<input type="submit" value="Show" name="gen">
 </th>
 </tr></table></form><p>
 <?
@@ -124,31 +102,31 @@ if($crm){
 		echo $resmsg;
 	}
 }
-if($loc){
+if($gen){
 ?>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?> >
 <th width=80><img src=img/32/dev.png><br>Device</th>
-<th width=40%><img src=img/32/glob.png><br>Location</th>
-<th width=40%><img src=img/32/find.png><br>Info</th>
+<th><img src=img/32/glob.png><br>Location</th>
+<th><img src=img/32/find.png><br>Info</th>
 <th><img src=img/32/clock.png><br>Check Uptime</th>
 <th><img src=img/32/neti.png><br>Depends On</th>
 <th><img src=img/32/say.png><br>Notification</th></tr>
 
 <?
-	$query	= GenQuery('devices','s','*','','',array('location'),array('regexp'),array($loc) );
+	$query	= GenQuery('devices','s','name,location,snmpversion,icon','','',array('location'),array('regexp'),array($loc) );
 	$res	= @DbQuery($query,$link);
 	if($res){
 		while( ($d = @DbFetchRow($res)) ){
-			$dico[$d['0']] = $d['18'];
-			$dsnm[$d['0']] = $d['14'];
-			$dloc[$d['0']] = $d['10'];
+			$dloc[$d['0']] = $d['1'];
+			$dsnm[$d['0']] = $d['2'];
+			$dico[$d['0']] = $d['3'];
 			$mdev[$d['0']] = 0;
 			$msta[$d['0']] = 0;
-			$mdep[$d['0']] = 0;
+			$mdep[$d['0']] = '-';
 			$msms[$d['0']] = 0;
 			$mmal[$d['0']] = 0;
-			$minfo[$d['0']] = 0;
+			$minfo[$d['0']] = '';
 		}
 		@DbFreeResult($res);
 	}else{
@@ -191,7 +169,7 @@ if($loc){
 		}else{
 			print @DbError($link);
 		}
-		if($cal and ! $mdev[$na] and $dsnm[$na]){
+		if($gen == 'Monitor' and !$mdev[$na] and $dsnm[$na]){
 			$adep = 'none';
 			if(count(array_keys($neb) ) == 1 and $ars){
 				$adep = key($neb);
@@ -200,19 +178,19 @@ if($loc){
 			$query	= GenQuery('monitoring','i','','','',array('device','status','depend','sms','mail','lastchk','uptime','lost','ok'),'',array($na,'0',$adep,'0','0','0','0','0','0') );
 			if( !@DbQuery($query,$link) ){echo "<h4 align=center>".DbError($link)."</h4>";}else{echo "<h3>$na $upokmsg</h3>";$mdev[$na]=1;}
 		}
-		list($bgm,$stat) = GetStatus(1,$mdev[$na],$msta[$na]);
+		list($bgm,$stat) = StatusBg(1,$mdev[$na],$msta[$na]);
 		
 		echo "<tr bgcolor=#$bg>\n";
 		echo "<th bgcolor=#$bgm><a href=Devices-Status.php?dev=$ud><img src=img/dev/$ico.png title=\"$stat\" border=0></a><p>\n";
-		echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=device><b>$na</b></a></th><td>$dloc[$na]</td><td>$minfo[$na]</td>";
+		echo "<b>$na</b></th><td>$dloc[$na]</td><td>$minfo[$na]</td>";
 
 		echo "<th>";
 		if($mdev[$na]){
-			echo "<a href=$_SERVER[PHP_SELF]?loc=$uloc&crm=$ud><img hspace=$hs src=img/16/bchk.png border=0 title=-Check></a>";
+			echo "<a href=?loc=$uloc&crm=$ud&gen=up><img hspace=$hs src=img/16/bchk.png border=0 title=-Check></a>";
 		}elseif($dsnm["$na"]){
-			echo "<a href=$_SERVER[PHP_SELF]?loc=$uloc&cad=$ud><img hspace=$hs src=img/16/bcls.png border=0  title=+Check></a>";
+			echo "<a href=?loc=$uloc&cad=$ud&gen=up><img hspace=$hs src=img/16/bcls.png border=0  title=+Check></a>";
 		}else{
-			echo "<img hspace=$hs src=img/16/bstp.png border=0  title=\"no SNMP available!\"></a>";
+			echo "<img hspace=$hs src=img/16/bstp.png border=0  title=\"SNMP not available!\"></a>";
 		}
 		echo "</th>\n";
 ?>
@@ -220,6 +198,7 @@ if($loc){
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <input type="hidden" name="dev" value="<?=$na?>">
 <input type="hidden" name="loc" value="<?=$loc?>">
+<input type="hidden" name="gen" value="update">
 <input type="text" name="dpo" size=12 value="<?=$mdep[$na]?>" onchange="this.form.submit();" title="type in device name to override link based dependency">
 <SELECT size=1 name="dep" onchange="this.form.submit();" title="set link based dependency">
 <OPTION VALUE="">Select
@@ -232,10 +211,10 @@ if($loc){
 		}
 		echo "</SELECT></form></td>\n";
 		echo "<th>";
-		if($msms[$na]){echo "<a href=$_SERVER[PHP_SELF]?loc=$uloc&dev=$ud&nrm=sms><img hspace=$hs src=img/16/mobil.png border=0 title=-SMS></a>";}
-		else{echo "<a href=$_SERVER[PHP_SELF]?loc=$uloc&dev=$ud&nad=sms><img hspace=$hs src=img/16/bcls.png border=0  title=+SMS></a>";}
-		if($mmal[$na]){echo "<a href=$_SERVER[PHP_SELF]?loc=$uloc&dev=$ud&nrm=mail><img hspace=$hs src=img/16/mail.png border=0 title=-Mail></a>";}
-		else{echo "<a href=$_SERVER[PHP_SELF]?loc=$uloc&dev=$ud&nad=mail><img hspace=$hs src=img/16/bcls.png border=0  title=+Mail></a>";}
+		if($msms[$na]){echo "<a href=?loc=$uloc&dev=$ud&nrm=sms&gen=up><img hspace=$hs src=img/16/mobil.png border=0 title=-SMS></a>";}
+		else{echo "<a href=?loc=$uloc&dev=$ud&nad=sms&gen=up><img hspace=$hs src=img/16/bcls.png border=0  title=+SMS></a>";}
+		if($mmal[$na]){echo "<a href=?loc=$uloc&dev=$ud&nrm=mail&gen=up><img hspace=$hs src=img/16/mail.png border=0 title=-Mail></a>";}
+		else{echo "<a href=?loc=$uloc&dev=$ud&nad=mail&gen=up><img hspace=$hs src=img/16/bcls.png border=0  title=+Mail></a>";}
 		echo "</th></tr>\n";
 		$ndev++;
 	}

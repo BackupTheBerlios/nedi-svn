@@ -8,12 +8,16 @@
 $lang	= 'eng';
 $datfmt = "j.M G:i:s";
 
+$btag	= "";
+$nocache= 0;
+$calendar= 0;
+$refresh = 0;
 $bga	= "D0D0D0";
 $bgb	= "C0C0C0";
 $bia	= "F0F0F0";
 $bib	= "E6E6E6";
 
-$tabtag = "cellspacing=1 cellpadding=6 border=0 width=100%";
+$tabtag = "cellspacing=1 cellpadding=5 border=0 width=100%";
 
 ini_set("memory_limit","16M");							# Added 8.1.2007 due to reporting problems on large networks
 
@@ -30,7 +34,7 @@ if(isset ($_SESSION['group']) ){
 require_once ("lang-$_SESSION[lang].php");
 require_once ("lib" . strtolower($backend) . ".php");
 ?>
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <title>NeDi <?=$self?></title>

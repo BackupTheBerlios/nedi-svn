@@ -30,6 +30,7 @@ $opa = isset( $_POST['opa']) ? $_POST['opa'] : "";
 $opb = isset( $_POST['opb']) ? $_POST['opb'] : "";
 $cop = isset( $_POST['cop']) ? $_POST['cop'] : "";
 $cmd = isset( $_POST['cmd']) ? $_POST['cmd'] : "";
+$sub = isset( $_POST['sub']) ? $_POST['sub'] : "";
 $int = isset( $_POST['int']) ? $_POST['int'] : "";
 $sim = isset( $_POST['sim']) ? $_POST['sim'] : "";
 $scm = isset( $_POST['scm']) ? $_POST['scm'] : "";
@@ -67,7 +68,7 @@ $cols = array(	"name"=>"Name",
 
 <form method="post" name="list" action="<?=$_SERVER['PHP_SELF']?>" name="cfg">
 <table bgcolor=#000000 <?=$tabtag?> >
-<tr bgcolor=#<?=$bg1?>><th width=80 rowspan=3><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/wrte.png border=0 title="sends commands or configures devices. Warning: Use simulate first!"></a></th>
+<tr bgcolor=#<?=$bg1?>><th width=80 rowspan=3><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/wrte.png border=0 title="2nd text field in Condition B activates substitution mode (1 comand only, no interfaces)"></a></th>
 <th valign=top>Condition A<p>
 <SELECT size=1 name="ina">
 <?
@@ -81,7 +82,7 @@ foreach ($cols as $k => $v){
 <? selectbox("oper",$opa);?>
 </SELECT>
 <p><a href="javascript:show_calendar('list.sta');"><img src="img/cal.png" border=0 hspace=8></a>
-<input type="text" name="sta" value="<?=$sta?>" size="25">
+<input type="text" name="sta" value="<?=$sta?>" size="25"OnFocus=select();>
 </th>
 <th valign=top>Combination<p>
 <SELECT size=1 name="cop">
@@ -92,7 +93,7 @@ foreach ($cols as $k => $v){
 <SELECT size=1 name="inb">
 <?
 foreach ($cols as $k => $v){
-       $selopt = ($ina == $k)?"selected":"";
+       $selopt = ($inb == $k)?"selected":"";
        echo "<option value=\"$k\" $selopt >$v\n";
 }
 ?>
@@ -101,13 +102,15 @@ foreach ($cols as $k => $v){
 <? selectbox("oper",$opb);?>
 </SELECT>
 <p><a href="javascript:show_calendar('list.stb');"><img src="img/cal.png" border=0 hspace=8></a>
-<input type="text" name="stb" value="<?=$stb?>" size="25">
+<input type="text" name="stb" value="<?=$stb?>" size="25"OnFocus=select();>
+<input type="text" name="sub" value="<?=$sub?>" size="25" OnFocus=select(); title="Substitutes this search string and use result as command argument">
 </th>
 
 </tr><tr bgcolor=#<?=$bg2?>>
 
-<th valign=top colspan=2>Commands / Configuration<p>
-<textarea rows="6" name="cmd" cols="60"><?=$cmd?></textarea>
+<th valign=top colspan=2>
+Commands / Configuration<p>
+<textarea rows="4" name="cmd" cols="60"><?=$cmd?></textarea>
 </th>
 
 <th valign=top>Interface Configuration<p>
@@ -160,15 +163,16 @@ if($ina){
 	if($res){
 		$prevos = "";
 		$oserr = 0;
-		while( ($d = @DbFetchRow($res)) ){
-			if($d[17]){
-				$devip[$d[0]] = long2ip($d[1]);
-				if ($prevos and $prevos != $d[8]){$oserr = 1;}
-				$prevos = $d[8];
-				$devos[$d[0]] = $d[8];
-				$devbi[$d[0]] = $d[9];
-				$devpo[$d[0]] = $d[16];
-				$devlo[$d[0]] = $d[17];
+		while( ($d = @DbFetchArray($res)) ){
+			if($d['login'] and $d['cliport']){
+				$devip[$d['name']] = long2ip($d['ip']);
+				if ($prevos and $prevos != $d['os']){$oserr = 1;}
+				$prevos = $d['os'];
+				$devos[$d['name']] = $d['os'];
+				$devsta[$d['name']] = $d[$ina];
+				$devstb[$d['name']] = $d[$inb];
+				$devpo[$d['name']] = $d['cliport'];
+				$devlo[$d['name']] = $d['login'];
 				$nres++;
 			}else{
 				echo "<h4>No login for $d[0]!</h4>\n";
@@ -181,31 +185,46 @@ if($ina){
 	}
 	if(!isset($devip) ){echo $resmsg;die;}
 	if($sim){
-		Buildcmd();
-
-		echo "<h2>Devices</h2>\n";
+		if(!$sub){
+			echo "<center><h2>Commands</h2>\n";
+			echo "<table bgcolor=#000000 bgcolor=#000000 cellspacing=1 cellpadding=8 border=0 width=80%>\n";
+			echo "<tr bgcolor=#EEEEEE><td align=left><pre>\n";
+			echo Buildcmd();
+			echo "</pre></td></tr></table>\n";
+		}
+		echo "<h2>Targets</h2>\n";
 		echo "<table bgcolor=#666666 $tabtag>\n";
-		echo "<tr bgcolor=#$bg2><th colspan=2>Device</th><th>OS</th><th>Bootimage</th><th>Login</th><th>IP Address</th><th>Port</th></tr>\n";
+		echo "<tr bgcolor=#$bg2><th colspan=2>Device</th><th>$cols[$ina]</th><th>".(($sub)?"Command":"$cols[$inb]</th>");
+		echo "<th>Login</th><th>IP Address</th><th>Port</th></tr>\n";
 		$row = 0;
 		foreach ($devip as $dv => $ip){
 			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 			$row++;
-			echo "<tr bgcolor=#$bg><td align=right>$row</td><th>$dv</th><td>$devos[$dv]</td><td>$devbi[$dv]</td><td>$devlo[$dv]</td><td><a href=telnet://$ip>$ip</a></td><td align=center>$devpo[$dv]</td></tr>\n";
+			echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th><td><b>$dv</b></td>";
+			echo "<td>$devsta[$dv]</td><td>" . (($sub)?Buildcmd($devstb[$dv]):$devstb[$dv]) . "</td>\n";
+			echo "<td>$devlo[$dv]</td><td><a href=telnet://$ip>$ip</a></td><td>$devpo[$dv]</td></tr>\n";
 		}
 		echo "</table><table bgcolor=#666666 $tabtag >\n";
 		echo "<tr bgcolor=#$bg2><td>$nres results using $query</td></tr></table>\n";
 	}else{
 		if(preg_match("/adm/",$_SESSION['group']) ){
-			$fd =  @fopen("log/cmd_$_SESSION[user]","w") or die ("can't create log/cmd_$_SESSION[user]");
-			fwrite($fd,Buildcmd($con) );
-			fclose($fd);
-
-			echo "<h2>Devices</h2></center><p><ul><ul><ol>\n";
+			if(!$sub){
+				$fd =  @fopen("log/cmd_$_SESSION[user]","w") or die ("can't create log/cmd_$_SESSION[user]");
+				fwrite($fd,Buildcmd('',$con) );
+				fclose($fd);
+			}
+			echo "<h2>Targets</h2></center><p><ul><ul><ol>\n";
 			foreach ($devip as $dv => $ip){
 				flush();
 				if($devpo[$dv] == 22){
-					echo "<li><b>$dv</b> <a href=ssh://$ip>$ip</a> SSH ignored...";
+					echo "<li><b>$dv</b> <a href=ssh://$ip>$ip</a> SSH not supported yet...";
 				}else{
+					if($sub){
+						$fd =  @fopen("log/cmd_$_SESSION[user]","w") or die ("can't create log/cmd_$_SESSION[user]");
+						fwrite($fd,Buildcmd($devstb[$dv],$con) );
+						fclose($fd);
+					}
+
 					echo "<li><b>$dv</b> <a href=telnet://$ip>$ip</a> ";
 					$cred = ( stristr('i',$guiauth) )?"$_SESSION[user] $pwd":"$devlo[$dv] dummy";
 					$log = `perl inc/Devsend.pl $ip $devpo[$dv] $cred $devos[$dv] log/cmd_$_SESSION[user]`;
@@ -220,29 +239,27 @@ if($ina){
 	}
 }
 
-function Buildcmd($cfgandwrite=0){
+function Buildcmd($arg="",$cfgandwrite=0){
 
-	global $cmd, $sint, $eint, $smod, $emod, $int, $icfg;
+	global $sub, $cmd, $stb, $sint, $eint, $smod, $emod, $int, $icfg;
 
 	$config = "";
 	if($cfgandwrite){$config .= "conf t\n";}
-	$config .= "$cmd\n";
-	if($int){
-		for($m = $smod;$m <= $emod;$m++){
-			for($i = $sint;$i <= $eint;$i++){
-				$config .= "int $int $m/$i\n";
-				$config .= "$icfg\n";
+	$config .= $cmd;
+	if($sub){
+		$config .= preg_replace("/$stb/",$sub,$arg);
+	}else{
+		if($int){
+			for($m = $smod;$m <= $emod;$m++){
+				for($i = $sint;$i <= $eint;$i++){
+					$config .= "int $int $m/$i\n";
+					$config .= "$icfg\n";
+				}
 			}
 		}
 	}
-	if($cfgandwrite){$config .= "end\nwrite mem\n";}
-
-	echo "<center><h2>Commands</h2>\n";
-	echo "<table bgcolor=#000000 bgcolor=#000000 cellspacing=1 cellpadding=8 border=0 width=80%><tr bgcolor=#EEEEEE><td align=left><pre>\n";
-	echo $config;
-	echo "</pre></td></tr></table>\n";
-
-	return $config;
+	if($cfgandwrite){$config .= "\nend\nwrite mem\n";}
+	return "$config\n";
 }
 
 include_once ("inc/footer.php");

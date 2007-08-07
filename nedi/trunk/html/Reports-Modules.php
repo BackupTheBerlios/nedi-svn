@@ -6,13 +6,14 @@
 #
 # DATE		COMMENT
 # -----------------------------------------------------------
-# 26/06/06	initial version.
+# 26/06/06	initial version
+# 03/07/07	minor changes & new inventory
 */
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "d0d6dd";
-$bg2	= "e0e6ee";
+$bg1	= "D0D0D7";
+$bg2	= "E0E0E7";
 $btag	= "";
 $nocache= 0;
 $calendar= 0;
@@ -22,64 +23,53 @@ include_once ("inc/header.php");
 
 $_GET = sanitize($_GET);
 $rep = isset($_GET['rep']) ? $_GET['rep'] : array();
-$lim = isset($_GET['lim']) ? $_GET['lim'] : 10;
+$flt = isset($_GET['flt']) ? $_GET['flt'] : "";
 $ord = isset($_GET['ord']) ? "checked" : "";
 ?>
 <h1>Module Reports</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/dmsc.png border=0 title="Device Module based reports">
+<img src=img/32/dcog.png border=0 title="Device Module based reports">
 </a></th>
 <th>Select Report(s)</th>
 <th>
 <SELECT MULTIPLE name="rep[]" size=4>
-<OPTION VALUE="mty" <? if(in_array("mty",$rep)){echo "selected";} ?> >Models
-<OPTION VALUE="mli" <? if(in_array("mli",$rep)){echo "selected";} ?> >Listing
+<OPTION VALUE="dis" <?=(in_array("dis",$rep))?"selected":""?> >Distribution
+<OPTION VALUE="inv" <?=(in_array("inv",$rep))?"selected":""?> >Inventory
 </SELECT>
-
 </th>
-<th>Limit
-<SELECT size=1 name="lim">
-<OPTION VALUE="10" <?=($lim == "10")?"selected":""?> >10
-<OPTION VALUE="20" <?=($lim == "20")?"selected":""?> >20
-<OPTION VALUE="50" <?=($lim == "50")?"selected":""?> >50
-<OPTION VALUE="100" <?=($lim == "100")?"selected":""?> >100
-<OPTION VALUE="500" <?=($lim == "500")?"selected":""?> >500
-<OPTION VALUE="0" <?=($lim == "0")?"selected":""?> >None!
-</SELECT>
+<th>Filter
+<input type="text" name="flt" value="<?=$flt?>" size="20" title="Filter module-models or device-types">
+</th>
 </th>
 <th>
-<INPUT type="checkbox" name="ord"  <?=$ord?> > alternative order
+<INPUT type="checkbox" name="ord"  <?=$ord?> title="Sort by model or type"> alternative
 </th>
 </SELECT></th>
-<th width=80><input type="submit" name="gen" value="Show"></th>
+<th width=80><input type="submit" name="do" value="Show"></th>
 </tr></table></form><p>
 <?
-if($rep){
-
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
-if ( in_array("mty",$_GET['rep']) ){
+
+if ( in_array("dis",$rep) ){
 ?>
 <h2>Model Distribution</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th width=10%><img src=img/32/fiap.png><br>Type</th>
-<th width=70%><img src=img/32/dev.png><br>Devices</th>
-<th width=20%><img src=img/32/form.png><br>Modules</th>
+<th width=10%><img src=img/32/fiap.png><br>Model</th>
+<th><img src=img/32/info.png><br>Description</th>
+<th width=70%><img src=img/32/dev.png><br>Installed on</th>
+<th width=20%><img src=img/32/form.png><br>Total Count</th>
 <?
-	$query	= GenQuery('modules');
+	$query	= GenQuery('modules','s','device,model,description','','',array('model'),array('regexp'),array($flt) );
 	$res	= @DbQuery($query,$link);
 	if($res){
 		$nmod = 0;
 		$nummo	= array();
 		while( ($m = @DbFetchRow($res)) ){
-			if( preg_match("/^[0-9]+$/",$m[2]) ){
-				$mdl = $m[3];
-			}else{
-				$mdl = $m[2];
-			}
-			$nummo[$mdl]++;
-			$modev[$mdl][$m[0]]++;
+			$nummo[$m[1]]++;
+			$modev[$m[1]][$m[0]]++;
+			$modes[$m[1]] = $m[2];
 			$nmod++;
 		}
 		@DbFreeResult($res);
@@ -97,48 +87,64 @@ if ( in_array("mty",$_GET['rep']) ){
 		if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 		$row++;
 		$tbar = Bar($n,0);
+		$um = rawurlencode($mdl);
 		echo "<tr bgcolor=#$bg>\n";
-		echo "<th bgcolor=#$bi width=10%>$mdl</th>\n";
-		echo "<td>";
+		echo "<th bgcolor=#$bi width=10%><a href=Devices-Modules.php?ina=model&opa==&sta=$um><b>$mdl</b></a></th>\n";
+		echo "<td>$modes[$mdl]</td><td>";
 		foreach ($modev[$mdl] as $dv => $ndv){
 			$ud = rawurlencode($dv);
 			echo "<a href=Devices-Status.php?dev=$ud>$dv</a>:<b>$ndv</b> ";
 		}
 		echo "</td>\n";
 		echo "<td>$tbar $n</td></tr>\n";
+		if($row == $lim){break;}
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
 	echo "<tr bgcolor=#$bg2><td>$row module types of $nmod modules in total</td></tr></table>\n";
 }
 
-if ( in_array("mli",$_GET['rep']) ){
+if ( in_array("inv",$rep) ){
 ?>
-<h2>Listing</h2>
+<h2>Inventory <?=($flt) ? " on \"$flt\" devices":"";?></h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th colspan=2><img src=img/32/dev.png><br>Device / Slot</th>
-<th><img src=img/32/fiap.png><br>Model</th>
-<th><img src=img/32/info.png><br>Description</th>
+<th><img src=img/32/find.png><br>Info</th>
 <th><img src=img/32/form.png><br>Serial Number</th>
 <th><img src=img/32/nic.png><br>HW</th>
 <th><img src=img/32/mem.png><br>FW</th>
-<th><img src=img/32/cog.png><br>SW</th>
+<th><img src=img/32/dsw.png><br>SW</th>
 <?
 	if($ord){
-		$sort = "model";
+		$sort = "type";
 	}else{
-		$sort = "";
+		$sort = "name";
 	}
-	$query	= GenQuery('modules','s','*',"$sort");
+	$query	= GenQuery('devices','s','name,type,serial,os,bootimage',$sort,'',array('type'),array('regexp'),array($flt) );
 	$res	= @DbQuery($query,$link);
 	if($res){
+		$dev = 0;
 		$row = 0;
-		while( ($m = @DbFetchRow($res)) ){
+		while( $d = @DbFetchRow($res) ){
 			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+			$dev++;
 			$row++;
-			$ud = rawurlencode($m[0]);
-			echo "<tr bgcolor=#$bg><th bgcolor=#$bi><a href=Devices-Status.php?dev=$ud>$m[0]</a></th>\n";
-			echo "<td>$m[1]</td><td>$m[2]</td><td>$m[3]</td><td>$m[4]</td><td>$m[5]</td><td>$m[6]</td><td>$m[7]</td></tr>\n";
-			if($row == $lim){break;}
+			$ud = rawurlencode($d[0]);
+			echo "<tr bgcolor=#$bg><th bgcolor=#$bia><a href=Devices-Status.php?dev=$ud><b>$d[0]</b></a></th>\n";
+			echo "<td align=right>-</td><td><b>$d[1]</b></td><td>$d[2]</td><td>-</td><td>$d[3]</td><td>$d[4]</td></tr>\n";
+			$mquery	= GenQuery('modules','s','*','slot','',array('device'),array('='),array($d[0]));
+			$mres	= @DbQuery($mquery,$link);
+			if($mres){
+				while( ($m = @DbFetchRow($mres)) ){
+					if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
+					$row++;
+					echo "<tr bgcolor=#$bg><td bgcolor=#$bib></td>\n";
+					echo "<td align=right>$m[1]</td><td><b>$m[2]</b> $m[3]</td><td>$m[4]</td><td>$m[5]</td><td>$m[6]</td><td>$m[7]</td></tr>\n";
+				}
+				@DbFreeResult($mres);
+			}else{
+				print @DbError($link);
+				die;
+			}
 		}
 		@DbFreeResult($res);
 	}else{
@@ -146,9 +152,7 @@ if ( in_array("mli",$_GET['rep']) ){
 		die;
 	}
 	echo "</table><table bgcolor=#666666 $tabtag >\n";
-	echo "<tr bgcolor=#$bg2><td>$row modules shown</td></tr></table>\n";
-}
-
+	echo "<tr bgcolor=#$bg2><td>$dev devices showing $row assets in total</td></tr></table>\n";
 }
 
 include_once ("inc/footer.php");

@@ -3,7 +3,7 @@
 
 # General
 SNMPv	2HC
-Type	Rtr3620
+Type	cisco3620	
 OS	IOS
 Icon	rsbl
 Bridge	

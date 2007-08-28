@@ -14,19 +14,15 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "77BBAA";
-$bg2	= "88CCBB";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
+$bg1	= "D0DFD0";
+$bg2	= "E0EFD0";
 
 include_once ("inc/header.php");
 
 $_GET = sanitize($_GET);
 $opr = isset($_GET['opr']) ? $_GET['opr'] : "";
 $ipf = isset($_GET['ipf']) ? $_GET['ipf'] : "";
-$shw = isset($_GET['shw']) ? $_GET['shw'] : "";
+$do = isset($_GET['do']) ? $_GET['do'] : "";
 ?>
 <h1>Network Report</h1>
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="netlist">
@@ -43,11 +39,11 @@ IP Address
 <input type="text" name="ipf" value="<?=$ipf?>" size="20"> 
 </th>
 <th width=80>
-<input type="submit" name="shw" value="Show">
+<input type="submit" name="do" value="Show">
 </th>
 </tr></table></form>
 <?
-if ($shw) {
+if ($do) {
 	$query	= GenQuery('networks','s','*','ip','',array('ip'),array('='),array($ipf) );
 	$link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 	$res	= @DbQuery($query,$link);
@@ -77,7 +73,6 @@ if ($shw) {
 					$devs[$dnet][$n[0]] = "<span style=\"color : blue\">mask base</span> on $n[1]";
 					$nquery	= GenQuery('nodes','a',"ip & $n[3]",'','lastseen - firstseen',array("ip & $n[3]"),array('='),array($dnet) );
 					$nodres	= @DbQuery($nquery,$link);
-					$nnod	= @DbNumRows($nodres);
 					$no		= @DbFetchRow($nodres);
 					$pop[$dnet]	= $no[1];
 					$age[$dnet]	= intval($no[2]/86400);
@@ -113,7 +108,7 @@ if ($shw) {
 				}
 				echo "<tr bgcolor=#$bg>";
 				echo "<td bgcolor=$bi width=20 align=center><img src=img/16/$ntimg title=$ntit></td>\n";
-				echo "<td><a href=Devices-Map.php?ina=network&flt=$net%2F$pfix&draw=1>$net/$pfix</a></td>\n";
+				echo "<td><a href=Topology-Map.php?ina=network&flt=$net%2F$pfix&draw=1>$net/$pfix</a></td>\n";
 				echo "<td>$dvs</td><td>$pbar <a href=Nodes-List.php?ina=ip&opa==&sta=$net/$pfix&ord=ip>$pop[$dn]</a></td>\n";
 				echo "<td>$abar $age[$dn] days</td>\n";
 				echo "</tr>\n";

@@ -13,6 +13,7 @@ function Nimg($m) {
 	elseif (stristr($m,"ACCTON"))				{$i = "acc";}
 	elseif (stristr($m,"ACER"))				{$i = "acr";}
 	elseif (stristr($m,"ADVANTECH"))			{$i = "adv";}
+	elseif (stristr($m,"ADVANCED DIGITAL INFORMATION"))	{$i = "adi";}
 	elseif (stristr($m,"ADAPTEC"))				{$i = "adt";}
 	elseif (stristr($m,"ADVANCED TECHNOLOGY &"))		{$i = "adtx";}
 	elseif (stristr($m,"AGILENT"))				{$i = "agi";}
@@ -20,35 +21,42 @@ function Nimg($m) {
 	elseif (stristr($m,"ACTIONTEC"))			{$i = "atec";}
 	elseif (stristr($m,"ALLEN BRAD"))			{$i = "ab";}
 	elseif (stristr($m,"ASUS"))				{$i = "asu";}
+	elseif (stristr($m,"AVM GmbH"))				{$i = "avm";}
 	elseif (stristr($m,"AXIS"))				{$i = "axis";}
 	elseif (stristr($m,"BECKHOFF"))				{$i = "bek";}
 	elseif (stristr($m,"BROADCOM"))				{$i = "bcm";}
 	elseif (stristr($m,"BROCADE"))				{$i = "brc";}
-	elseif (stristr($m,"EMULEX"))				{$i = "emx";}
-	elseif (stristr($m,"ENTRADA"))				{$i = "ent";}
-	elseif (stristr($m,"FIRST INTERNAT"))			{$i = "fic";}
-	elseif (stristr($m,"INTERGRAPH"))			{$i = "igr";}
-	elseif (stristr($m,"KINGSTON"))				{$i = "ktc";}
-	elseif (stristr($m,"KYOCERA"))				{$i = "kyo";}
-	elseif (stristr($m,"LEXMARK"))				{$i = "lex";}
+	elseif (stristr($m,"BROTHER INDUSTRIES"))		{$i = "bro";}
 	elseif (stristr($m,"CANON"))				{$i = "can";}
 	elseif (stristr($m,"COMPAQ"))				{$i = "q";}
 	elseif (stristr($m,"COMPAL"))				{$i = "cpl";}
 	elseif (stristr($m,"DELL"))				{$i = "de";}
 	elseif (stristr($m,"D-LINK"))				{$i = "dli";}
 	elseif (stristr($m,"DIGITAL EQUIPMENT"))		{$i = "dec";}
+	elseif (stristr($m,"ELECTRONICS FOR IMAGING"))		{$i = "efi";}
+	elseif (stristr($m,"EMULEX"))				{$i = "emx";}
+	elseif (stristr($m,"ENTRADA"))				{$i = "ent";}
+	elseif (stristr($m,"EPSON"))				{$i = "eps";}
+	elseif (stristr($m,"FIRST INTERNAT"))			{$i = "fic";}
 	elseif (stristr($m,"FUJITSU"))				{$i = "fs";}
 	elseif (stristr($m,"GIGA-BYTE"))			{$i = "gig";}
 	elseif (stristr($m,"HEWLETT"))				{$i = "hp";}
 	elseif (stristr($m,"IBM"))				{$i = "ibm";}
-	elseif (stristr($m,"INTERFLEX"))			{$i = "intr";}
 	elseif (stristr($m,"INTEL"))				{$i = "int";}
+	elseif (stristr($m,"INTERFLEX"))			{$i = "intr";}
+	elseif (stristr($m,"INTERGRAPH"))			{$i = "igr";}
 	elseif (stristr($m,"IWILL"))				{$i = "iwi";}
+	elseif (stristr($m,"KINGSTON"))				{$i = "ktc";}
+	elseif (stristr($m,"KYOCERA"))				{$i = "kyo";}
+	elseif (stristr($m,"LEXMARK"))				{$i = "lex";}
+	elseif (stristr($m,"Microsoft Corporation"))		{$i = "ms";}
 	elseif (stristr($m,"MINOLTA"))				{$i = "min";}
 	elseif (stristr($m,"LINKSYS"))				{$i = "lsy";}
 	elseif (stristr($m,"MICRO-STAR"))			{$i = "msi";}
 	elseif (stristr($m,"LANTRONIX"))			{$i = "ltx";}
+	elseif (stristr($m,"LANCOM"))				{$i = "lac";}
 	elseif (stristr($m,"MOTOROLA"))				{$i = "mot";}
+	elseif (stristr($m,"NATIONAL INSTRUMENTS"))		{$i = "ni";}
 	elseif (stristr($m,"NETWORK COMP"))			{$i = "ncd";}
 	elseif (stristr($m,"NETGEAR"))				{$i = "ngr";}
 	elseif (stristr($m,"NEXT"))				{$i = "nxt";}
@@ -57,6 +65,7 @@ function Nimg($m) {
 	elseif (stristr($m,"PLANET"))				{$i = "pla";}
 	elseif (stristr($m,"PAUL SCHERRER"))			{$i = "psi";}
 	elseif (stristr($m,"POLYCOM"))				{$i = "ply";}
+	elseif (stristr($m,"PROXIM"))				{$i = "prx";}
 	elseif (stristr($m,"QUANTA"))				{$i = "qnt";}
 	elseif (stristr($m,"RARITAN"))				{$i = "rar";}
 	elseif (stristr($m,"RAD DATA"))				{$i = "rad";}
@@ -72,7 +81,6 @@ function Nimg($m) {
 	elseif (stristr($m,"STRATUS"))				{$i = "sts";}
 	elseif (stristr($m,"SUN MICROSYSTEMS"))			{$i = "sun";}
 	elseif (stristr($m,"SUPERMICRO"))			{$i = "sum";}
-	elseif (stristr($m,"STANDARD MICROSYS"))		{$i = "smc";}
 	elseif (stristr($m,"HUGHES"))				{$i = "wsw";}
 	elseif (stristr($m,"FOUNDRY"))				{$i = "fdry";}
 	elseif (stristr($m,"NUCLEAR"))				{$i = "atom";}
@@ -84,10 +92,12 @@ function Nimg($m) {
 	elseif (stristr($m,"WISTRON"))				{$i = "wis";}
 	elseif (stristr($m,"XYLAN"))				{$i = "xylan";}
 	elseif (stristr($m,"XEROX"))				{$i = "xrx";}
+	elseif (stristr($m,"ZYXEL COMMUNICATIONS"))		{$i = "zyx";}
 	elseif (preg_match("/3\s*COM|MEGAHERTZ/i",$m))		{$i = "3com";}
 	elseif (preg_match("/AIRONET|CISCO/i",$m))		{$i = "cis";}
 	elseif (preg_match("/AVAYA|LANNET/i",$m))		{$i = "ava";}
 	elseif (preg_match("/BAY|NORTEL|NETICS|XYLOGICS/i",$m))	{$i = "nort";}
+	elseif (preg_match("/SMC Net|STANDARD MICROSYS/i",$m))	{$i = "smc";}
 	else							{$i = "gen";}
 	return "$i.png";
 }
@@ -163,7 +173,7 @@ function CheckTCP ($ip, $p,$d){
 			}elseif( preg_match("/CONTENT=\"(.*)\">/i",$ans,$mstr) ){
 				return "<img src=img/16/bchk.png hspace=20> " . $mstr[1];
 			}else{
-				$mstr = preg_replace("/[^\x20-\x7e]/",'',$ans);
+				$mstr = preg_replace("/[^\x20-\x7e]|<!|!>/",'',$ans);
 				return "<img src=img/16/bchk.png hspace=20> $mstr";
 			}
 		}

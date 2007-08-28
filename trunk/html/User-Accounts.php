@@ -13,10 +13,6 @@
 
 $bg1	= "CCAA88";
 $bg2	= "DDBB99";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 $hs	= "6";
 
 include_once ("inc/header.php");

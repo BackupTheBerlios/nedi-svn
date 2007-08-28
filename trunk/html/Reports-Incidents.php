@@ -12,12 +12,8 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$bg1	= "eeccaa";
-$bg2	= "ffddaa";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
+$bg1	= "DFD7D0";
+$bg2	= "EFE7E0";
 
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
@@ -56,7 +52,7 @@ $bpos = strpos($locformat, "b");
 </th>
 </SELECT></th>
 
-<th width=80><input type="submit" name="shw" value="Show"></th>
+<th width=80><input type="submit" name="do" value="Show"></th>
 </tr></table></form><p>
 <?
 if($rep){
@@ -253,7 +249,7 @@ elseif($lim == 0){$heuer -= 5;}
 			}else{
 				$ninc = count($curi[$t]);
 				if($ninc == 1){
-					echo "<img src=img/16/bomb.png border=0 title=\"Only $ninc incident on $then[weekday]\"></a>";
+					echo "<img src=img/16/bomb.png border=0 title=\"Only 1 incident on $then[weekday]\"></a>";
 				}elseif($ninc < 10){
 					echo "<img src=img/16/impt.png border=0 title=\"$ninc incidents on $then[weekday]\"></a>";
 				}else{

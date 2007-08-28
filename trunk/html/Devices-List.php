@@ -4,7 +4,7 @@
 # Program: Devices-List.php
 # Programmer: Remo Rickli
 #
-# DATE		COMMENT
+# DATE	COMMENT
 # -----------------------------------------------------------
 # 22/02/05	initial version.
 # 04/03/05	Revised backend
@@ -15,10 +15,7 @@
 
 $bg1	 = "88AADD";
 $bg2	 = "99BBEE";
-$btag	 = "";
-$nocache = 0;
 $calendar= 1;
-$refresh = 0;
 
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
@@ -32,7 +29,7 @@ $opa = isset($_GET['opa']) ? $_GET['opa'] : "";
 $opb = isset($_GET['opb']) ? $_GET['opb'] : "";
 $cop = isset($_GET['cop']) ? $_GET['cop'] : "";
 $ord = isset($_GET['ord']) ? $_GET['ord'] : "";
-$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','location','contact','type');
+$col = isset($_GET['col']) ? $_GET['col'] : array('name','ip','serial','type','location','contact');
 
 $cols = array(	"name"=>"Name",
 		"ip"=>"Main IP",
@@ -52,7 +49,11 @@ $cols = array(	"name"=>"Name",
 		"cliport"=>"CLI port",
 		"login"=>"Login",
 		"firstseen"=>"First Seen",
-		"lastseen"=>"Last Seen"
+		"lastseen"=>"Last Seen",
+		"cpu"=>"CPU Usage",
+		"memcpu"=>"Avail CPU Mem",
+		"memio"=>"Avail IO Mem",
+		"temp"=>"Temperature"
 		);
 
 ?>
@@ -104,36 +105,21 @@ foreach ($cols as $k => $v){
        $selopt = (in_array($k,$col))?"selected":"";
        echo "<option value=\"$k\" $selopt >$v\n";
 }
-if($rrdstep){ ?>
+?>
 <OPTION VALUE="graphs" <?=(in_array("graphs",$col))?"selected":""?> >Graphs
-<? } ?>
 </SELECT>
 </th>
-<th width=80><input type="submit" value="Search"></th>
+<th width=80><input type="submit" value="Show"></th>
 </tr></table></form><p>
 <?
 if ($ina){
 	echo "<table bgcolor=#666666 $tabtag><tr bgcolor=#$bg2>\n";
-
 	ColHead('name',80);
-	if( in_array("ip",$col) ){ColHead('ip');}
-	if( in_array("origip",$col) ){ColHead('origip');}
-	if( in_array("serial",$col) ){ColHead('serial');}
-	if( in_array("type",$col) ){ColHead('type');}
-	if( in_array("services",$col) ){ColHead('services');}
-	if( in_array("description",$col) ){ColHead('description');}
-	if( in_array("os",$col) ){ColHead('os');}
-	if( in_array("bootimage",$col) ){ColHead('bootimage');}
-	if( in_array("location",$col) ){ColHead('location');}
-	if( in_array("contact",$col) ){ColHead('contact');}
-	if( in_array("vtpdomain",$col) ){ColHead('vtpdomain');}
-	if( in_array("vtpmode",$col) ){ColHead('vtpmode');}
-	if( in_array("snmpversion",$col) ){ColHead('snmpversion');}
-	if( in_array("community",$col) ){ColHead('community');}
-	if( in_array("login",$col) ){ColHead('login');}
-	if( in_array("cliport",$col) ){ColHead('cliport');}
-	if( in_array("firstseen",$col) ){ColHead('firstseen');}
-	if( in_array("lastseen",$col) ){ColHead('lastseen');}
+	foreach($col as $h){
+		if($h != 'graphs' and $h != 'name'){
+			ColHead($h);
+		}
+	}
 	if( in_array("graphs",$col) ){echo "<th>Graphs</th>";}
 	echo "</tr>\n";
 
@@ -147,13 +133,13 @@ if ($ina){
 			$row++;
 			$ip = long2ip($dev[1]);
 			$oi = long2ip($dev[19]);
-			$ud = urlencode($dev[0]);
+			$ud = rawurlencode($dev[0]);
 			list($fc,$lc) = Agecol($dev[4],$dev[5],$row % 2);
 			echo "<tr bgcolor=#$bg><th bgcolor=#$bi>\n";
 			if(in_array("name",$col)){
 				echo "<a href=Devices-Status.php?dev=$ud><img src=img/dev/$dev[18].png title=\"$dev[3]\" border=0 vspace=4></a><br>\n";
 				}
-			echo "<a href=Nodes-List.php?ina=device&opa==&sta=$ud&ord=device><b>$dev[0]</b></a>\n";
+			echo "<b>$dev[0]</b>\n";
 			if(in_array("ip",$col)){
 				echo "<td><a href=telnet://$ip>$ip</a></td>";
 			}
@@ -163,7 +149,7 @@ if ($ina){
 			if(in_array("serial",$col)){ echo "<td>$dev[2]</td>";}
 			if(in_array("type",$col)){ 
 				if( strstr($dev[3],"1.3.6.") ){
-					echo "<td><a href=Other-Defgen.php?so=$dev[3]&ip=$ip&c=$dev[15]>$dev[3]</a></td>";
+					echo "<td><a href=Other-Defgen.php?so=$dev[3]&ip=$ip&co=$dev[15]>$dev[3]</a></td>";
 				}else{
 					echo "<td>$dev[3]</td>";
 				}
@@ -191,6 +177,10 @@ if ($ina){
 				$ls       = date("j.M G:i:s",$dev[5]);
 				echo "<td bgcolor=#$lc>$ls</td>";
 			}
+			if(in_array("cpu",$col))	{echo "<td align=right>$dev[20]</td>";}
+			if(in_array("memcpu",$col))	{echo "<td align=right>$dev[21]</td>";}
+			if(in_array("memio",$col))	{echo "<td align=right>$dev[22]</td>";}
+			if(in_array("temp",$col))	{echo "<td align=right>$dev[23]</td>";}
 			if(in_array("graphs",$col)){
 				echo "<th><a href=Devices-Graph.php?dv=$ud&cpu=on><img src=inc/drawrrd.php?dv=$ud&t=cpu&s=s border=0 title=\"CPU load\">";
 				echo "<a href=Devices-Graph.php?dv=$ud&mem=on><img src=inc/drawrrd.php?dv=$ud&t=mem&s=s border=0 title=\"Available Memory\">";

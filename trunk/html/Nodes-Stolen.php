@@ -13,10 +13,6 @@
 
 $bg1	= "ccdd88";
 $bg2	= "ddeeaa";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 include_once ("inc/header.php");
 include_once ('inc/libnod.php');

@@ -12,7 +12,6 @@
 
 $bg1	= "CCAA77";
 $bg2	= "DDBB88";
-$btag	= "";
 
 include_once ("inc/header.php");
 

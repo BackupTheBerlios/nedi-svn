@@ -14,11 +14,7 @@
 
 $bg1	= "DDBB99";
 $bg2	= "EECCAA";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
-$msgfile = 'log/msg.txt';
+$msgfile= 'log/msg.txt';
 
 include_once ("inc/header.php");
 
@@ -28,12 +24,14 @@ $msg = isset( $_POST['msg']) ? $_POST['msg'] : "";
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if(isset($_GET['up']) ){
-	if($_GET['pass'] and $_GET['pass'] == $_GET['vpas']  ){
-		$pass = md5( $_GET['pass'] );
-		$query	= GenQuery('user','u','name',$name,'',array('password'),array('='),array($pass) );
-		if( !@DbQuery($query,$link) ){echo "<h4 align=center>".DbError($link)."</h3>";}else{echo "<h3>$name's password $upokmsg</h3>";}
-	}else{
-		echo "$n1rmsg";
+	if($_GET['pass']){
+		if($_GET['pass'] == $_GET['vpas']){
+			$pass = md5( $_GET['pass'] );
+			$query	= GenQuery('user','u','name',$name,'',array('password'),array('='),array($pass) );
+			if( !@DbQuery($query,$link) ){echo "<h4 align=center>".DbError($link)."</h3>";}else{echo "<h3>$name's password $upokmsg</h3>";}
+		}else{
+			echo "$n1rmsg";
+		}
 	}
 	if(isset($_GET['email'])){
 		$query	= GenQuery('user','u','name',$name,'',array('email'),array('='),array($_GET['email']) );

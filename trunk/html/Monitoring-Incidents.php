@@ -13,10 +13,6 @@
 
 $bg1	 = "ddbb99";
 $bg2	 = "eeccaa";
-$btag	 = "";
-$nocache = 0;
-$calendar= 0;
-$refresh = 0;
 
 include_once ("inc/header.php");
 include_once ('inc/libdev.php');
@@ -38,7 +34,7 @@ if( isset($_GET['p']) ){
 }elseif( isset($_GET['n']) ){
 	$nof = $off + $lim;
 }
-$dlim = "$nof,$lim";
+$dlim = ($lim)?"$nof,$lim":0;
 
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 if($dli){

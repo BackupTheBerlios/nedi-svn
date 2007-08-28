@@ -1,6 +1,6 @@
 #============================================================================
 #
-# Program: libcli.pl
+# Program: libcli-sshnet.pl
 # Programmer: Remo Rickli, dcr
 #
 # -> Net::Telnet/Net::SSH::Perl based Functions <-
@@ -25,31 +25,38 @@
 package cli;
 use Net::Telnet::Cisco;
 
-use vars qw($sshnet);
+use vars qw($sshnetok);
 
 eval 'use Net::SSH::Perl';
 if ($@){
-	$sshnet = 0;
-	print "SSH not available\n" if $main::opt{d};
+	$sshnetok = 0;
+	print "Net::SSH::Perl not available\n" if $main::opt{d};
 }else{
-	$sshnet = 1;
+	$sshnetok = 1;
 	print "Net::SSH::Perl loaded\n" if $main::opt{d};
 }
+
 # original my $prompt = '/(?m:^[\w.-]+\s?(?:\(config[^\)]*\))?\s?[\$#>]\s?(?:\(enable\))?\s*$)/';
 my $prompt = '/.+?[#>]\s?(?:\(enable\)\s*)?$/';
 
 #============================================================================
-# Map the port to be used for telnet according to config.
+# HP managed to request the "any key" before login on certain devices. This is only a dirty
+# fix since I'm too stupid to make autodetection work !@#$!@$#
 #============================================================================
-sub MapTp{
+sub Kickit{
+#	select(undef, undef, undef, 0.4);							# Wait 200ms to get whole banner
+#	my $banner = ${$_[0]->buffer};
+#	print"\n$banner\n";
+#
+#	if($banner =~ /Press any key to continue/){
+#		print $_[0]->print("");
+#		print"Tk";
+#	}
 
-
-	my $tepo = 23;
-	if ($misc::map{$_[0]}{cp}){
-		$tepo = $misc::map{$_[0]}{cp};
-		print "M$tepo " if $main::opt{d};
+	if( $main::dev{$_[0]}{ty} =~ /^J90/){
+		print $_[1]->print("");
+		print"Tk";
 	}
-	return $tepo;
 }
 
 #============================================================================
@@ -57,29 +64,37 @@ sub MapTp{
 #============================================================================
 sub PrepDev{
 
-	my $us  = "";
-	my $nok = 2;
-	my $na = $_[0];
-	my $op = $_[1];
+	my $us    = "";
+	my $nok   = 2;										#  clibad=2 means very true ;-)
+	my $pnmap = 1;										# port not mapped -> ssh will be tried...
+	my $na    = $_[0];
+	my $op    = $_[1];
 	my @users = @misc::users;
 
-	if($op eq "mac" and $main::dev{$na}{os} !~ /^IOS/){							# Only IOS has support for mac-address stuff
-		return 2;
-	}	
-	if(defined $main::dev{$na}{cp} and $main::dev{$na}{cp} != 0){						# If port not defined, it's new or set to be prepd
-		if($main::dev{$na}{us}){									# Do we have a user?
-			return 0;										# Lets use that then (clibad=false)
-		}else{												# No user but a real port means it failed before
-			print " Pu";
-			return 2;										#  clibad=2 means very true ;-)
+	if($op eq "fwd" and $main::dev{$na}{os} !~ /^IOS/){					# Only IOS has support for mac-address stuff
+		return $nok;
+	}
+	if(defined $main::dev{$na}{cp} and $main::dev{$na}{cp} != 0){				# Undef -> it's new, 0 -> set to be prepd
+		if(!$main::dev{$na}{us}){							# Do we have a  user?
+			print "Pu";
+			return $nok;								# No user but a real port -> failed before
+		}elsif(exists $misc::login{$main::dev{$na}{us}}){				# OK if in nedi.conf
+			return 0;								# Lets use that then (clibad=false)
+		}else{
+			print "Pc";								# User not in nedi.conf -> Prep
 		}
+	}
+	if(defined $misc::map{$main::dev{$na}{ip}}{cp}){					# Disable SSH upon telnet port map
+		$main::dev{$na}{cp} = $misc::map{$main::dev{$na}{ip}}{cp};
+		print "M$main::dev{$na}{cp}" if $main::opt{d};
+		$pnmap = 0;
 	}else{
-		$main::dev{$na}{cp} = &MapTp($main::dev{$na}{ip});						# Go prep device
+		$main::dev{$na}{cp} = 23;
 	}
 	if($main::dev{$na}{os} eq "Cat1900"){
 		do {
 			$us = shift (@users);
-			print "P:$us " if $main::opt{d};
+			print " P:$us" if $main::opt{d};
 			my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$na}{ip},
 								Port	=> $main::dev{$na}{cp},
 								Prompt  => $prompt,
@@ -99,21 +114,18 @@ sub PrepDev{
 				$session->close;
 			}else{
 				print "Tc";
-				return 2;
+				return $nok;
 			}
-		} while ($#users ne "-1" and $nok);								# And stop on ok or we ran out of logins
-	}elsif( $main::dev{$na}{os} =~ /^(IOS|CatOS|Ironware)/){
+		} while ($#users ne "-1" and $nok);						# And stop on ok or we ran out of logins
+	}elsif( $main::dev{$na}{os} =~ /^(IOS|CatOS|Ironware|ProCurve)/){
 		do {
 			$us = shift (@users);
 			print " P:$us" if $main::opt{d};
-			if($sshnet){
+			if($sshnetok and $pnmap){
 				eval {
-				my $ssh = Net::SSH::Perl->new($main::dev{$na}{ip}, options => ["BatchMode yes", 
-												"RhostsAuthentication no",
-												#"UserKnownHostFile /dev/null",
-												#"GlobalKnownHostFile /dev/null",
-												"protocol => 2" ]);
-
+				my $ssh = Net::SSH::Perl->new($main::dev{$na}{ip}, options => ["BatchMode yes",
+										"RhostsAuthentication no",
+										"protocol => 2" ]);
 					$ssh->login($us, $misc::login{$us}{pw});
 					my ($stdout, $stderr, $exit) = $ssh->cmd("exit");
 					if ($stderr) {
@@ -124,7 +136,7 @@ sub PrepDev{
 					}
 				};
 			}else{
-				$@ = " Hs";
+				$@ = "Hs";
 			}
 			print $@ if $main::opt{d};
 			if ($@){
@@ -134,84 +146,30 @@ sub PrepDev{
 									Timeout	=> $misc::timeout,
 									Errmode	=> 'return'
 									);
-				if(defined $session){								# To be sure it doesn't bail out...
-					if( $session->login( $us,$misc::login{$us}{pw} ) ){
-						if ( $misc::login{$us}{en} ){
-							$session->enable( $misc::login{$us}{en} );
-							if ($session->is_enabled){
-								$nok = 0;
-							}else{
-								print "Te";
-							}
-						}else{$nok = 0}
+				if(defined $session){
+					Kickit($_[0],$session);
+					if( $session->login($us,$misc::login{$us}{pw}) ){
+						if ($misc::login{$us}{en}){
+							$session->enable($misc::login{$us}{en});
+						}
+						if ($session->is_enabled){			# Make sure we are enabled now		
+							$nok = 0;
+						}else{
+							print "Te";
+						}
 					}else{
 						print "Tl";
 					}
 					$session->close;
 				}else{
 					print "Tc";
-					return 2;
+					return $nok;
 				}
 			}
-		} while ($#users ne "-1" and $nok);								# And stop once a user worked or we ran out of them.
-	}elsif( $main::dev{$na}{os} eq "ProCurve"){								# ProCurves throw lots of escape sequences out, which confuse Net::Telnet::Cisco
-		do {
-			$us = shift (@users);
-			print " P:$us" if $main::opt{d};
-			if($sshnet){
-				eval {
-					my $ssh = Net::SSH::Perl->new($main::dev{$na}{ip}, options => ["BatchMode yes", 
-													"RhostsAuthentication no",
-													#"UserKnownHostFile /dev/null",
-													#"GlobalKnownHostFile /dev/null",
-													"protocol => 2" ]);
-
-					$ssh->login($us, $misc::login{$us}{pw});
-					my ($stdout, $stderr, $exit) = $ssh->cmd("exit");
-					if ($exit == 0) {
-						$nok = 0;
-						$main::dev{$na}{cp} = 22;
-					}else{
-						print "Hl";
-					}
-				};
-			}else{
-				$@ = " Hs";
-			}
-			print $@ if $main::opt{d};
-			if ($@){		
-				my $session = Net::Telnet->new(	Host	=> $main::dev{$na}{ip},
-								Port	=> $main::dev{$na}{cp},
-								Prompt  => $prompt,
-								Timeout	=> $misc::timeout,
-								input_record_separator => "\r",
-								Errmode	=> 'return'
-								);
-				if(defined $session){								# To be sure it doesn't bail out...
-					$session->waitfor('/Password:/');
-					if( $session->print($misc::login{$us}{pw}) ){
-						if ( $misc::login{$us}{en} ){
-							$session->print("enable");
-							$session->waitfor('/Password:/');
-							$session->print($misc::login{$us}{en});
-							if (!$session->errmsg){
-								$nok = 0;
-							}else{
-								print "Te";
-							}
-						}else{$nok = 0}
-					}else{
-						print "Tl";
-					}
-					$session->close;
-				}else{
-					print "Tc";
-					return 2;
-				}
-			}
-		} while ($#users ne "-1" and $nok);								# And stop once a user worked or we ran out of them.
+		} while ($#users ne "-1" and $nok);						# And stop once a user worked or we ran out of them.
 	}else{
-		return 2;
+		$main::dev{$na}{cp} = 0;							# Clear port to indicate unsupported device
+		return $nok;
 	}
 	if($nok){
 		print "Tu";
@@ -225,18 +183,21 @@ sub PrepDev{
 #============================================================================
 # Get Ios mac address table.
 #============================================================================
-sub GetMacTab{
+sub BridgeFwd{
 
 	my $line = "";
 	my $nspo = 0;
 	my @cam  = ();
 	my $cmd  = "sh mac-address-table dyn";
+	my $cmd2  = "sh port-security addr";							# Thanks Duane Walker 7/2007
 	my $cap  = 0;
 
-	if($main::dev{$_[0]}{os} eq "IOS-wl"){									# Cisco WLan specific...
-		$cap = 1;											# Needed to avoid using counters as vlans
-		$cmd = 'sh bridge | exclude \*\*\*';								# Work around aged (***) forwarding entries
+	if($main::dev{$_[0]}{os} eq "IOS-wl"){							# Cisco WLan specific...
+		$cap = 1;									# Needed to avoid using counters as vlans
+		$cmd = 'sh bridge | exclude \*\*\*';						# Work around aged (***) forwarding entries
 	}
+	print " F:$main::dev{$_[0]}{us}:$main::dev{$_[0]}{cp} " if $main::opt{d};
+
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
 			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
@@ -253,10 +214,12 @@ sub GetMacTab{
 		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 							Port	=> $main::dev{$_[0]}{cp},
 							Prompt  => $prompt,
+							#Input_log  => "input.log",
+							#output_log  => "output.log",
 							Timeout	=> $misc::timeout,
 							Errmode	=> 'return'
 							);
-		if( defined($session) ){									# To be sure it doesn't bail out...
+		if( defined($session) ){
 			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
 				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
 					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
@@ -267,6 +230,7 @@ sub GetMacTab{
 				}
 				$session->cmd("terminal len 0");
 				@cam = $session->cmd($cmd);
+				push @cam, $session->cmd($cmd2) if ($misc::getfwd eq 's' and !$cap);	# Thanks Duane Walker 7/2007
 				$session->close;
 			}else{
 				$session->close;
@@ -280,80 +244,83 @@ sub GetMacTab{
 		}
 	}
 	foreach my $l (@cam){
-		if ($l =~ /\s+(dynamic|forward)\s+/i){
+		if ($l =~ /\s+(dynamic|forward|secure(dynamic|sticky))\s+/i){			# (secure) Thanks to Duane Walker 7/2007
 			my $mc = "";
 			my $po = "";
 			my $vl = "";
 			my @mactab = split (/\s+/,$l);
 			foreach my $col (@mactab){
-				if ($col =~ /^(Gi|Fa|Do|Po|Vi)/){
-					$po = &misc::Shif($col);
-					if($po =~ /\.[0-9]/){							# Does it look like a subinterface?
-						my @subpo = split(/\./,$po);
-						$vl = $subpo[1];
-						if($misc::portprop{$_[0]}{$subpo[0]}{upl}){$misc::portprop{$_[0]}{$po}{upl} = 1}	# inhert uplink metric on subinterface
-					}
-				}
+				if ($col =~ /^(Gi|Fa|Do|Po|Vi)/){$po = &misc::Shif($col)}
 				elsif ($col =~ /^[0-9|a-f]{4}\./){$mc = $col}			
-				elsif (!$cap and $col =~ /^[0-9]{1,4}$/ and !$vl){$vl = $col}			# Only use this, if it's not a Cisco AP
+				elsif (!$cap and $col =~ /^[0-9]{1,4}$/ and !$vl){$vl = $col}	# Only use this, if it's not a Cisco AP
 			}
-			$mc =~ s/\.//g;
-			if ($po =~ /^.EC-|^Po[0-9]|channel/){
-				$misc::portprop{$_[0]}{$po}{chn} = 1;
-			}
-			if ($vl !~ /$misc::ignoredvlans/){
-				$misc::portprop{$_[0]}{$po}{pop}++;
-				$misc::portnew{$mc}{$_[0]}{po} = $po;
-				$misc::portnew{$mc}{$_[0]}{vl} = $vl;
-				print "\n FWC:$mc on $po vl$vl" if $main::opt{v};
-				$nspo++;
+			if( exists($misc::portprop{$_[0]}{$po}) ){				# Make sure IFidx exists before using IF
+				if($po =~ /\.[0-9]/){						# Does it look like a subinterface?
+					my @subpo = split(/\./,$po);
+					$vl = $subpo[1];
+					if($misc::portprop{$_[0]}{$subpo[0]}{upl}){$misc::portprop{$_[0]}{$po}{upl} = 1}	# inherit uplink metric on subinterface
+				}
+				$mc =~ s/\.//g;
+
+				if ($vl !~ /$misc::ignoredvlans/){
+					if ($po =~ /^.EC-|^Po[0-9]|channel/){
+						$misc::portprop{$_[0]}{$po}{chn} = 1;
+					}
+					$misc::portprop{$_[0]}{$po}{pop}++;
+					$misc::portnew{$mc}{$_[0]}{po} = $po;
+					$misc::portnew{$mc}{$_[0]}{vl} = $vl;
+					print "\n FWC:$mc on $po vl$vl" if $main::opt{v};
+					$nspo++;
+				}
 			}
 		}
 	}
-	print " f$nspo";
+	print " f$nspo ";
 	return 0;
 }
 
 #============================================================================
 # Wrapper to get the proper config
 #============================================================================
-sub GetCfg{
+sub Config{
 
 	print " B:$main::dev{$_[0]}{us}:$main::dev{$_[0]}{cp} " if $main::opt{d};
 
-	if($main::dev{$_[0]}{os} =~ /^IOS/){
-		&db::BackupCfg( $_[0], &cli::GetIosCfg($_[0]) );
-	}elsif($main::dev{$_[0]}{os} eq "CatOS"){
-		&db::BackupCfg( $_[0], &cli::GetCatCfg($_[0]) );
-	}elsif($main::dev{$_[0]}{os} eq "Cat1900"){
-		&db::BackupCfg( $_[0], &cli::GetC19Cfg($_[0]) );
+	if($main::dev{$_[0]}{os} eq "Cat1900"){
+		&db::BackupCfg( $_[0], &cli::FetchC19Cfg($_[0]) );
 	}elsif($main::dev{$_[0]}{os} eq "Ironware"){
-		&db::BackupCfg( $_[0], &cli::GetIronCfg($_[0]) );
+		&db::BackupCfg( $_[0], &cli::FetchCfg($_[0],"sh run","skip-page-display") );
 	}elsif($main::dev{$_[0]}{os} eq "ProCurve"){
-		&db::BackupCfg( $_[0], &cli::GetProCfg($_[0]) );
+		&db::BackupCfg( $_[0], &cli::FetchCfg($_[0],"sh run","no page") );
+	}elsif($main::dev{$_[0]}{os} eq "CatOS"){
+		&db::BackupCfg( $_[0], &cli::FetchCfg($_[0],"sh conf","set length 0") );
+	}elsif($main::dev{$_[0]}{os} eq "IOS-fw"){
+		&db::BackupCfg( $_[0], &cli::FetchCfg($_[0],"sh run","pager 0") );
+	}else{
+		&db::BackupCfg( $_[0], &cli::FetchCfg($_[0],"sh run","terminal length 0") );
 	}
 }
 
 #============================================================================
-# Get IOS Config and return it in an array.
+# Fetch  Config and return it in an array.
+# Parameters:
+# 1. Target Device
+# 2. Command to show configuration
+# 3. Command to disable page breaks
+# 4. Send a <CR> to get a login prompt [0|1]
 #============================================================================
-sub GetIosCfg{
+sub FetchCfg{
 
-	my $cmd = "sh run";
-	my $pag = "terminal length 0";
 	my $go  = 0;
 	my $cl	= 0;
 	my @run = ();
 	my @cfg = ();
 
-	if($main::dev{$_[0]}{os} eq "IOS-fw"){									# Cisco firewall specific...
-		$pag = "pager 0";
-	}
 	if( $main::dev{$_[0]}{cp} == 22 ){
 		eval {
 			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
 			$ssh->login($main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw});
-			my ($stdout, $stderr, $exit) = $ssh->cmd($cmd);
+			my ($stdout, $stderr, $exit) = $ssh->cmd($_[1]);
 			@run = split("\n", $stdout);
 		};
 		if ($@){
@@ -364,91 +331,25 @@ sub GetIosCfg{
 		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 							Port	=> $main::dev{$_[0]}{cp},
 							Prompt  => $prompt,
+							Timeout => ($misc::timeout),		# Increase timeout to build config.
 							#Input_log  => "input.log",
 							#output_log  => "output.log",
-							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
 							Errmode	=> 'return'
 						  	);
-		if( defined($session) ){									# To be sure it doesn't bail out...
-			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
-				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
-					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
-						$session->close;
-						print "Te";
-						return "Enable failed!\n";
-					}
+		if( defined($session) ){
+			Kickit($_[0],$session);
+			if( $session->login($main::dev{$_[0]}{us},$misc::login{$main::dev{$_[0]}{us}}{pw}) ){
+				if ($misc::login{$main::dev{$_[0]}{us}}{en}){
+					$session->enable($misc::login{$main::dev{$_[0]}{us}}{en});
 				}
-				$session->cmd($pag);
-				@run = $session->cmd($cmd);
-				$session->close;
-			}else{
-				$session->close;
-				print "Tl";
-				return "Login $main::dev{$_[0]}{us} failed!\n";
-			}
-
-		}else{
-			print "Tc";
-			return "Telnet failed!";
-		}
-	}
-	foreach my $line (@run){
-		if ($line =~ /^(Current|PIX|FWSM|ASA)\s/){$go = 1}
-		if ($go){
-			$line =~ s/[\n\r]//g;
-			print "\n CFG:$line" if $main::opt{v};
-			push @cfg,$line;
-			$cl++;
-		}
-	}
-	if(defined($cfg[$#cfg]) and $cfg[$#cfg] eq "" ){pop @cfg}						# Remove empty line at the end.
-	print "Bi";
-	print "-$cl" if $main::opt{d};
-	return @cfg;
-}
-
-#============================================================================
-# Get CatOS Config and return it in an array.
-#============================================================================
-sub GetCatCfg{
-
-	my $cmd = "sh conf";
-	my $go  = 0;
-	my $cl	= 0;
-	my @run = ();
-	my @cfg = ();
-
-	if( $main::dev{$_[0]}{cp} == 22 ){
-		eval {
-			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
-			$ssh->login($main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw});
-			my ($stdout, $stderr, $exit) = $ssh->cmd($cmd);
-			@run = split("\n", $stdout);
-		};
-		if ($@){
-			print "Ho";
-			return "SSH failed!";
-		}
-	}else{
-		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
-							Port	=> $main::dev{$_[0]}{cp},
-							Prompt  => $prompt,
-							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
-							Errmode	=> 'return'
-						  	);
-		
-		if( defined($session) ){									# To be sure it doesn't bail out...
-			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
-				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
-					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
-						$session->close;
-						print "Te";
-						return "Enable failed!\n";
-					}
+				if ($session->is_enabled){					# Make sure we are enabled now		
+					$session->cmd($_[2]) if $_[2];
+					$session->timeout($misc::timeout * 30);			
+					@run = $session->cmd($_[1]);
+					$session->close;
+				}else{
+					print "Te";
 				}
-				$session->cmd("set length 0");
-				@run = $session->cmd($cmd);
-				$session->close;
 			}else{
 				$session->close;
 				print "Tl";
@@ -460,15 +361,20 @@ sub GetCatCfg{
 		}
 	}
 	foreach my $line (@run){
-		if ($line =~ /^begin$/){$go = 1}
+		$line =~ s/[\n\r]//g;
+		if ($line =~ /^(Running|Current|PIX|FWSM|ASA)\s|^begin$/){$go = 1}
 		if ($go){
-			$line =~ s/[\n\r]//g;
 			print "\n CFG:$line" if $main::opt{v};
 			push @cfg,$line;
 			$cl++;
 		}
 	}
-	print "Bc";
+	if( defined($cfg[$#cfg]) ){ 
+		if($cfg[$#cfg] eq "" ){pop @cfg}						# Remove empty line at the end.
+	}else{											# Empty config can't be good...
+		push @cfg,"Empty config!";
+	}
+	print "Bf";
 	print "-$cl" if $main::opt{d};
 	return @cfg;
 }
@@ -476,7 +382,7 @@ sub GetCatCfg{
 #============================================================================
 # Get Catalyst 1900 Config and return it in an array.
 #============================================================================
-sub GetC19Cfg{
+sub FetchC19Cfg{
 
 	my @cfg = ();
 	my $cl	= 0;
@@ -484,17 +390,17 @@ sub GetC19Cfg{
 	my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
 						Port	=> $main::dev{$_[0]}{cp},
 						Prompt  => $prompt,
-						Timeout => ($misc::timeout + 10),				# Add 10 seconds to build config.
+						Timeout => ($misc::timeout + 10),		# Add 10 seconds to build config.
 						Errmode	=> 'return'
 					  	);
 	
-	if( defined($session) ){										# To be sure it doesn't bail out...
+	if( defined($session) ){
 		if( $session->waitfor('/Enter Selection:.*$/') ){
 			$session->print("k");
 			if ($session->enable( $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
 				my @run = $session->cmd("show run");
 			
-				shift @run;									# Trim & Remove Pagebreaks
+				shift @run;							# Trim & Remove Pagebreaks
 				shift @run;
 				foreach my $line (@run){
 					if ($line !~ /--More--|^$/){
@@ -503,7 +409,7 @@ sub GetC19Cfg{
 						$cl++;
 					}		
 				}
-				print "B9";
+				print "Bf";
 				print "-$cl" if $main::opt{d};
 			} else {
 				print "Te";
@@ -519,160 +425,6 @@ sub GetC19Cfg{
 		print "Tc";
 		return "Telnet failed!";
 	}
-}
-
-#============================================================================
-# Get Foundry Config and return it in an array.
-#============================================================================
-sub GetIronCfg{
-
-	my $cmd = "sh run";
-	my $go  = 0;
-	my $cl	= 0;
-	my @run = ();
-	my @cfg = ();
-
-	if( $main::dev{$_[0]}{cp} == 22 ){
-		eval {
-			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
-			$ssh->login($main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw});
-			my ($stdout, $stderr, $exit) = $ssh->cmd($cmd);
-			@run = split("\n", $stdout);
-		};
-		if ($@){
-			print "Ho";
-			return "SSH failed!";
-		}
-	}else{
-		my $session = Net::Telnet::Cisco->new(	Host	=> $main::dev{$_[0]}{ip},
-							Port	=> $main::dev{$_[0]}{cp},
-							Prompt  => $prompt,
-							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
-							Errmode	=> 'return'
-						  	);
-		if( defined($session) ){									# To be sure it doesn't bail out...
-			if( $session->login( $main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw} ) ){
-				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
-					if (!$session->enable( $misc::login{$main::dev{$_[0]}{us}}{en} ) ){
-						$session->close;
-						print "Te";
-						return "Enable failed!\n";
-					}
-				}
-				$session->cmd("skip-page-display");
-				@run = $session->cmd($cmd);
-				$session->close;
-			}else{
-				$session->close;
-				print "Tl";
-				return "Login $main::dev{$_[0]}{us} failed!\n";
-			}
-
-		}else{
-			print "Tc";
-			return "Telnet failed!";
-		}
-	}
-	foreach my $line (@run){
-		if ($line =~ /^Current /){$go = 1}
-		if ($go){
-			$line =~ s/[\n\r]//g;
-			print "\n CFG:$line" if $main::opt{v};
-			push @cfg,$line;
-			$cl++;
-		}
-	}
-	if( $cfg[$#cfg] eq "" ){pop @cfg}									# Remove empty line at the end.
-	print "Bf";
-	print "-$cl" if $main::opt{d};
-	return @cfg;
-}
-
-#============================================================================
-# Get HP ProCurve Config and return it in an array.
-#============================================================================
-sub GetProCfg{
-
-	my $cmd = "sh run";
-	my $go  = 0;
-	my $cl	= 0;
-	my @run = ();
-	my @cfg = ();
-
-	if( $main::dev{$_[0]}{cp} == 22 ){
-		eval {
-			my $ssh = Net::SSH::Perl->new($main::dev{$_[0]}{ip});
-			$ssh->login($main::dev{$_[0]}{us}, $misc::login{$main::dev{$_[0]}{us}}{pw});
-			my ($stdout, $stderr, $exit) = $ssh->cmd($cmd);
-			@run = split("\n", $stdout);
-		};
-		if ($@){
-			print "Ho";
-			return "SSH failed!";
-		}
-	}else{
-		my $session = Net::Telnet->new(	Host	=> $main::dev{$_[0]}{ip},
-							Port	=> $main::dev{$_[0]}{cp},
-							Prompt  => $prompt,
-							#input_record_separator => "\r",
-							Timeout => ($misc::timeout * 30),			# Increase timeout to build config.
-							Errmode	=> 'return'
-						  	);
-		if( defined($session) ){									# To be sure it doesn't bail out...
-print "A" if $main::opt{d};
-			$session->waitfor('/Password:/');
-print "B" if $main::opt{d};
-			if( $session->print($misc::login{$main::dev{$_[0]}{us}}{pw}) ){
-print "C" if $main::opt{d};
-				if ( $misc::login{$main::dev{$_[0]}{us}}{en} ){
-print "D" if $main::opt{d};
-					$session->print("enable");
-print "E" if $main::opt{d};
-					$session->waitfor('/Password:/');
-					$session->print($misc::login{$main::dev{$_[0]}{us}}{en});
-					if (!$session->errmsg){
-						$nok = 0;
-					}else{
-						print "Te";
-						return "Enable failed!\n";
-					}
-print "F" if $main::opt{d};
-				}
-				$session->print("no page");
-print "G" if $main::opt{d};
-				$session->cmd($cmd);
-print "H" if $main::opt{d};
-				my $stdout = $session->get();
-				$stdout =~ s/\033.{1,7}[hHKr]+?//g;
-				@run = split("\r", $stdout);
-#open(FILEWRITE, "> procurve.log");
-#print FILEWRITE $stdout;
-#close FILEWRITE;
-				$session->close;
-			}else{
-				$session->close;
-				print "Tl";
-				return "Login $main::dev{$_[0]}{us} failed!\n";
-			}
-
-		}else{
-			print "Tc";
-			return "Telnet failed!";
-		}
-	}
-	foreach my $line (@run){
-		if ($line =~ /^Running /){$go = 1}
-		if ($go){
-			$line =~ s/[\n\r]//g;
-			print "\n CFG:$line" if $main::opt{v};
-			push @cfg,$line;
-			$cl++;
-		}
-	}
-	pop @cfg;
-	print "Bh";
-	print "-$cl" if $main::opt{d};
-	return @cfg;
 }
 
 1;

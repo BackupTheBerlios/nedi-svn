@@ -8,16 +8,17 @@
 #============================================================================
 package misc;
 
-use vars qw($seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter);
-use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath $rrdcmd);
-use vars qw($arpwatch $ignoredvlans $retire $timeout $rrdstep $redbuild $ipchg $ifchg);
-use vars qw($notify $thres $pause $smtpserver $mailfrom );
-use vars qw(%login %map %doip %dcomm %ouineb %cdplink %sysobj %ifmac); 
+use vars qw($seedlist $netfilter $webdev $leafdev $border $ouidev $descfilter $getfwd);
+use vars qw($backend $dbpath $dbname $dbuser $dbpass $dbhost $rrdpath $rrdcmd $rrdstep);
+use vars qw($arpwatch $ignoredvlans $retire $timeout $redbuild $ipchg $ifchg);
+use vars qw($notify $thres $cpua $mema $tmpa $trfa $trfw $pause $smtpserver $mailfrom);
+use vars qw(%login %map %doip %dcomm %ouineb %sysobj %ifmac); 
 use vars qw(%oui %arp %rarp %arpn %portprop %portnew);
-use vars qw(@todo @oudo @doneoth @donecdp @donenam @donemac @doneip @comms @seeds @users @devdel); 
+use vars qw(@todo @donenam @doneid @doneip @comms @seeds @users @devdel); 
 
+# RRD specific settings
+$rrdcmd		= "rrdtool";									# points to executable, empty string disables rrd!
 $rrdpath	= "$main::p/rrd";
-$rrdcmd		= "rrdtool";
 
 #===================================================================
 # Read and parse Configuration file.
@@ -62,13 +63,19 @@ sub ReadConf {
 			elsif ($v[0] eq "dbhost"){$dbhost = $v[1]}
 
 			elsif ($v[0] eq "ignoredvlans"){$ignoredvlans = $v[1]}
+			elsif ($v[0] eq "getfwd"){$getfwd = $v[1]}
 			elsif ($v[0] eq "retire"){$retire = $main::now - $v[1] * 86400;}
 			elsif ($v[0] eq "timeout"){$timeout = $v[1]}
 			elsif ($v[0] eq "arpwatch"){$arpwatch = $v[1]}
 			elsif ($v[0] eq "rrdstep"){$rrdstep = $v[1]}
 
 			elsif ($v[0] eq "notify"){$notify = $v[1]}
-			elsif ($v[0] eq "threshold"){$thres = $v[1]}
+			elsif ($v[0] eq "uptime-alert"){$thres = $v[1]}
+			elsif ($v[0] eq "cpu-alert"){$cpua = $v[1]}
+			elsif ($v[0] eq "mem-alert"){$mema = $v[1]}
+			elsif ($v[0] eq "temp-alert"){$tmpa = $v[1]}
+			elsif ($v[0] eq "traf-alert"){$trfa = $v[1]}
+			elsif ($v[0] eq "traf-warn"){$trfw = $v[1]}
 			elsif ($v[0] eq "pause"){$pause = $v[1]}
 			elsif ($v[0] eq "smtpserver"){$smtpserver = $v[1]}
 			elsif ($v[0] eq "mailfrom"){$mailfrom = $v[1]}
@@ -85,7 +92,7 @@ sub ReadConf {
 #===================================================================
 sub ReadOUIs {
 
-	open  ("OUI", "$main::p/inc/oui.txt" ) or die "oui.txt not in $main::p/inc, please dl from ieee.org first!";		# read OUI's first
+	open  ("OUI", "$main::p/inc/oui.txt" ) or die "no oui.txt in $main::p/inc!";		# read OUI's first
 	my @oui = <OUI>;
 	close("OUI");
 	chomp @oui;
@@ -97,7 +104,7 @@ sub ReadOUIs {
 			$oui{lc($m[0])} = substr($m[2],0,32);
 		}
 	}
-	open  ("IAB", "$main::p/inc/iab.txt" ) or die "iab.txt not in $main::p/inc, please dl from ieee.org first!";		# now add IAB's (00-50-C2)	
+	open  ("IAB", "$main::p/inc/iab.txt" ) or die "no iab.txt in $main::p/inc!";		# now add IAB's (00-50-C2)	
 	my @iab = <IAB>;
 	close("IAB");
 	chomp @iab;
@@ -140,13 +147,13 @@ sub Strip {
 	if(! defined $_[0]){return ''}
 	my $ch = $_[0];
 
-	$ch =~ s/\n|\r|\s+/ /g;											# Remove strange characters.
+	$ch =~ s/\n|\r|\s+/ /g;									# Remove strange characters.
 	$ch =~ s/["']//g;
-	$ch =~ s/\c@//g;       											# Remove Null String
-	$ch =~ s/\c[\[D//g;											# Remove Escape Sequence
-	$ch =~ s/\c[OD//g;											# Remove Escape Sequence
-	$ch =~ s/\c[M1//g;											# Remove Escape Sequence
-	$ch =~ s/\c[//g;											# Remove Escape Char
+	$ch =~ s/\c@//g;       									# Remove Null String
+	$ch =~ s/\c[\[D//g;									# Remove Escape Sequence
+	$ch =~ s/\c[OD//g;									# Remove Escape Sequence
+	$ch =~ s/\c[M1//g;									# Remove Escape Sequence
+	$ch =~ s/\c[//g;									# Remove Escape Char
 	
 	return $ch;
 }
@@ -164,12 +171,12 @@ sub Shif {
 		$n =~ s/^Ethernet/Et/;
 		$n =~ s/^Serial/Se/;
 		$n =~ s/^Dot11Radio/Do/;
-		$n =~ s/^[F|G]EC-//;										# Doesn't match telnet CAM table!
-		$n =~ s/^BayStack (.*?)- //;									# Nortel specific
-		$n =~ s/^Vlan/Vl/;										# MSFC2 and Cat6k5 discrepancy!
-		$n =~ s/(Port\d): .*/$1/g;									# Ruby specific
-		$n =~ s/pci|motorola|power|switch|network|interface|management//ig;				# Strip other garbage
-		$n =~ s/\s+//g;											# Strip spaces
+		$n =~ s/^[F|G]EC-//;								# Doesn't match telnet CAM table!
+		$n =~ s/^BayStack (.*?)- //;							# Nortel specific
+		$n =~ s/^Vlan/Vl/;								# MSFC2 and Cat6k5 discrepancy!
+		$n =~ s/(Port\d): .*/$1/g;							# Ruby specific
+		$n =~ s/pci|motorola|power|switch|network|interface|management//ig;		# Strip other garbage
+		$n =~ s/\s+//g;									# Strip spaces
 		return $n;
 	}else{
 		return "-";
@@ -288,7 +295,7 @@ sub InitSeeds {
 			if ($l !~ /^#|^$/){
 				my @f  = split(/\s+|,|;/,$l);
 				my $ip = "";
-				if ($f[0] !~ /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/){			# Resolve name if it's not an IP.
+				if ($f[0] !~ /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/){	# Resolve name if it's not an IP.
 					(my $a, my $b, my $c, my $d) = unpack( 'C4',gethostbyname($f[0]) );
 					if(defined $a){
 						$ip = join('.',$a,$b,$c,$d);
@@ -309,7 +316,7 @@ sub InitSeeds {
 			}
 		}
 	}
-	if (!$s) {												# Use default GW if no seeds are available.
+	if (!$s) {										# Use default GW if no seeds are available.
 		my $gw		=  &GetGw();
 		$todo[0] 	= 'seed1';
 		$doip{'seed1'}	= $gw;
@@ -335,7 +342,7 @@ sub Discover {
 				die "DB error messages!\n";
 			}
 		}
-		print "\tnetfilter $netfilter prevents discovery.\t";
+		print "netfilter $netfilter prevents discovery.\t";
 		return;
 	}
 	if ($name){
@@ -344,16 +351,16 @@ sub Discover {
 			return '';
 		}else{
 			&snmp::Enterprise($name);
-			if(&snmp::Interfaces($name)){print " "}else{print "\t"}					# Get interfaces and use less spacing, if we had warnings
-			if(&snmp::IfAddresses($name)){print " "}else{print "\t"}				# Get IP addresses and use less spacing, if we had warnings
-			if(defined $rrdstep){&ManageRRD($name)}
+			if(&snmp::Interfaces($name)){print " "}else{print "\t"}			# Get interfaces and use less spacing, if we had warnings
+			if(&snmp::IfAddresses($name)){print " "}else{print "\t"}		# Get IP addresses and use less spacing, if we had warnings
+			if($rrdcmd){&ManageRRD($name)}
 			
-			if($misc::sysobj{$main::dev{$name}{so}}{dp} eq "CDP"){					# Even without -c to identify links
+			if($misc::sysobj{$main::dev{$name}{so}}{dp} eq "CDP"){			# Even without -c to identify links
 				&snmp::CDP($name,$_[0]);
-			}elsif($misc::sysobj{$main::dev{$name}{so}}{dp} eq "LLDP"){
+			}elsif($misc::sysobj{$main::dev{$name}{so}}{dp} eq "LLDP"){		# Even without -l to identify links
 				&snmp::LLDP($name,$_[0]);
 			}else{
-				print "   ";
+				print "    ";
 			}
 			
 			if($misc::sysobj{$main::dev{$name}{so}}{mt}){
@@ -361,36 +368,40 @@ sub Discover {
 			}
 			
 			if ($main::dev{$name}{sv} > 3){
-				if(!&snmp::ArpTable($name)){print "\t"};
+				if(!&snmp::Arp($name)){print "  "};
+				if($main::opt{r}){						# User route discovery, if -r
+					if(&snmp::Routes($name)){print " "}else{print "  "}
+				}else{
+					print "    ";
+				}
 			}else{
-				print "\t";									# Spacer instead of L3 info.
+				print "\t";							# Spacer instead of L3 info.
 			}
 
 			my $clibad = 1;
-			if($misc::sysobj{$main::dev{$name}{so}}{bf}){						# Get mac address table, if  bridging is set in .def
-				if(!$main::opt{s}){
-					$clibad = &cli::PrepDev($name,"mac");					# PrepDev returns 2 upon failure
+			if($misc::sysobj{$main::dev{$name}{so}}{bf}){				# Get mac address table, if  bridging is set in .def
+				if($getfwd){							# Using CLI is configured?
+					$clibad = &cli::PrepDev($name,"fwd");			# PrepDev returns 2 upon failure
 					if(!$clibad){
-						$clibad = &cli::GetMacTab($name);
+						$clibad = &cli::BridgeFwd($name);
 					}
 				}
 				if($clibad){
-					&snmp::MacTable($name);							# Do SNMP if telnet fails or -s
+					&snmp::BridgeFwd($name);				# Do SNMP if telnet fails or CLI not configured
 				}
 			}else{
-				print "  ";									# Spacer instead of L2 info.
+				print "\t";							# Spacer instead of L2 info.
 			}
 
 			if($main::opt{b}){
 				$clibad = &cli::PrepDev($name,"cfg");
 				if(!$clibad){
-					&cli::GetCfg($name);
+					&cli::Config($name);
 				}
 			}
 
 			if (!exists $main::dev{$name}{fs}){$main::dev{$name}{fs} = $main::now}
 			$main::dev{$name}{ls} = $main::now;
-			print "\t";
 			return $name;
 		}
 	}else{
@@ -410,15 +421,15 @@ sub Discover {
 sub BuildArp {
 
 	my $nad = 0;
-	open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";					# read arp.dat
+	open  ("ARPDAT", $arpwatch ) or die "ARP:$arpwatch not found!";				# read arp.dat
 	
 	my @adat = <ARPDAT>;
 	close("ARPDAT");
 	chomp @adat;
 	foreach my $l (@adat){
 		my @ad = split(/\s/,$l);
-		if($ad[2] > $retire){									# Only add current entries
-			my $m = sprintf "%02s%02s%02s%02s%02s%02s",split(/:/,$ad[0]);
+		my $m = sprintf "%02s%02s%02s%02s%02s%02s",split(/:/,$ad[0]);
+		if( defined($portnew{$m}) ){
 			$arp{$m}  = $ad[1];
 			$rarp{$ad[1]}  = $m;
 			print " AWA:$m $arp{$m}\n" if $main::opt{v};
@@ -426,7 +437,7 @@ sub BuildArp {
 			$nad++;
 		}
 	}
-	print "$nad	arpwatch entries used.\n"  if $main::opt{d};
+	print "$nad	arpwatch entries used.\n";
 }
 
 #===================================================================
@@ -437,12 +448,11 @@ sub LinkIf {
 	my $newdv = "";
 	my $newif = "";
 	my $pop   = 65535;
-	my $newmet = 250;											# This should never be seen in DB!
+	my $newmet = 250;									# This should never be seen in DB!
 	my $mc    = $_[0];
 
 	print "$mc [" if $main::opt{v};
-
-	foreach my $dv (keys(%{$portnew{$mc}}) ){								# Cycle thru ports...
+	foreach my $dv (keys(%{$portnew{$mc}}) ){						# Cycle thru ports...
 		my $if = $portnew{$mc}{$dv}{po};
 		if(!defined $portprop{$dv}{$if}{rtr}){$portprop{$dv}{$if}{rtr} = 0}
 		if(!defined $portprop{$dv}{$if}{upl}){$portprop{$dv}{$if}{upl} = 0}
@@ -453,7 +463,7 @@ sub LinkIf {
 				$portprop{$dv}{$if}{chn} * 100;
 
 		if( $portprop{$dv}{$if}{pop} <= $pop and $metric <= $newmet ){
-			$newdv = $dv;										# ...and use the one with least# of other MACs for links, if interface value is equal or better than the existing entry.
+			$newdv = $dv;								# ...and use the one with least# of other MACs for links, if interface value is equal or better than the existing entry.
 			$newif = $if;
 			$newmet = $metric;
 			$pop = $portprop{$dv}{$if}{pop};
@@ -472,13 +482,13 @@ sub LinkIf {
 sub Link {
 
 	my %devmac = ();
-	foreach my $dv (@donenam){										# Build array with device MACs
+	foreach my $dv (@donenam){								# Build array with device MACs
 		my $mc =$rarp{$main::dev{$dv}{ip}};
 		if(defined $mc){
 			$devmac{$mc} = $dv;
 		}
 	}
-	foreach my $dmc ( keys %devmac ){									# Use any device MACs to identify uplinks
+	foreach my $dmc ( keys %devmac ){							# Use any device MACs to identify uplinks
 		if(exists $portnew{$dmc}){
 			foreach my $dv (keys(%{$portnew{$dmc}}) ){
 				my $if = $portnew{$dmc}{$dv}{po};
@@ -492,7 +502,7 @@ sub Link {
 	}
 	foreach my $dv (@donenam){
 		foreach my $if (keys (%{$portprop{$dv}})){
-			if (!$portprop{$dv}{$if}{rtr} and $portprop{$dv}{$if}{pop} > 24){			# A switchport with more than 24 macs is an uplink, because I say so...
+			if (!$portprop{$dv}{$if}{rtr} and $portprop{$dv}{$if}{pop} > 24){	# A switchport with more than 24 macs is an uplink, because I say so...
 				if(!$portprop{$dv}{$if}{upl}){
 					$portprop{$dv}{$if}{upl} = 1;
 					$main::int{$dv}{$portprop{$dv}{$if}{idx}}{com} .= " U:>24";
@@ -501,87 +511,88 @@ sub Link {
 			}
 		}
 	}
-	if ($main::opt{c}) {											# Simpler approach, if we have CDP devices.
-		%main::link = %cdplink;
-		foreach my $na (@doneoth){
+	foreach my $na (@donenam){
+		if(!exists $main::link{$na}){							# No Static, CDP or LLDP link exists yet
 			my $foundupl = 0;
-			my $mc =$rarp{$main::dev{$na}{ip}};							# MAC of device
-			(my $ndv, my $nif, my $imet) = &LinkIf($mc);
-			if ($ndv and $nif){
-				$portprop{$ndv}{$nif}{upl} = 1;
-				my $nmc = $rarp{$main::dev{$ndv}{ip}};						# MAC of CDP device
-	
-				if(defined $nmc and defined $portnew{$nmc}{$na}){				# Neighbour found on own IF?
-					my $upl = $portnew{$nmc}{$na}{po};
-					$foundupl = 1;
-					$portprop{$na}{$upl}{upl} = 1;
-					$main::link{$ndv}{$nif}{$na}{$upl}{bw} = $portprop{$ndv}{$nif}{spd};
-					$main::link{$ndv}{$nif}{$na}{$upl}{ty} = "M";
-					$main::link{$ndv}{$nif}{$na}{$upl}{du} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{dpx};
-					$main::link{$ndv}{$nif}{$na}{$upl}{vl} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{vln};
-					$main::link{$na}{$upl}{$ndv}{$nif}{bw} = $portprop{$na}{$upl}{spd};
-					$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "M";
-					$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
-					$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-					$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= " M:$ndv-$nif";
-					$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= " M:$na-$upl";
-					print " LNM:$na:$upl <-> $ndv:$nif\n" if $main::opt{v};
-				}else{
-					my @dif = ();
-	
-					foreach my $dv (@donenam){						# Any OUI MAc on own IF?
-						my $devmc = $rarp{"$main::dev{$dv}{ip}"};
-						if(defined $devmc){
-							if(defined $portnew{$devmc}{$na} and !grep /$portnew{$devmc}{$na}{po}/, @dif){
-								my $upl = $portnew{$devmc}{$na}{po};
-								$foundupl = 1;
-								push (@dif,$upl);
-								$portprop{$na}{$upl}{upl} = 1;
-								$main::link{$ndv}{$nif}{$na}{$upl}{bw} = $portprop{$ndv}{$nif}{spd};
-								$main::link{$ndv}{$nif}{$na}{$upl}{ty} = "O";
-								$main::link{$ndv}{$nif}{$na}{$upl}{du} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{dpx};
-								$main::link{$ndv}{$nif}{$na}{$upl}{vl} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{vln};
-								$main::link{$na}{$upl}{$ndv}{$nif}{bw} = $portprop{$na}{$upl}{spd};
-								$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "O";
-								$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
-								$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-								$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= " O:$ndv-$nif";# Problem with port channels on CatOS?
-								$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= " O:$na-$upl";
-								print " LNO:$na:$upl <-> $ndv:$nif?\n" if $main::opt{v};
+			my $mc = $rarp{$main::dev{$na}{ip}};					# MAC of device
+			if(defined $mc and exists $portnew{$mc}){
+				(my $ndv, my $nif, my $imet) = &LinkIf($mc);
+				if ($ndv and $nif){
+					$portprop{$ndv}{$nif}{upl} = 1;
+					my $nmc = $rarp{$main::dev{$ndv}{ip}};			# MAC of CDP device
+
+					if(defined $nmc and defined $portnew{$nmc}{$na}){	# Neighbour found on own IF?
+						my $upl = $portnew{$nmc}{$na}{po};
+						$foundupl = 1;
+						$portprop{$na}{$upl}{upl} = 1;
+						$main::link{$ndv}{$nif}{$na}{$upl}{bw} = $portprop{$ndv}{$nif}{spd};
+						$main::link{$ndv}{$nif}{$na}{$upl}{ty} = "M";
+						$main::link{$ndv}{$nif}{$na}{$upl}{du} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{dpx};
+						$main::link{$ndv}{$nif}{$na}{$upl}{vl} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{vln};
+						$main::link{$na}{$upl}{$ndv}{$nif}{bw} = $portprop{$na}{$upl}{spd};
+						$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "M";
+						$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
+						$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
+						$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= " M:$ndv-$nif";
+						$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= " M:$na-$upl";
+						print " LNM:$na:$upl <-> $ndv:$nif\n" if $main::opt{v};
+					}else{
+						my @dif = ();
+
+						foreach my $dv (@donenam){			# Any OUI MAc on own IF?
+							my $devmc = $rarp{"$main::dev{$dv}{ip}"};
+							if(defined $devmc){
+								if(defined $portnew{$devmc}{$na} and !grep /$portnew{$devmc}{$na}{po}/, @dif){
+									my $upl = $portnew{$devmc}{$na}{po};
+									$foundupl = 1;
+									push (@dif,$upl);
+									$portprop{$na}{$upl}{upl} = 1;
+									$main::link{$ndv}{$nif}{$na}{$upl}{bw} = $portprop{$ndv}{$nif}{spd};
+									$main::link{$ndv}{$nif}{$na}{$upl}{ty} = "O";
+									$main::link{$ndv}{$nif}{$na}{$upl}{du} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{dpx};
+									$main::link{$ndv}{$nif}{$na}{$upl}{vl} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{vln};
+									$main::link{$na}{$upl}{$ndv}{$nif}{bw} = $portprop{$na}{$upl}{spd};
+									$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "O";
+									$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
+									$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
+									$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= " O:$ndv-$nif";# Problem with port channels on CatOS?
+									$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= " O:$na-$upl";
+									print " LNO:$na:$upl <-> $ndv:$nif?\n" if $main::opt{v};
+								}
 							}
 						}
 					}
-				}
-				if(0 and !$foundupl){								# Use port with highest population as last resort.
-			
-					my $upl = "";
-					my $pop = 0;
-	
-					foreach my $if (keys (%{$portprop{$na}})){				# Use port with highest population as last resort.
-						if ($portprop{$na}{$if}{pop} > $pop){
-							$pop = $portprop{$na}{$if}{pop};
-							$upl = $if;
+					if(!$foundupl){						# Use port with highest population as last resort.
+				
+						my $upl = "";
+						my $pop = 0;
+
+						foreach my $if (keys (%{$portprop{$na}})){			# Use port with highest population as last resort.
+							if ($portprop{$na}{$if}{pop} > $pop){
+								$pop = $portprop{$na}{$if}{pop};
+								$upl = $if;
+							}
+						}
+						if($upl){
+							$portprop{$na}{$upl}{upl} = 1;
+							$main::link{$ndv}{$nif}{$na}{$upl}{bw} = $portprop{$ndv}{$nif}{spd};
+							$main::link{$ndv}{$nif}{$na}{$upl}{ty} = "P";
+							$main::link{$ndv}{$nif}{$na}{$upl}{du} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{dpx};
+							$main::link{$ndv}{$nif}{$na}{$upl}{vl} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{vln};
+							$main::link{$na}{$upl}{$ndv}{$nif}{bw} = $portprop{$na}{$upl}{spd};
+							$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "P";
+							$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
+							$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
+							$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= " P:$na-$upl";
+							$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= " P:$ndv-$nif";
+							print " LNP:$na:$upl <-> $ndv:$nif??\n" if $main::opt{v};
 						}
 					}
-					$portprop{$na}{$upl}{upl} = 1;
-					$main::link{$ndv}{$nif}{$na}{$upl}{bw} = $portprop{$ndv}{$nif}{spd};
-					$main::link{$ndv}{$nif}{$na}{$upl}{ty} = "P";
-					$main::link{$ndv}{$nif}{$na}{$upl}{du} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{dpx};
-					$main::link{$ndv}{$nif}{$na}{$upl}{vl} = $main::int{$na}{$portprop{$na}{$upl}{idx}}{vln};
-					$main::link{$na}{$upl}{$ndv}{$nif}{bw} = $portprop{$na}{$upl}{spd};
-					$main::link{$na}{$upl}{$ndv}{$nif}{ty} = "P";
-					$main::link{$na}{$upl}{$ndv}{$nif}{du} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{dpx};
-					$main::link{$na}{$upl}{$ndv}{$nif}{vl} = $main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{vln};
-					$main::int{$ndv}{$portprop{$ndv}{$nif}{idx}}{com} .= " P:$na-$upl";
-					$main::int{$na}{$portprop{$na}{$upl}{idx}}{com} .= " P:$ndv-$nif";
-					print " LNP:$na:$upl <-> $ndv:$nif??\n" if $main::opt{v};
+				}else{
+					print "$mc no current IF\n" if $main::opt{v};
 				}
-			}else{
-				print "$mc no current IF\n" if $main::opt{v};
 			}
-
 		}
-	}else{
 	}
 }
 
@@ -593,30 +604,32 @@ sub UpNodif {
 	my $newdv = "";
 	my $newif = "";
 	my $vlan = "";
-	my $newmet = 250;											# This should never be seen in DB!
+	my $newmet = 250;									# This should never be seen in DB!
 	my $mc    = $_[0];
 
-	if($_[1]){												#  Node exists already...
+	if($_[1]){										#  Node exists already...
 		if($main::nod{$mc}{iu} < $retire){
-			$newmet = 200;										# forces update if interface hasn't been updated in the retirement period.
+			$newmet = 200;								# forces update if interface hasn't been updated in the retirement period.
 		}else{
-			$newmet = $main::nod{$mc}{im};								# Use old if value if available.
+			$newmet = $main::nod{$mc}{im};						# Use old if value if available.
 		}
 	}
 	print " $newmet-> " if $main::opt{v};
-	foreach my $dv (keys(%{$portnew{$mc}}) ){								# Cycle thru ports...
+	foreach my $dv (keys(%{$portnew{$mc}}) ){						# Cycle thru ports...
 		my $if = $portnew{$mc}{$dv}{po};
 		if(!defined $portprop{$dv}{$if}{rtr}){$portprop{$dv}{$if}{rtr} = 0}
 		if(!defined $portprop{$dv}{$if}{upl}){$portprop{$dv}{$if}{upl} = 0}
 		if(!defined $portprop{$dv}{$if}{chn}){$portprop{$dv}{$if}{chn} = 0}
 		if(!defined $portprop{$dv}{$if}{pho}){$portprop{$dv}{$if}{pho} = 0}
+		if(!defined $portprop{$dv}{$if}{wln}){$portprop{$dv}{$if}{wln} = 0}
 
 		my $metric =	$portprop{$dv}{$if}{pho} * 10 + 
+				$portprop{$dv}{$if}{wln} * 20 + 
 				$portprop{$dv}{$if}{rtr} * 30 + 
 				$portprop{$dv}{$if}{upl} * 50 + 
 				$portprop{$dv}{$if}{chn} * 100;
 		if ($metric <= $newmet ){
-			$newdv  = $dv;										# ...and use the new one, if interface value is equal or better than the existing entry or update is forced due to age.
+			$newdv  = $dv;								# ...and use the new one, if interface value is equal or better than the existing entry or update is forced due to age.
 			$newif  = $if;
 			$newmet = $metric;
 			$vlan   = $portnew{$mc}{$newdv}{vl};
@@ -665,7 +678,7 @@ sub UpNodip {
 				}
 			}
 			$ipchg++;
-		}elsif($main::nod{$mc}{au} < $retire){								# Same IP forever, update name
+		}elsif($main::nod{$mc}{au} < $retire){						# Same IP forever, update name
 			$getna = 1;
 		}
 	}else{
@@ -674,7 +687,7 @@ sub UpNodip {
 	$main::nod{$mc}{ip} = $arp{$mc};
 	if($getna){
 		$main::nod{$mc}{au} = $main::now;
-		if(exists $arpn{$mc}){										# ARPwatch got a name, ...
+		if(exists $arpn{$mc}){								# ARPwatch got a name, ...
 			$main::nod{$mc}{na} = $arpn{$mc};
 		}else{
 			$main::nod{$mc}{na} = gethostbyaddr(inet_aton($arp{$mc}), AF_INET) or $main::nod{$mc}{na} = "";
@@ -697,7 +710,7 @@ sub BuildNod {
 	print "Building Nodes (i:IP n:non-IP x:ignored f:no IF):\n"  if $main::opt{d};
 	print "Building IP nodes from Arp cache:\n"  if $main::opt{v};
 	foreach my $mc (keys(%arp)){
-		if (!grep(/^$arp{$mc}$/,@doneip) or $main::opt{N}){						# Don't use devices as nodes.
+		if (!grep(/^$mc$/,@doneid) or $main::opt{N}){					# Don't use devices as nodes unless desired.
 			print " NOD:$mc [" if $main::opt{v};
 			if ( exists $portnew{$mc} ){
 				my $nodex = 0;
@@ -715,7 +728,7 @@ sub BuildNod {
 				&UpNodif($mc,$nodex);
 				print "i"  if $main::opt{d};
 			}else{
-				print " no new IF ]\n" if $main::opt{v};					# Should only happen when Arpwatch is used
+				print " no new IF ]\n" if $main::opt{v};			# Should only happen when Arpwatch is used
 				print "f"  if $main::opt{d};
 			}
 			$nip++;
@@ -762,7 +775,7 @@ sub BuildNod {
 }
 
 #===================================================================
-# Remove nodes their logs which have been inactive longer than $misc::retire days
+# Remove nodes  which have been inactive longer than $misc::retire days
 #===================================================================
 sub RetireNod {
 
@@ -792,7 +805,7 @@ sub ManageRRD {
 	my $dv		= $_[0];
 	my $ok		= 0;
 	
-	$dv =~ s/([^a-zA-Z0-9_-])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
+	$dv =~ s/([^a-zA-Z0-9_.-])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
 	if (-e "$rrdpath/$dv"){
 		$ok = 1;
 	}else{
@@ -809,7 +822,7 @@ sub ManageRRD {
 					"DS:cpu:GAUGE:$ds:0:100",
 					"DS:memcpu:GAUGE:$ds:0:U",
 					"DS:memio:GAUGE:$ds:0:U",
-					"DS:temp:GAUGE:$ds:-100:100",
+					"DS:temp:GAUGE:$ds:-1000:1000",
 					"RRA:AVERAGE:0.5:1:720",
 					"RRA:AVERAGE:0.5:24:720");
 		}
@@ -829,9 +842,9 @@ sub ManageRRD {
 		}else{print "Rs"}
 		$ok = 0;
 		foreach my $i ( keys(%{$main::int{$_[0]}}) ){
-			if(exists $main::int{$_[0]}{$i}{ina}){							# Avoid errors due empty ifnames
+			if(exists $main::int{$_[0]}{$i}{ina}){					# Avoid errors due empty ifnames
 				$irf =  $main::int{$_[0]}{$i}{ina};
-				$irf =~ s/([^a-zA-Z0-9_-])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
+				$irf =~ s/([^a-zA-Z0-9_.-])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
 				if (-e "$rrdpath/$dv/$irf.rrd"){
 					$ok = 1;
 				}else{
@@ -900,14 +913,10 @@ sub RetrVar{
 	my $ifmac = retrieve("$main::p/ifmac.db");
 	%ifmac = %$ifmac;
 
-	my $doneoth = retrieve("$main::p/doneoth.db");
-	@doneoth = @{$doneoth};
-	my $donecdp = retrieve("$main::p/donecdp.db");
-	@donecdp = @$donecdp;
 	my $donenam = retrieve("$main::p/donenam.db");
 	@donenam = @$donenam;
-	my $donemac = retrieve("$main::p/donemac.db");
-	@donemac = @$donemac;
+	my $doneid = retrieve("$main::p/doneid.db");
+	@doneid = @$doneid;
 	my $doneip = retrieve("$main::p/doneip.db");
 	@doneip = @$doneip;
 
@@ -918,8 +927,6 @@ sub RetrVar{
 	%main::net = %$net;
 	my $int = retrieve("$main::p/int.db");
 	%main::int = %$int;
-	my $cdplink = retrieve("$main::p/cdplink.db");
-	%misc::cdplink = %$cdplink;
 	my $vlan = retrieve("$main::p/vlan.db");
 	%main::vlan = %$vlan;
 }
@@ -939,16 +946,13 @@ sub StorVar{
 	store \%rarp, "$main::p/rarp.db";
 	store \%ifmac, "$main::p/ifmac.db";
 	
-	store \@doneoth, "$main::p/doneoth.db";
-	store \@donecdp, "$main::p/donecdp.db";
 	store \@donenam, "$main::p/donenam.db";
-	store \@donemac, "$main::p/donemac.db";
+	store \@doneid, "$main::p/doneid.db";
 	store \@doneip, "$main::p/doneip.db";
 
 	store \%main::dev, "$main::p/dev.db";
 	store \%main::int, "$main::p/int.db";
 	store \%main::net, "$main::p/net.db";
-	store \%misc::cdplink, "$main::p/cdplink.db";
 	store \%main::vlan, "$main::p/vlan.db";
 }
 

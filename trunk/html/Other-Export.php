@@ -14,11 +14,6 @@
 $bg1 = "CEC881";
 $bg2 = "DFD992";
 
-$btag = "";
-$nocache = 0;
-$calendar= 0;
-$refresh = 0;
-
 // Header.php contains the navigation and general settings for the UI
 include_once("inc/header.php");
 
@@ -114,7 +109,6 @@ $dblink = DbConnect($dbhost, $dbuser, $dbpass, $dbname);
 		<!-- This <th> contains the SQL dump part of the form -->
 		<th valign="top" width="25%" >
 			<input type="radio" name="action" value="sqldump" <?=$action=="sqldump"?"checked":""?>>SQL Dump</input>
-			<input type="radio" name="action" value="db" <?=$action=="db"?"checked":""?>>Layout</input><p>
 			<p>
 				Tables:
 			</p>
@@ -188,7 +182,7 @@ if($action == "export") {
 		// For each device found a new .conf file with the device name and the date of the
 		// last configuration change contained in the file name is created
 		while($row = DbFetchArray($res)) {
-			$filename = "./log/".$row['device']."_".date("Ymd_Hi", $row['time']).".conf";
+			$filename = "./log/".rawurlencode($row['device'])."_".date("Ymd_Hi", $row['time']).".conf";
 
 			$cfgfile = fopen($filename, "w");
 			fwrite($cfgfile, $row['config']);
@@ -205,7 +199,7 @@ if($action == "export") {
 
 		// CreateArchive() is called to make an archive out of all the configuration files that have been created
 		if($arch == "plain") $arch = "tar";
-		$archive = CreateArchive("./log/nediconfigs_".$_SESSION['user'], $arch, $configs, ($timest=="checked"?1:0));
+		$archive = CreateArchive("./log/configs_".$_SESSION['user'], $arch, $configs, ($timest=="checked"?1:0));
 		echo "Created archive ".$archive."<br>\n";
 
 		// Now all the .conf files are deleted
@@ -234,7 +228,7 @@ if($action == "export") {
 		flush();
 
 		// CreateArchive() is called to make an archive out of the CSV file that has been created
-		$archive = CreateArchive("./log/nediexport_".$_SESSION['user'], $arch, "./log/nedi.csv", ($timest=="checked"?1:0));
+		$archive = CreateArchive("./log/export_".$_SESSION['user'], $arch, "./log/nedi.csv", ($timest=="checked"?1:0));
 
 		echo "Created archive ".$archive."<br>\n";
 
@@ -263,7 +257,7 @@ else if($action == "sqldump") {
 	flush();
 
 	// CreateArchive() is called to make an archive out of the SQL dump file that has been created
-	$archive = CreateArchive("./log/nedidump_".$_SESSION['user'], $arch, "./log/nedi.sql", ($timest=="checked"?1:0));
+	$archive = CreateArchive("./log/dump_".$_SESSION['user'], $arch, "./log/nedi.sql", ($timest=="checked"?1:0));
 	echo "Created archive ".$archive."<br>\n";
 
 	// Now the dump file is deleted
@@ -276,24 +270,24 @@ else if($action == "sqldump") {
 
 	echo "<meta http-equiv=\"refresh\" content=\"0; URL=".$archive."\">\n";
 }
-else if($action == "db") {
+else {
 echo "<h2>NeDi Database Layout</h2>\n";
 	$res = DbQuery(GenQuery("", "t"), $dblink);
 	$col = 0;
 	echo "<table width=100%><tr valign=top>\n";
 	while($tab = DbFetchRow($res)){
 		if($col == 4){echo "</tr><tr valign=top>\n";$col=0;}
-		echo "<td><table bgcolor=#666666 $tabtag><tr bgcolor=#$bg2><th colspan=2>$tab[0]</th><th>NULL</th><th>KEY</th></tr>\n";
+		echo "<td><table bgcolor=#666666 $tabtag>\n<tr bgcolor=#$bg2><th colspan=3>$tab[0]</th><th>NULL</th><th>KEY</th></tr>\n";
 		$cres = DbQuery(GenQuery($tab[0], "c"), $dblink);
 		$row = 0;
 		while($c = DbFetchRow($cres)){
 			if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 			$row++;
-			echo "<tr bgcolor=#$bg><th bgcolor=#$bi align=left>$c[0]</th><td>$c[1]</td><td>$c[2]</td><td>$c[3]</td></tr>\n";
+			echo "<tr bgcolor=#$bg><th>$row</th><th bgcolor=#$bi align=left>$c[0]</th><td>$c[1]</td><td>$c[2]</td><td>$c[3]</td></tr>\n";
 		}
 		$nres = DbQuery(GenQuery($tab[0], "s"), $dblink);
-		echo "<tr bgcolor=#$bg2><th colspan=4>".DbNumRows($nres)." Records</th></tr>";
-		echo "</table></td>";
+		echo "<tr bgcolor=#$bg2><th colspan=5>".DbNumRows($nres)." Records</th></tr>\n";
+		echo "</table></td>\n";
 		$col++;
 	}
 	echo "</td></tr></table>\n";
@@ -370,7 +364,7 @@ function DbDump($tables, $link, $outfile) {
 		$res = DbQuery("DESCRIBE `$tbl`;", $link);
 		while($field = DbFetchArray($res)) {
 			// If a field is either of type "varchar()" or "text" the we add a '1' to the array...
-			if((substr($field['Type'], 0, 8) == "varchar(") || ($field['Type'] == "text")) {
+			if( preg_match("/char|text/",$field['Type']) ) {
 				$chfields[] = 1;
 			}
 			// ...otherwise, we add a '0'
@@ -450,11 +444,13 @@ function DbCsv($res, $sep, $quotes, $outfile) {
 	$csvfile = fopen($outfile, "w");
 
 	// The rows of the given result are processed one after the other
-	while($row = DbFetchRow($res)) {
+	while($row = DbFetchArray($res)) {
 		$csv = "";
 
+//preg_match("/^(origip|ip)$/",$c)
 		// Each element is added to the string individually
-		foreach($row as $field) {
+		foreach($row as $id => $field) {
+			if(preg_match("/^(origip|ip)$/",$id) ){$field = long2ip($field);}
 			// If quotes are wished, they are put around the element
 			if($quotes == "on") $csv .= "\"";
 			$csv .= $field;

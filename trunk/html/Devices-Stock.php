@@ -17,10 +17,6 @@
 
 $bg1	= "88BBCC";
 $bg2	= "AACCDD";
-$btag	= "onload=document.add.ser.focus();";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 $cico['10']  = "star";
 $cico['100'] = "brld";
@@ -31,15 +27,15 @@ include_once ("inc/header.php");
 include_once ('inc/libdev.php');
 $_GET = sanitize($_GET);
 ?>
-<h1>Devices Stock</h1>
-<form method="get" action="<?=$_SERVER['PHP_SELF']?>" name=add>
+<h1>Stock Management</h1>
+<form method="get" action="<?=$_SERVER['PHP_SELF']?>" name="add">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>>
-<img src=img/32/pkg.png border=0 title="Devices will be removed as found in discovery via SN#">
+<img src=img/32/pkg.png border=0 title="Devices and modules will be removed if SN# is found in discovery">
 </a></th>
 
 <th>Serial# <input type="text" name="ser" size="20" OnFocus=select();></th>
-<th>Type <input type="text" name="typ" size="20" OnFocus=select();></th>
+<th>Type/Model<input type="text" name="typ" size="20" OnFocus=select();></th>
 <th>Location <input type="text" name="loc" size="12" OnFocus=select();></th>
 <th>Condition <select size=1 name="con">
 <?
@@ -50,7 +46,11 @@ foreach (array_keys($stco) as $c){
 ?>
 </select></th>
 <th width=80><input type="submit" value="Add" name="add"></th></tr>
-</table></form><p>
+</table></form>
+<script type="text/javascript">
+document.add.ser.focus();
+</script>
+<p>
 <?
 $link	= @DbConnect($dbhost,$dbuser,$dbpass,$dbname);
 
@@ -69,9 +69,9 @@ if( isset($_GET['add']) or isset($_GET['del']) ){
 	}
 }
 ?>
-<h2>Type Inventory</h2>
+<h2>Available Items</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
-<th><img src=img/32/fiap.png><br>Type</th>
+<th><img src=img/32/fiap.png><br>Type/Model</th>
 <th><img src=img/32/dev.png><br>Quantity</th>
 
 <?
@@ -92,7 +92,7 @@ if($res){
 </table><table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?>><td><?=$row?> results using <?=$query?></td></tr></table>
 
-<h2>Location Inventory</h2>
+<h2>Location Distribution</h2>
 <table bgcolor=#666666 <?=$tabtag?> ><tr bgcolor=#<?=$bg2?>>
 <th><img src=img/32/glob.png><br>Location</th>
 <th><img src=img/32/dev.png><br>Quantity</th>
@@ -115,11 +115,11 @@ if($res){
 </table><table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?>><td><?=$row?> results using <?=$query?></td></tr></table>
 
-<h2>Device Inventory</h2>
+<h2>Detailed Inventory</h2>
 <table bgcolor=#666666 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg2?>>
 <th colspan=2><img src=img/32/key.png><br>Serial #</th>
-<th><img src=img/32/fiap.png><br>Type</th>
+<th><img src=img/32/fiap.png><br>Type/Model</th>
 <th><img src=img/32/smil.png><br>Added by</th>
 <th><img src=img/32/clock.png><br>Added on</th>
 <th><img src=img/32/glob.png><br>Location</th>

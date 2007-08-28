@@ -13,7 +13,7 @@ $bgb	= "C0C0C0";
 $bia	= "F0F0F0";
 $bib	= "E6E6E6";
 
-$tabtag = "cellspacing=1 cellpadding=6 border=0 width=100%";
+$tabtag = "cellspacing=1 cellpadding=5 border=0 width=100%";
 
 ini_set("memory_limit","16M");							# Added 8.1.2007 due to reporting problems on large networks
 
@@ -30,28 +30,28 @@ if(isset ($_SESSION['group']) ){
 require_once ("lang-$_SESSION[lang].php");
 require_once ("lib" . strtolower($backend) . ".php");
 ?>
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <title>NeDi <?=$self?></title>
-<?=($nocache)?"<META HTTP-EQUIV=\"CACHE-CONTROL\" CONTENT=\"NO-CACHE\">\n":""?>
-<?=($refresh)?"<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"$pause;$_SERVER[PHP_SELF]\">\n":""?>
-<?=($calendar)?"<script language=\"JavaScript\" src=\"inc/cal.js\"></script>\n":""?>
+<?=(isset($nocache))?"<meta http-equiv=\"cache-control\" content=\"no-cache\">\n":""?>
+<?=(isset($refresh))?"<meta http-equiv=\"refresh\" content=\"$refresh;$_SERVER[PHP_SELF]\">\n":""?>
+<?=(isset($calendar))?"<script language=\"JavaScript\" src=\"inc/cal.js\"></script>\n":""?>
 
 <link href='inc/style.css' type=text/css rel=stylesheet>
 <link rel='shortcut icon' href='img/favicon.ico'>
-<SCRIPT LANGUAGE='JavaScript' SRC='inc/JSCookMenu.js'></SCRIPT>
-<LINK REL='stylesheet' HREF='inc/ThemeN/theme.css' TYPE='text/css'>
-<SCRIPT LANGUAGE='JavaScript' SRC='inc/ThemeN/theme.js'></SCRIPT>
+<script language='JavaScript' src='inc/JSCookMenu.js'></script>
+<link rel='stylesheet' href='inc/ThemeN/theme.css' TYPE='text/css'>
+<script language='JavaScript' src='inc/ThemeN/theme.js'></script>
 </head>
 
-<body <?=$btag?>>
+<body>
 <table bgcolor=#000000 <?=$tabtag?>>
 <tr bgcolor=#<?="$bg1" ?>>
 <td align=center width=80><a href='http://www.nedi.ch'><img src='img/n.png' border=0 hspace=10 valign=middle></a></td>
 <td ID=MainMenuID></td><th width=80><?=$_SESSION['user']?></th></tr></table>
 
-<SCRIPT LANGUAGE="JavaScript"><!--
+<script language="JavaScript"><!--
 var mainmenu = [
 <?
 	foreach (array_keys($mod) as $m) {

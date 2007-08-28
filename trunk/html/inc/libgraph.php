@@ -5,14 +5,26 @@
 
 // RRDtool properties
 $rrdcmd  = "rrdtool";										# point to rrdtool
-$rrdpath = "/var/nedi/rrd";									# point to rrds
-$fahrtmp = 0;											# show temperature in degrees F too
+$rrdpath = "/var/nedi/rrd";									# point to rrds (on *nix)...
 
+$fahrtmp = 0;											# show temperature in degrees F too
+$usebits = 1;											# For lazy peoples (hallo Chi3f)
+
+//===================================================================
+// Stack traffic and errors
+function Safelabel($s){
+	return preg_replace('/[$&]/','.', $s);
+}
+
+//===================================================================
+// Stack traffic and errors
 function GraphTraffic($rrd,$t){
 
+	global $usebits;
+
 	$c = 0;
-	$drawin = "";
-	$drawout= "";
+	$drawin = '';
+	$drawout= '';
 	$inmod  = 'AREA';
 	$outmod = 'LINE2';
 	$n	= count($rrd);
@@ -20,31 +32,51 @@ function GraphTraffic($rrd,$t){
 	if($t == 'trf'){
 		$idef = 'inoct';
 		$odef = 'outoct';
-		$tit = 'Traffic in Byte/s';
+		if ($usebits){
+			$tit = 'Traffic in Bit/s';
+		}else{
+			$tit = 'Traffic in Byte/s';
+		}
 		$cols = array('0000aa','008800','0044bb','00bb44','0088ee','00ee88','00aaff','00ffaa','0044ff','00ff44','0088ff','00ff88','3388ff','33ff88','6688ff','66ff88');
 	}else{
 		$idef = 'inerr';
 		$odef = 'outerr';
-		$tit = "Errors";
+		$tit = 'Errors/s';
 		$cols = array('880000','886600','aa0000','aa8800','ee0000','eeaa00','ff0000','ffcc00','ff0066','ffcc66','ff0088','ffcc88','ff00aa','ffeeaa','ff00cc','ffccdd');
 	}
 	foreach (array_keys($rrd) as $i){
                 $il = str_replace(":","\:",$i);
-		$drawin .= "DEF:$idef$c=$rrd[$i]:$idef:AVERAGE $inmod:$idef$c#$cols[$c]:\"$il  in";
+		if ($usebits){
+			$drawin .= "DEF:$idef$c=$rrd[$i]:$idef:AVERAGE ";
+			$drawin .= "CDEF:b$idef$c=$idef$c,8,* $inmod:b$idef$c#$cols[$c]:\"$il  in";
+		}else{
+			$drawin .= "DEF:$idef$c=$rrd[$i]:$idef:AVERAGE $inmod:$idef$c#$cols[$c]:\"$il  in";
+		}
 		if($c == 2 * $n - 2){$drawin .= "\\l";}
 		$drawin .= "\" ";
 		$c++;
-		$drawout .= "DEF:$odef$c=$rrd[$i]:$odef:AVERAGE $outmod:$odef$c#$cols[$c]:\"$il out\" ";
+		if ($usebits){
+			$drawout .= "DEF:$odef$c=$rrd[$i]:$odef:AVERAGE ";
+			$drawout .= "CDEF:b$odef$c=$odef$c,8,* $outmod:b$odef$c#$cols[$c]:\"$il out\" ";
+		}else{
+			$drawout .= "DEF:$odef$c=$rrd[$i]:$odef:AVERAGE $outmod:$odef$c#$cols[$c]:\"$il out\" ";
+		}
 		$c++;
 		$inmod = 'STACK';
 		$outmod = 'STACK';
 	}
 	return array($drawin,$drawout,$tit);	
 }
-function GraphOpts($s,$dur,$tit){
+
+//===================================================================
+// Defines graphs according to their size (tiny, small, med and large)
+function GraphOpts($s,$dur,$tit,$bw){
+
+	global $usebits;
 
 	if($s == 't'){
-		return "-w32 -h16 -j -c CANVAS#ddeedd";
+		if (!$usebits){$bw = $bw/8;}
+		return "-w32 -h16 -u $bw -j -c CANVAS#ddeedd";
 	}elseif($s == 's'){
 		$dur = $dur?$dur:1;
 		return "-w80 -h60 -g -s -${dur}d -L5";
@@ -57,6 +89,8 @@ function GraphOpts($s,$dur,$tit){
 	}
 }
 
+//===================================================================
+// Old test functions for the plotter...
 class Graph {
 	
 	function Graph($res){

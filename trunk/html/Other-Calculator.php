@@ -12,10 +12,6 @@
 
 $bg1	= "DDDDAA";
 $bg2	= "EEEEBB";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 include_once ("inc/header.php");
 
@@ -44,11 +40,11 @@ Sub/Supernet Mask <input type="text" name="smsk" value="<?=$getsub?>" size="15">
 if (isset ($_GET['calc']) ) {
 
 if(preg_match("/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/",$getip) ){
-	$ip		= $getip;
+	$ip	= $getip;
 	$dip	= ip2long($getip);
 }else{
 	$getip = $getip + 0;													// force 32 Bit unsigned for PHP!!!
-	$ip		= long2ip($getip);
+	$ip	= long2ip($getip);
 	$dip	= $getip;
 }
 list($pfix,$mask,$bmsk)	= Masker($getmsk);
@@ -69,7 +65,7 @@ $net	= long2ip($dnet);
 $bnet	= ip2bin($net);
 $hnet	= "0x".ip2hex($net);
 
-$bc		= long2ip($dnet + $dwmsk);
+$bc	= long2ip($dnet + $dwmsk);
 $dbc	= ip2long($bc);
 $bbc	= ip2bin($bc);
 $hbc	= "0x".ip2hex($bc);

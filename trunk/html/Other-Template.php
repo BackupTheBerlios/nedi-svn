@@ -11,10 +11,6 @@
 
 $bg1	= "88AADD";
 $bg2	= "99BBEE";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 include_once ("inc/header.php");
 

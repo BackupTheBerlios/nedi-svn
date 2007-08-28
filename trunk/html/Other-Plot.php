@@ -11,10 +11,6 @@
 
 $bg1	= "884488";
 $bg2	= "CC88CC";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 $cmd = isset($_GET['cmd']) ? $_GET['cmd'] : '';
 $res = isset($_GET['res']) ? $_GET['res'] : 'vga';

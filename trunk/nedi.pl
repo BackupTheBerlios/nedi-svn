@@ -14,6 +14,7 @@
 # 3/11/06		v1.0.w  1st SSH implementation, link mgmt, defgen	(RC3)
 # 15/12/06	v1.0.w Cleanup and bugfixes. RRDs based on 1h interval 	(RC4-Xmas edition)
 # 21/03/07	v1.0.w More cleanup, -I and -N, nodetrack, rel IF counters	(Relase)
+# 16/04/07	v1.0  device names now BINARY (is case sensitive), new  (route based) discovery, stock module management.
 #============================================================================
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -38,17 +39,18 @@ use Getopt::Std;
 use vars qw($p $now $nediconf $cdp $lldp $oui);
 use vars qw(%nod %dev %int %mod %link %vlan %opt %net %usr); 
 
-getopts('AbcdDiIlLnNost:u:vw:y',\%opt) or &Help();
+getopts('AbcdDiIlLNort:u:vw:y',\%opt) or &Help();
 
 $p = $0;
 $p =~ s/(.*)\/(.*)/$1/;
 if($0 eq $p){$p = "."};
 $now = time;
-require "$p/inc/libmisc.pl";											# Use the miscellaneous nedi library
+require "$p/inc/libmisc.pl";									# Use the miscellaneous nedi library
 &misc::ReadConf();
-require "$p/inc/libsnmp.pl";											# Use the SNMP function library
-require "$p/inc/libcli-sshnet.pl";												# Use the Net::SSH::Perl CLI library
-require "$p/inc/libmon.pl";											# Use the Monitoring lib for notifications.
+require "$p/inc/libsnmp.pl";									# Use the SNMP function library
+require "$p/inc/libcli-sshnet.pl";								# Use the Net::SSH::Perl CLI library
+require "$p/inc/libmon.pl";									# Use the WEB functions for webdevs.
+require "$p/inc/libweb.pl";									# Use the Monitoring lib for notifications.
 require "$p/inc/lib" . lc($misc::backend) . ".pl" || die "Backend error ($misc::backend)!";
 
 if($opt{u}){
@@ -63,17 +65,17 @@ select(STDOUT); $| = 1;
 # This is the debug mode, using previousely saved vars instead of discovering...
 # -------------------------------------------------------------------
 if ($opt{D}){
-	&misc::ReadOUIs();
-	&db::ReadDev();
+	print &misc::ReadOUIs();
+	print &db::ReadDev();
 	&misc::RetrVar();
 # Functions to be debugged go here
 #	&db::UnStock();
-	&misc::BuildArp() if(defined $misc::arpwatch);								# Needs to be built before Links!
+	&misc::BuildArp() if(defined $misc::arpwatch);						# Needs to be built before Links!
 	&misc::Link();
 
-	print &db::ReadNod();
-	&misc::BuildNod();
-	&misc::RetireNod();
+#	print &db::ReadNod();
+#	&misc::BuildNod();
+#	&misc::RetireNod();
 
 #	&db::WriteDev();
 #	&db::WriteVlan();
@@ -93,72 +95,39 @@ if ($opt{w}) {
 }elsif($opt{y}) {
 	&ShowDefs();
 }else{
+	@misc::doneid  = ();
+	@misc::doneip  = ();
+	@misc::donenam = ();
+
 	print &misc::ReadOUIs();
 	print &db::ReadDev();
+	print &db::ReadLink('type','S');						# Read static links to avoid doubles
 
 	my $nseed = &misc::InitSeeds();
 
-	$cdp = 0;
-	$oui = 0;
-	if ( $opt{c} or $opt{l} ) {												# Use seed(s) for CDP or LLDP discovery.
-		if($opt{c}){$cdp = 1}
-		if($opt{l}){$lldp = 1}
-		print "Dynamic discovery with $nseed seed(s) on ". localtime($now)."\n";
-		print "===============================================================================\n";
-		print "Device				Status				     Todo/Done\n";
-		print "-------------------------------------------------------------------------------\n";
-		while ($#misc::todo ne "-1"){
-			my $start = time;
-			my $cdpid = shift(@misc::todo);
-			my $name = &misc::Discover($cdpid);
-			push (@misc::donenam, $name) if ($name);
-			push (@misc::donecdp,$cdpid);
-			push (@misc::doneip,$misc::doip{$cdpid});
-			my $dur = time - $start."sec ";
-			print $dur if $main::opt{d};
-			printf ("%4d/%d \n",scalar(@misc::todo),scalar(@misc::donenam) );
-		}
-	}else{
-		print "Static discovery with $nseed devices on ". localtime($now)."\n";
-		print "===============================================================================\n";
-		print "Device				Status				     Todo/Done\n";
-		print "-------------------------------------------------------------------------------\n";
-		while ($#misc::todo ne "-1"){
-			my $start = time;
-			my $ip = shift(@misc::todo);
-			my $name = &misc::Discover($ip);
-			push (@misc::donenam,$name) if ($name);
-			push (@misc::doneoth,$name) if ($name);
-			push (@misc::doneip,$ip) if ($name);
-			my $dur = time - $start."sec ";
-			print $dur if $main::opt{d};
-			printf ("%4d/%d\n",scalar(@misc::todo),scalar(@misc::donenam) );
-		}
-	}
-	if ($opt{o}) {																# Use seed(s) for OUI discovery.
-		$cdp = 0;
-		$oui = 1;
-		my $noudo = scalar(@misc::oudo);
-		if($noudo){
-			print "-  OUI Discovery with $noudo canditates - - - - - - - - - - - - - - - - - - - -\n";
-			while ($#misc::oudo ne "-1"){
-				my $start = time;
-				my $mac = shift(@misc::oudo);
-				my $name = &misc::Discover($mac);
-				push (@misc::donemac,$mac);
-				push (@misc::donenam,$name) if ($name);
-				push (@misc::doneoth,$name) if ($name);
-				push (@misc::doneip,$misc::doip{$mac}) if ($name);
-				my $dur = time - $start."sec ";
-				print $dur if $main::opt{d};
-				printf ("%4d/%d\n",scalar(@misc::oudo),scalar(@misc::donenam) );
-			}
-		}
+	print "CDP-"   if($opt{c});
+	print "LLDP-"  if($opt{l});
+	print "OUI-"   if($opt{o});
+	print "Route-" if($opt{r});
+	print "Discovery with $nseed seed(s) on ". localtime($now)."\n";
+	print "===============================================================================\n";
+	print "Device				Status				     Todo/Done\n";
+	print "-------------------------------------------------------------------------------\n";
+	while ($#misc::todo ne "-1"){
+		my $start = time;
+		my $id    = shift(@misc::todo);
+		my $name  = &misc::Discover($id);
+		push (@misc::doneid,$id);
+		push (@misc::doneip,$misc::doip{$id});
+		push (@misc::donenam, $name) if ($name);
+		my $dur = time - $start;
+		print " ${dur}sec" if $main::opt{d};
+		printf ("%4d/%d\n",scalar(@misc::todo),scalar(@misc::donenam) );
 	}
 	print "-------------------------------------------------------------------------------\n";
 	if (scalar @misc::donenam){
 		&misc::StorVar() if ($opt{d});
-		&misc::BuildArp() if(defined $misc::arpwatch);								# Needs to be built before Links!
+		&misc::BuildArp() if(defined $misc::arpwatch);					# Needs to be built before Links!
 		&misc::Link();
 	
 		print &db::ReadNod();
@@ -205,14 +174,15 @@ sub ShowDefs {
 #===================================================================
 sub Help {
 	print "\n";
-	print "usage: nedi.pl [-i|-D|-t|-l|-c|-w|-y|] <more option(s)>\n";
+	print "usage: nedi.pl [-i|-D|-t|-w|-y|] <more option(s)>\n";
 	print "Discovery Options (can be combined, default is static) --------------------\n";
-	print "-u<file>	use specified seedlist\n";
+	print "-b	backup running configs\n";
 	print "-c	CDP discovery\n";
 	print "-l 	LLDP discovery\n";
 	print "-o	OUI discovery (based on ARP chache entries of the above)\n";
-	print "-b	backup running configs\n";
-	print "-s	force SNMP for mac-address-tables on IOS switches\n";
+	print "-r	route table discovery (on L3 devices)\n";
+	print "-s	GONE! check nedi.conf for getfwd...\n";
+	print "-u<file>	use specified seedlist\n";
 	print "-A 	append to networks, links, vlans, interfaces and modules tables\n";
 	print "-I 	don't try to find best suited IP addresses for devices\n";
 	print "-L 	don't touch links, so you can maintain them manually\n";
@@ -232,23 +202,23 @@ sub Help {
 	print "f#	Forwarding entries\n";
 	print "m#	Modules\n";
 	print "v#	Vlans\n";
-	print "[clo]#/#	(CDP,LLDP or OUI) queueing (added/done already)\n";
+	print "[clro]#/#	(CDP,LLDP,route or OUI) queueing (added/done already)\n";
 	print "b#	border hits\n";
 	print "\nWarnings (upper case letters):\n";
 	print "Ax	Addresses (i=IF IP, m=IF mask, a=arptable, n=no IF)\n";
-	print "Bx	Backup configs (i=IOS, c=Cat, 9=C1900, n=new, u=updated)\n";
+	print "Bx	Backup configs (f=fetched, n=new, u=updated)\n";
 	print "Fx(#)	Forwarding table (i=IF, p=Port, #=vlan)\n";
 	print "Ix	Interface (d=desc, n=name, t=type, s=speed, m=mac, a=admin status,\n";
 	print "		h(in)/H(out)=HC octet,o/O=octet,e/E=error, l=alias, x=duplex, v=vlan)\n";
+	print "Hx	SSH (s=no ssh libs or port mapped, c=connect, l=login, u=no user, o=other\n";
 	print "M#..	Mapping IP or telnet port according to config\n";
 	print "Mx	Modules (t=slot, d=desc, c=class, h=hw, f=fw, s=sw, n=SN, m=model)\n";
-	print "Qx	Queueing (c=CPD, l=LLDP, 0=IP is 0.0.0.0, s=seeing itself, d=desc filter, v=voip)\n";
-	print "Px	CLI preparing (u=no user, set retry in Devices-Status to prep again.)\n";
+	print "Qx	Queueing (c=CPD, l=LLDP, r=route, 0=IP is 0.0.0.0, s=seeing itself, d=desc filter, v=voip)\n";
+	print "Px	CLI preparing (u=no user, c=no credentials\n";
 	print "Rx	RRD (d=mkdir, u=update, s=create sys, i=create IF,n=IF name)\n";
 	print "Sx	SNMP (c=connect, n=SN, B=Bootimage,u=CPU util, m=CPUmem,i=IOmem,t=Temp)\n";
-	print "Tx	Telnet (c=connect,e=enable, l=login, u=no user, o=other\n";
-	print "Hx	SSH (s=no ssh libs, c=connect, l=login, u=no user, o=other\n";
+	print "Tx	Telnet (c=connect,e=enable, k=needed kick, l=login, u=no user, o=other\n";
 	print "Vx	VTP or Vlan (d=VTP domain, m=VTP mode, n=Vl name)\n";
 	print "---------------------------------------------------------------------------\n";
-	die "NeDi 1.0.w 30.Mar 2007\n";
+	die "NeDi 1.0-rc3 28.Aug 2007\n";
 }

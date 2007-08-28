@@ -9,14 +9,11 @@
 # 04/07/06	initial version
 # 08/30/06	formfill and SNMP OID check added
 # 31/01/07	added dot3 and baystack interface templates
+# 31/01/07	added dot3 interface vlan and gen standard
 */
 
 $bg1	= "887766";
 $bg2	= "998877";
-$btag	= "";
-$nocache= 0;
-$calendar= 0;
-$refresh = 0;
 
 $now = date ("j.M y G:i",time());
 
@@ -232,6 +229,13 @@ function bridgeset(idx) {
 
 function setgen(gen) {
 	if('1' == gen){
+		document.bld.sn.value = "1.3.6.1.2.1.47.1.1.1.1.11.1";
+		document.bld.bi.value = "";
+		document.bld.ico.value = "genh";
+		document.bld.vln.value = "1.3.6.1.2.1.17.7.1.4.3.1.1";
+		document.bld.vtd.value = "";
+		document.bld.vtm.value = "";
+	}else if ('2' == gen){
 		document.bld.sn.value = "1.3.6.1.4.1.9.3.6.3.0";
 		document.bld.bi.value = "1.3.6.1.4.1.9.2.1.73.0";
 		document.bld.ico.value = "genc";
@@ -242,7 +246,7 @@ function setgen(gen) {
 		document.bld.vln.value = "1.3.6.1.4.1.9.9.46.1.3.1.1.4.1";
 		document.bld.vtd.value = "1.3.6.1.4.1.9.9.46.1.2.1.1.2.1";
 		document.bld.vtm.value = "1.3.6.1.4.1.9.9.46.1.2.1.1.3.1";
-	}else if ('2' == gen){
+	}else if ('3' == gen){
 		document.bld.sn.value = "1.3.6.1.4.1.1991.1.1.1.1.2.0";
 		document.bld.bi.value = "1.3.6.1.4.1.1991.1.1.2.1.49.0";
 		document.bld.ico.value = "genf";
@@ -251,7 +255,7 @@ function setgen(gen) {
 		document.bld.brg.selectedIndex  = 1;
 		document.bld.dsp.selectedIndex  = 0;
 		document.bld.vln.value = "1.3.6.1.4.1.1991.1.1.3.2.1.1.25";
-	}else if ('3' == gen){
+	}else if ('4' == gen){
 		document.bld.sn.value = "1.3.6.1.4.1.45.1.6.3.1.6.0";
 		document.bld.bi.value = "1.3.6.1.4.1.45.1.6.4.2.1.10.0";
 		document.bld.ico.value = "genn";
@@ -279,7 +283,7 @@ function setint(typ) {
 		document.bld.idx.value = "1.3.6.1.2.1.10.7.2.1.1";
 		document.bld.hdv.value = "2";
 		document.bld.fdv.value = "3";
-		document.bld.ivl.value = "";
+		document.bld.ivl.value = "1.3.6.1.2.1.17.7.1.4.5.1.1";
 		document.bld.ivx.value = "";
 	}else if ('2' == typ){
 		document.bld.ial.value = "";
@@ -425,6 +429,7 @@ function get(oid) {
 }
 
 function walk(oid) {
+	if(oid == ""){oid = '1.3.6.1.2.1.31.1.1.1.18';}
 	window.open('inc/snmpwalk.php?ip=' + document.bld.ip.value + '&c=' + document.bld.co.value + '&oid=' + oid,'SNMP','scrollbars=1,menubar=0,resizable=1,width=400,height=600');
 }
 
@@ -444,9 +449,10 @@ function walk(oid) {
 
 <tr bgcolor=#<?=$bg2?>><th colspan=4>
 <img src="img/16/bcnl.png" align=left onClick="setgen();" title="Clear General">
-<img src="img/gsw.png" align=left onClick="setgen('1');" title="Possible Cisco OIDs">
-<img src="img/ksw.png" align=left onClick="setgen('2');" title="Possible Foundry OIDs">
-<img src="img/bsw.png" align=left onClick="setgen('3');" title="Possible Nortel OIDs">
+<img src="img/wsw.png" align=left onClick="setgen('1');" title="Possible Generic OIDs">
+<img src="img/gsw.png" align=left onClick="setgen('2');" title="Possible Cisco OIDs">
+<img src="img/ksw.png" align=left onClick="setgen('3');" title="Possible Foundry OIDs">
+<img src="img/bsw.png" align=left onClick="setgen('4');" title="Possible Nortel OIDs">
 <img src="img/16/dev.png" hspace=10 align=right>
 General</th></tr>
 <tr><th align=right>
@@ -535,7 +541,7 @@ VTP Mode</th><td>
 Interfaces</th></tr>
 <tr><th align=right>
 IF Alias</th><td>
-<input type="text" name="ial" value="<?=$ial?>" size="30" title="Specify, if enterprise specific alias is used instead of MIB2" onfocus=select(); onchange="update();">
+<input type="text" name="ial" value="<?=$ial?>" size="30" title="Specify only if enterprise specific IF alias is used instead of MIB2" onfocus=select(); onchange="update();">
 <img src=img/16/bdwn.png onClick="walk(document.bld.ial.value);">
 </td><th align=right>
 Alias Index</th><td>

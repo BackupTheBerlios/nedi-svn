@@ -6,6 +6,10 @@
 #
 # -> Send commands to devices via telnet <-
 #
+# DATE	COMMENT
+# --------------------------------------------------------------------------
+# 14/04/05	initial version.
+# 24/07/07	 better OS handling & cmd output.
 #============================================================================
 #use strict;
 #use vars qw($timeout @users %login);
@@ -36,12 +40,18 @@ if(defined $guiauth and $guiauth =~ /i/){
 	$login{$us}{pw} = $pw;
 }
 
-if ($os eq "IOS"){
-	SendIOS();
-}elsif ($os eq "CatOS"){
-	SendCat();
-}elsif ($os eq "Cat1900"){
+if ($os eq 'Cat1900'){
 	SendC19();
+}elsif ($os eq 'Ironware'){
+	SendDev('skip-page-display',0);
+}elsif ($os eq 'ProCurve'){
+	SendDev('no page',1);
+}elsif ($os eq 'CatOS'){
+	SendDev('set length 0',0);
+}elsif ($os eq 'IOS-fw'){
+	SendDev('pager 0',0);
+}else{
+	SendDev('terminal len 0',0);
 }
 
 #===================================================================
@@ -49,8 +59,8 @@ if ($os eq "IOS"){
 #===================================================================
 sub ReadConf {
 
-	if (-e "../nedi.conf"	){
-		open  (CONF, "../nedi.conf" );
+	if (-e "/var/nedi/nedi.conf"	){
+		open  (CONF, "/var/nedi/nedi.conf" );
 	}elsif (-e "/etc/nedi.conf"){
 		open  (CONF, "/etc/nedi.conf" );
 	}else{
@@ -75,11 +85,10 @@ sub ReadConf {
 	}
 }
 
-
 #============================================================================
-# Send to IOS device
+# Send to device
 #============================================================================
-sub SendIOS{
+sub SendDev{
 
 	my $line = "";
 	my @out;
@@ -88,83 +97,39 @@ sub SendIOS{
 						Port	=> $po,
 						Prompt  => $prompt,
 						Timeout => $timeout,
+						#Input_log  => "log/input.log",
+						#output_log  => "log/output.log",
 						Errmode => "return",
 						);
+	open  (LOG, ">$cf-$ip.log" ) or print "$os: can't write to $cf";
+	print LOG $session->send_wakeup( 'connect' ) if $_[1];
+
 	if( $session->login( $us, $login{$us}{pw} ) ){
 		if ( $login{$us}{en} ){
 			if (!$session->enable( $login{$us}{en} ) ){
 				$session->close;
-				print "SendIOS-en: " . $session->errmsg;
+				print "$os-enable: " . $session->errmsg;
 				return 1;
 			}
 		}
-		$session->cmd("terminal len 0");
-
-		open  (LOG, ">$cf-$ip.log" ) or print "SendIOS: can't write to $cf";
+		print LOG $session->cmd($_[0]);
 
 		foreach my $c (@cfg){
+			print LOG "$c\n";
 			@out = $session->cmd($c);
 			print LOG join("",@out);
 			print ".";
 			if( $session->errmsg ){
 				$session->close;
 				close (LOG);
-				print "SendIOS-cmd: " . $session->errmsg;
+				print "$os-command: " . $session->errmsg;
 				return 1;
 			}
 		}
 	}else{
 		$session->close;
 		close (LOG);
-		print "SendIOS: " . $session->errmsg;
-		return 1;
-	}
-	$session->close;
-	print " ok";
-}
-
-#============================================================================
-# Send to CatOS device
-#============================================================================
-sub SendCat{
-
-	my $line = "";
-	my @out;
-
-	my $session = Net::Telnet::Cisco->new(	Host	=> $ip,
-						Port	=> $po,
-						Prompt  => $prompt,
-						Timeout   => $timeout,
-						Errmode => "return",
-						);
-	
-	if( $session->login( $us, $login{$us}{pw} ) ){
-		if ( $login{$us}{en} ){
-			if (!$session->enable( $login{$us}{en} ) ){
-				$session->close;
-				print "SendCat: " . $session->errmsg;
-				return 1;
-			}
-		}
-		$session->cmd("set length 0");
-
-		open  (LOG, ">$cf-$ip.log" ) or print "SendCat: can't write to $cf";
-
-		foreach my $c (@cfg){
-			@out = $session->cmd($c);
-			print LOG join("",@out);
-			print ".";
-			if( $session->errmsg ){
-				$session->close;
-				close (LOG);
-				print "SendCat: " . $session->errmsg;
-				return 1;
-			}
-		}
-	}else{
-		$session->close;
-		close (LOG);
-		print "SendCat: " . $session->errmsg;
+		print "$os-connect: " . $session->errmsg;
 		return 1;
 	}
 	$session->close;
@@ -187,15 +152,13 @@ sub SendC19{
 						);
 
 	if( $session->waitfor('/Enter Selection:.*$/') ){
-		$session->print("k");
+		open  (LOG, ">$cf-$ip.log" ) or print "SendC19: can't write to $cf";
+		print LOG $session->print("k");
 		if (!$session->enable( $login{$us}{pw} ) ){
 			$session->close;
-			print "SendC19: " . $session->errmsg;
+			print "$os-enable: " . $session->errmsg;
 			return 1;
 		}
-
-		open  (LOG, ">$cf-$ip.log" ) or print "SendC19: can't write to $cf";
-
 		foreach my $c (@cfg){
 			@out = $session->cmd($c);
 			print LOG join("",@out);
@@ -203,14 +166,14 @@ sub SendC19{
 			if( $session->errmsg ){
 				$session->close;
 				close (LOG);
-				print "SendC19: " . $session->errmsg;
+				print "$os-command: " . $session->errmsg;
 				return 1;
 			}
 		}
 	}else{
 		$session->close;
 		close (LOG);
-		print "SendC19: " . $session->errmsg;
+		print "$os-menu: " . $session->errmsg;
 		return 1;
 	}
 	$session->close;

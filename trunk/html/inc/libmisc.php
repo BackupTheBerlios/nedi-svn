@@ -7,18 +7,20 @@
 // Read configuration
 function ReadConf($group) {
 
-	if (file_exists('/etc/nedi.conf')) {
-		$conf = file('/etc/nedi.conf');
-	}elseif (file_exists('/var/nedi/nedi.conf')) {
+	if (file_exists('/var/nedi/nedi.conf')) {
 		$conf = file('/var/nedi/nedi.conf');
+	}elseif (file_exists('/etc/nedi.conf')) {
+		$conf = file('/etc/nedi.conf');
 	}else{
 		echo "Dude, where's nedi.conf?";
 		die;
 	}
-	global $timeout,$ignoredvlans,$locsep,$locformat,$lang,$guiauth,$redbuild,$disc,$modgroup,$pause;
+	global $locsep,$lang,$guiauth,$redbuild,$disc,$modgroup;
 	global $mod,$backend,$dbpath,$dbhost,$dbname,$dbuser,$dbpass,$retire;
-	global $rrdstep;
+	global $timeout,$ignoredvlans,$cpua,$mema,$tmpa,$trfa,$trfw,$pause,$rrdstep;
 
+	$locsep 	= ";";
+	
 	foreach ($conf as $cl) {
 		if ( !preg_match("/^#|^$/",$cl) ){
 			$l = rtrim($cl);
@@ -38,6 +40,12 @@ function ReadConf($group) {
 			elseif ($v[0] == "dbuser")	{$dbuser = $v[1];}
 			elseif ($v[0] == "dbpass")	{$dbpass = $v[1];}
 
+			elseif ($v[0] == "cpu-alert")	{$cpua = $v[1];}
+			elseif ($v[0] == "mem-alert")	{$mema = $v[1];}
+			elseif ($v[0] == "temp-alert")	{$tmpa = $v[1];}
+			elseif ($v[0] == "traf-alert")	{$trfa = $v[1];}
+			elseif ($v[0] == "traf-warn")	{$trfw = $v[1];}
+
 			elseif ($v[0] == "pause")	{$pause = $v[1];}
 			elseif ($v[0] == "ignoredvlans"){$ignoredvlans = $v[1];}
 			elseif ($v[0] == "retire")	{$retire = $v[1];}
@@ -46,7 +54,6 @@ function ReadConf($group) {
 			elseif ($v[0] == "rrdstep")	{$rrdstep = $v[1];}
 
 			elseif ($v[0] == "locsep")	{$locsep = $v[1];}
-			elseif ($v[0] == "locformat")	{$locformat = $v[1];}
 			elseif ($v[0] == "guiauth")	{$guiauth = $v[1];}
 			elseif ($v[0] == "redbuild")	{$redbuild = $v[1];}
 			elseif ($v[0] == "disc")	{$disc = $v[1];}
@@ -57,10 +64,10 @@ function ReadConf($group) {
 //===================================================================
 // Sanitize parameters
 function sanitize( $arr ){
-    if ( is_array( $arr ) ) {
-        return array_map( 'sanitize', $arr );
-    }
-    return preg_replace( "/\.\.|\"/","", $arr );
+	if ( is_array( $arr ) ) {
+		return array_map( 'sanitize', $arr );
+	}
+	return preg_replace( "/\.\.\//","", $arr );
 }
 
 //===================================================================
@@ -97,7 +104,11 @@ function Masker($nm) {
 	if(preg_match("/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/",$nm) ){
 		$mask = $nm;
 		list($n1,$n2,$n3,$n4) = split("\.", $nm);
-		$bits = str_pad(decbin($n1) . decbin($n2) . decbin($n3) . decbin($n4),32,0);
+		$bits = str_pad(decbin($n1),8,0,STR_PAD_LEFT) .
+			str_pad(decbin($n2),8,0,STR_PAD_LEFT) .
+			str_pad(decbin($n3),8,0,STR_PAD_LEFT) .
+			str_pad(decbin($n4),8,0,STR_PAD_LEFT);
+		#$bits = str_pad(decbin($n1) . decbin($n2) . decbin($n3) . decbin($n4),32,0);
 		$nbit = count_chars($bits);
 		$pfix = $nbit[49];										// the 49th char is "1"...
 	}elseif(preg_match("/^[-]|\d{3,10}$/",$nm ) ){
@@ -165,11 +176,11 @@ global $ord,$cols;
 	if($w){$wi="width=$w";}
 	if (!$ord){
 		echo "<th $wi>$cols[$n]<a href=?$_SERVER[QUERY_STRING]&ord=$n><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
-	}elseif($n == $ord){
+	}elseif($ord == $n){
 		echo "<th $wi class=blu>$cols[$n] <a href=?";
 		echo preg_replace('/&ord=(.*)/',"&ord=$n+desc",$_SERVER['QUERY_STRING']);
 		echo "><img src=img/up.png border=0 title=\"Reverse sort by $n\"></a></th>";
-	}elseif("$n desc" == $ord){
+	}elseif($ord == "$n desc"){
 		echo "<th $wi class=blu>$cols[$n] <a href=?";
 		echo preg_replace('/&ord=(.*)/',"&ord=$n",$_SERVER['QUERY_STRING']);
 		echo "><img src=img/dwn.png border=0 title=\"Sort by $n\"></a></th>";
@@ -199,19 +210,19 @@ function selectbox($type,$sel="") {
 
 //===================================================================
 // Generate coloured bar for html
-function Bar($length=1,$tresh=0) {
+function Bar($val=1,$tresh=0,$style=0) {
 	if($tresh > 0){
-		if($length < $tresh){
+		if($val < $tresh){
 			$img = "grn";
-		}elseif($length < 2 * $tresh){
+		}elseif($val < 2 * $tresh){
 			$img = "org";
 		}else{
 			$img = "red";
 		}
 	}elseif($tresh < 0){
-		if($length < -$tresh/2){
+		if($val < -$tresh/2){
 			$img = "red";
-		}elseif($length < -$tresh){
+		}elseif($val < -$tresh){
 			$img = "org";
 		}else{
 			$img = "grn";
@@ -219,21 +230,25 @@ function Bar($length=1,$tresh=0) {
 	}else{
 		$img = "blu";
 	}
-	if($length > 100000){
-		$length = intval($length / 10000 - 10);	
-		return "<img src=img/$img.png width=400 height=20 hspace=2 border=1 title=\">100000\"><img src=img/$img.png width=$length height=20 hspace=2 border=1>";
-	}elseif($length > 10000){
-		$length = intval($length / 1000 - 10);	
-		return "<img src=img/$img.png width=300 height=20 hspace=2 border=1 title=\">10000\"><img src=img/$img.png width=$length height=20 hspace=2 border=1>";
-	}elseif($length > 1000){
-		$length = intval($length / 100 - 10);	
-		return "<img src=img/$img.png width=200 height=20 hspace=2 border=1 title=\">1000\"><img src=img/$img.png width=$length height=20 hspace=2 border=1>";
-	}elseif($length > 100){
-		$length = intval($length / 10 - 10);		
-		return "<img src=img/$img.png width=100 height=20 hspace=2 border=1 title=\">100\" ><img src=img/$img.png width=$length height=20 hspace=2 border=1>";
+	if($style){
+		$length = intval(log($val) );
+		return "<img src=img/$img.png width=$length height=10 hspace=2 border=1 title=\"$val\">";
+	}
+	if($val > 100000){
+		$length = intval($val / 10000 - 10);	
+		return "<img src=img/$img.png width=400 height=20 hspace=2 border=1 title=\">100000\"><img src=img/$img.png width=$length height=20 hspace=2 border=1 title=\"$val\">";
+	}elseif($val > 10000){
+		$length = intval($val / 1000 - 10);	
+		return "<img src=img/$img.png width=300 height=20 hspace=2 border=1 title=\">10000\"><img src=img/$img.png width=$length height=20 hspace=2 border=1 title=\"$val\">";
+	}elseif($val > 1000){
+		$length = intval($val / 100 - 10);	
+		return "<img src=img/$img.png width=200 height=20 hspace=2 border=1 title=\">1000\"><img src=img/$img.png width=$length height=20 hspace=2 border=1 title=\"$val\">";
+	}elseif($val > 100){
+		$length = intval($val / 10 - 10);		
+		return "<img src=img/$img.png width=100 height=20 hspace=2 border=1 title=\">100\" ><img src=img/$img.png width=$length height=20 hspace=2 border=1 title=\"$val\">";
 	}else{
-		$length = intval($length);
-		return "<img src=img/$img.png width=$length height=20 hspace=2 border=1>";
+		$length = intval($val);
+		return "<img src=img/$img.png width=$length height=20 hspace=2 border=1 title=\"$val\">";
 	}
 }
 

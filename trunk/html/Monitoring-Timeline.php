@@ -14,10 +14,7 @@
 
 $bg1	= "CCCC99";
 $bg2	= "DDDDAA";
-$btag	= "";
-$nocache= 0;
 $calendar= 1;
-$refresh = 0;
 
 include_once ("inc/header.php");
 include_once ('inc/libmon.php');
@@ -87,9 +84,9 @@ while($istart < $to){
 		if($res){
 			$nmsg = 0;
 			while( $m = @DbFetchRow($res) ){
-				$mbar = Bar($m[1],0);
+				$mbar = Bar($m[1],0,1);
 				echo "<a href=Monitoring-Messages.php?ina=time&opa=%3E=&sta=$fs&cop=AND&inb=time&opb=%3C&stb=$fe&lvl=$m[0]>";
-				echo "<img src=img/16/" . $mico[$m[0]] . ".png title=\"" . $mlvl[$m[0]] . "\" border=0></a>$mbar\n";
+				echo "<img src=img/16/" . $mico[$m[0]] . ".png title=\"" . $mlvl[$m[0]] . "\" border=0></a>$mbar \n";
 				$nmsg += $m[1];
 			}
 			if(!$nmsg){

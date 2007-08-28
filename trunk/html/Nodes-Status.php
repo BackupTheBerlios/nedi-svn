@@ -15,10 +15,6 @@
 
 $bg1	 = "BBDDCC";
 $bg2	 = "CCEEDD";
-$btag	 = "";
-$nocache = 0;
-$calendar= 0;
-$refresh = 0;
 
 include_once ("inc/header.php");
 include_once ('inc/libnod.php');
@@ -32,7 +28,7 @@ $del = isset($_GET['del']) ? $_GET['del'] : "";
 <form method="get" action="<?=$_SERVER['PHP_SELF']?>">
 <table bgcolor=#000000 <?=$tabtag?> >
 <tr bgcolor=#<?=$bg1?>><th width=80><a href=<?=$_SERVER['PHP_SELF'] ?>><img src=img/32/ngrn.png border=0 title="DB info and a little portscan (22,23,80, 137 & 443) for nodes"></a></th>
-<th>MAC Address <input type="text" name="mac" value="<?=$mac?>" size="12"></th>
+<th>MAC Address <input type="text" name="mac" value="<?=$mac?>" size="15"></th>
 <th width=80><input type="submit" value="Show"></th>
 </tr></table></form><p>
 <?
@@ -58,7 +54,7 @@ if ($mac){
 		$img		= Nimg("$n[2];$n[3]");
 		$fs		= date($datfmt,$n[4]);
 		$ls		= date($datfmt,$n[5]);
-		$ud 		= urlencode($n[6]);
+		$ud 		= rawurlencode($n[6]);
 		list($fc,$lc)	= Agecol($n[4],$n[5],0);
 
 		if($n[7]){
@@ -84,8 +80,7 @@ if ($mac){
 			$query	= GenQuery('vlans','s','*','','',array('device','vlanid'),array('=','='),array($n[6],$n[8]),array('AND') );
 			$res	= @DbQuery($query,$link);
 			$nvl	= @DbNumRows($res);
-			if ($nvl != 1) {
-			}else{
+			if ($nvl == 1) {
 				$vl	= @DbFetchRow($res);
 			}
 			@DbFreeResult($res);
@@ -96,14 +91,14 @@ if ($mac){
 <tr><td width=50% valign=top>
 <h2>Database Info</h2><p>
 <table bgcolor=#666666 <?=$tabtag?> >
-<tr><th bgcolor=#<?=$bia?> width=120><a href=Nodes-Status.php?mac=<?=$n[2]?> ><img src=img/oui/<?=$img?> title="<?=$n[3]?>" vspace=8 border=0></a><br><?=$name?></th>
+<tr><th bgcolor=#<?=$bia?> width=120><a href=?mac=<?=$n[2]?> ><img src=img/oui/<?=$img?> title="<?=$n[3]?>" vspace=8 border=0></a><br><?=$name?></th>
 <td bgcolor=#<?=$bg2?>>
-<a href=Devices-Status.php?dev=<?=$ud?> ><img src=img/16/hwif.png hspace=8 border=0 title="Status of related device"></a>
+<a href=Devices-Status.php?dev=<?=$ud?> ><img src=img/16/hwif.png hspace=8 border=0 title="Status of <?=$n[6]?>"></a>
 
 <?
 if(preg_match("/dsk/",$_SESSION['group']) ){
 	echo "<img src=img/sep.png hspace=12><a href=Nodes-Stolen.php?na=$n[0]&ip=$n[1]&stl=$n[2]&dev=$n[6]&ifn=$n[7]><img src=img/16/fiqu.png hspace=8 border=0  title=\"Mark as stolen!\"></a>";
-	echo "<a href=$_SERVER[PHP_SELF]?wol=$n[2]><img src=img/16/powr.png hspace=8 border=0 title=\"Power on\"></a>";
+	echo "<a href=$_SERVER[PHP_SELF]?wol=$n[2]><img src=img/16/powr.png hspace=8 border=0 title=\"Send Wake on Lan packet\"></a>";
 }
 if(preg_match("/adm/",$_SESSION['group']) ){
 	echo "<img src=img/sep.png hspace=12><a href=$_SERVER[PHP_SELF]?del=$n[2]><img src=img/16/bcnl.png hspace=8 border=0 onclick=\"return confirm('Delete node $n[2]?')\" title=\"Delete this node!\"></a>";
@@ -111,7 +106,7 @@ if(preg_match("/adm/",$_SESSION['group']) ){
 ?>
 </td></tr>
 <tr><th bgcolor=#<?=$bg1?>>MAC Address</th>	<td bgcolor=#<?=$bgb?>><b><?=rtrim(chunk_split($n[2],2,"-"),"-")?></b> or <b><?=rtrim(chunk_split($n[2],4,"."),".")?></b></td></tr>
-<tr><th bgcolor=#<?=$bg1?>>NIC Vendor</th>	<td bgcolor=#<?=$bgb?>><?=$n[3]?></td></tr>
+<tr><th bgcolor=#<?=$bg1?>>NIC Vendor</th>	<td bgcolor=#<?=$bgb?>><a href=http://www.google.com/search?q=<?=urlencode($n[3])?>&btnI=1><?=$n[3]?></a></td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IP Address</th>	<td bgcolor=#<?=$bga?>><?=$ip?> (<?=($n[1])?gethostbyaddr($ip):"";?>)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>IP Update</th>	<td bgcolor=#<?=$a1c?>><?=$au?> (<?=$n[13]?> Changes / <?=$n[14]?> Lost)</td></tr>
 <tr><th bgcolor=#<?=$bg1?>>Device</th>		<td bgcolor=#<?=$bga?>><?=$n[6]?></td></tr>
@@ -134,26 +129,24 @@ if($n[1]){
 <tr><th bgcolor=#<?=$bg1?> width=120><a href=http://<?=$ip?> target=window><img src=img/32/glob.png border=0></a><br>HTTP</th><td bgcolor=#<?=$bga?>><?=CheckTCP($ip,'80'," \r\n\r\n")?></td></tr>
 <tr><th bgcolor=#<?=$bg1?> width=120><a href=https://<?=$ip?> target=window><img src=img/32/glok.png border=0></a><br>HTTPS</th><td bgcolor=#<?=$bga?>><?=CheckTCP($ip,'443','')?></td></tr>
 <tr><th bgcolor=#<?=$bg1?> width=120><a href=ssh://<?=$ip?>><img src=img/32/lokc.png border=0></a><br>SSH</th><td bgcolor=#<?=$bga?>><?=CheckTCP($ip,'22','')?></td></tr>
-<tr><th bgcolor=#<?=$bg1?> width=120><a href=telnet://<?=$ip?>><img src=img/32/kons.png border=0></a><br>Telnet</th><td bgcolor=#<?=$bga?>><?=CheckTCP($ip,'23','\n')?></td></tr>
+<tr><th bgcolor=#<?=$bg1?> width=120><a href=telnet://<?=$ip?>><img src=img/32/loko.png border=0></a><br>Telnet</th><td bgcolor=#<?=$bga?>><?=CheckTCP($ip,'23','\n')?></td></tr>
 </table>
 <?
 }else{
 	echo "<h4>No IP!</h4>";
 }
 echo'</td></tr>';
-if($rrdstep){
-	$rsh = $rrdstep / 3600;
-	if($d = urlencode($n[6]) and $if = urlencode($n[7]) ){
+
+if($d = rawurlencode($n[6]) and $if = rawurlencode($n[7]) ){
 ?>
 <tr><td align=center>
-<h2>Current Interface Traffic (<?=$rsh?>h average)</h2>
+<h2>Current Interface Traffic (<?=$rrdstep?>s average)</h2>
 <a href=Devices-Graph.php?dv=<?=$d?>&if%5B%5D=<?=$if?>><img src=inc/drawrrd.php?dv=<?=$d?>&if%5B%5D=<?=$if?>&s=m&t=trf border=0></a>
 </td><td align=center>
-<h2>Current Interface Errors (<?=$rsh?>h average)</h2>
+<h2>Current Interface Errors (<?=$rrdstep?>s average)</h2>
 <img src=inc/drawrrd.php?dv=<?=$d?>&if%5B%5D=<?=$if?>&s=m&t=err border=0>
 </td></tr>
 <?
-	}
 }
 ?>
 <tr><td align=center valign=top>
@@ -200,9 +193,11 @@ $row = 0;
 while( $l = @DbFetchRow($res) ){
 	if ($row % 2){$bg = $bga; $bi = $bia; }else{$bg = $bgb; $bi = $bib;}
 	$row++;
-	$uld = urlencode($l[2]);
+	$utd = rawurlencode($l[2]);
+	$uti = rawurlencode($l[3]);
 	echo "<tr bgcolor=#$bg><th bgcolor=#$bi>$row</th><td>". date($datfmt,$l[1]) ."</td>\n";
-	echo "<td><a href=Devices-Status.php?dev=$uld&shp=on>$l[2]</a></td><td>$l[3]</td><td>$l[4]</td><td>$l[5]</td></tr>\n";
+	echo "<td><a href=Devices-Status.php?dev=$utd&shp=on>$l[2]</a></td><td>";
+	echo "<a href=Nodes-List.php?ina=device&opa==&sta=$utd&cop=AND&inb=ifname&opb==&stb=$uti>$l[3]</td><td>$l[4]</td><td>$l[5]</td></tr>\n";
 }
 @DbFreeResult($res);
 

@@ -1,0 +1,43 @@
+# Definition for other created by Defgen 1.0
+
+# General
+SNMPv	1
+Type
+OS	other
+Icon	
+Bridge	
+Serial	1.3.6.1.2.1.47.1.1.1.1.11.1
+Dispro	
+Bimage	
+
+# Vlan Specific
+VLnams	
+VTPdom	
+VTPmod	
+
+# Modules
+Modesc	
+Moclas	
+Movalu	
+Moname	
+Modhw	
+Modsw	
+Modfw	
+Modser	
+Momodl	
+
+# Interfaces
+IFalia	
+IFalix	
+IFvlan	
+IFvlix	
+IFdupl	
+IFduix	
+Halfdp	1
+Fulldp	2
+
+# RRD Graphing
+CPUutl	
+Temp	
+MemCPU	
+MemIO	

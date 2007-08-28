@@ -1,0 +1,43 @@
+# Definition for 1.3.6.1.4.1.45.3.30.1 created by Defgen 1.0
+
+# General
+SNMPv	1
+Type	350F-HD
+OS	Baystack350
+Icon	w2br
+Bridge	normal
+Dispro	
+Serial	1.3.6.1.4.1.45.1.6.3.1.6.0
+Bimage	1.3.6.1.4.1.45.1.6.4.2.1.10.0
+
+# Vlan Specific
+VLnams	
+VTPdom	
+VTPmod	
+
+# Interfaces
+IFalia	
+IFalix	
+IFvlan	
+IFvlix	
+IFdupl	doublespeed
+IFduix	
+Halfdp	
+Fulldp	
+
+# Modules
+Modesc	
+Moclas	
+Movalu	
+Moslot	
+Modhw	
+Modsw	
+Modfw	
+Modser	
+Momodl	
+
+# RRD Graphing
+CPUutl	
+Temp	
+MemCPU	
+MemIO	

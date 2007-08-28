@@ -1,0 +1,43 @@
+# Definition for 1.3.6.1.4.1.9.1.642 created by Marco Rauchenstein on 25.Aug 07 14:20
+
+# General
+SNMPv	2HC
+Type	Cisco-1812W
+OS	IOS
+Icon	fwbl
+Bridge	CAP
+Dispro	CDP
+Serial	1.3.6.1.4.1.9.9.92.1.1.1.2.3
+Bimage	1.3.6.1.4.1.9.2.1.73.0
+
+# Vlan Specific
+VLnams	
+VTPdom	
+VTPmod	
+
+# Interfaces
+IFalia	
+IFalix	
+IFvlan	
+IFvlix	
+IFdupl	
+IFduix	
+Halfdp	1
+Fulldp	2
+
+# Modules
+Modesc	
+Moclas	
+Movalu	
+Moslot	
+Modhw	
+Modsw	
+Modfw	
+Modser	
+Momodl	
+
+# RRD Graphing
+CPUutl	1.3.6.1.4.1.9.9.109.1.1.1.1.5.1	
+Temp	
+MemCPU	1.3.6.1.4.1.9.9.48.1.1.1.6.1
+MemIO	1.3.6.1.4.1.9.9.48.1.1.1.6.2
